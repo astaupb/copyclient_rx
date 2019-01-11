@@ -1,5 +1,6 @@
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +22,7 @@ class _RootPageState extends State<RootPage> {
   static final Backend backend = BackendSunrise(client);
   AuthBloc authBloc = AuthBloc(backend: backend);
   JoblistBloc joblistBloc;
+  UserBloc userBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +41,16 @@ class _RootPageState extends State<RootPage> {
             // AUTHORIZED AND READY TO HUSTLE
             joblistBloc = JoblistBloc(backend);
             joblistBloc.onStart(state.token);
+
+            userBloc = UserBloc(backend);
+            userBloc.onStart(state.token);
+
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
-              child: JoblistPage(),
+              child: BlocProvider<UserBloc>(
+                bloc: userBloc,
+                child: JoblistPage(),
+              ),
             );
           } else {
             if (state.isException) {

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocs_copyclient/joblist.dart';
 
 import 'joblist_tile.dart';
+import '../../widgets/drawer.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -17,14 +18,18 @@ class _JoblistPageState extends State<JoblistPage> {
       appBar: AppBar(
         title: Text('Jobliste'),
       ),
+      drawer: MainDrawer(),
       body: BlocBuilder<JoblistEvent, JoblistState>(
         bloc: BlocProvider.of<JoblistBloc>(context),
         builder: (BuildContext context, JoblistState state) {
           if (state.isResult) {
             if (state.value.length == 0) {
               return Center(
-                child: Text(
-                    'Die Jobliste ist aktuell leer. Oben rechts kannst du neue Dokumente hochladen.'),
+                child: Padding(
+                  child: Text(
+                      'Die Jobliste ist aktuell leer. Oben rechts kannst du neue Dokumente hochladen.'),
+                  padding: EdgeInsets.only(left: 40.0, right: 40.0),
+                ),
               );
             } else {
               return ListView.builder(
