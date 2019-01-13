@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: TealOutlineButton(
+      floatingActionButton: MediaQuery.of(context).viewInsets.bottom==0.0 ? TealOutlineButton(
         child: Text(
           'Registrieren',
           textAlign: TextAlign.center,
@@ -30,7 +30,7 @@ class LoginPage extends StatelessWidget {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (BuildContext context) => RegisterPage()));
         },
-      ),
+      ) : null,
     );
   }
 }
