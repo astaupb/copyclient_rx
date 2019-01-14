@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocs_copyclient/joblist.dart';
 
 import 'joblist_tile.dart';
-import '../../widgets/drawer.dart';
+import '../../widgets/drawer/drawer.dart';
 
 class JoblistPage extends StatefulWidget {
   @override

@@ -1,66 +1,21 @@
-import 'dart:math' as math;
-
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:blocs_copyclient/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:barcode_scan/barcode_scan.dart';
 
-class MainDrawer extends StatefulWidget {
-  static const List<String> _headerImages = [
-    'images/drawer/screen.jpeg',
-  ];
+import 'drawer_header.dart' as my;
 
-  MainDrawer({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _MainDrawerState createState() => _MainDrawerState();
-}
-
-class _MainDrawerState extends State<MainDrawer> {
-  AuthBloc authBloc;
+class MainDrawer extends StatelessWidget {
+  MainDrawer({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    authBloc = BlocProvider.of<AuthBloc>(context);
+    final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          BlocBuilder<UserEvent, UserState>(
-            bloc: BlocProvider.of<UserBloc>(context),
-            builder: (BuildContext context, state) {
-              if (state.isResult) {
-                return UserAccountsDrawerHeader(
-                  accountName: Text(state.value.username,
-                      style: TextStyle(fontSize: 27.0)),
-                  accountEmail: Text(
-                      'Restliches Guthaben: ${state.value.credit.toString()}'),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(
-                          MainDrawer._headerImages[math.Random()
-                              .nextInt(MainDrawer._headerImages.length)],
-                        ),
-                        fit: BoxFit.fill),
-                  ),
-                );
-              } else {
-                return UserAccountsDrawerHeader(
-                  accountName: Text(''),
-                  accountEmail: Text('Restliches Guthaben: '),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(MainDrawer._headerImages[math.Random()
-                            .nextInt(MainDrawer._headerImages.length)]),
-                        fit: BoxFit.fill),
-                  ),
-                );
-              }
-            },
-          ),
+          my.DrawerHeader(),
           ListTile(
             title: Text('Aufladen'),
             trailing: Icon(Icons.credit_card),
@@ -116,7 +71,8 @@ class _MainDrawerState extends State<MainDrawer> {
             title: Text('Logout'),
             trailing: Icon(Icons.exit_to_app),
             onTap: () {
-              _logout();
+              authBloc.logout();
+              Navigator.of(context).popUntil(ModalRoute.withName('/'));
             },
           ),
           Divider(),
@@ -128,10 +84,5 @@ class _MainDrawerState extends State<MainDrawer> {
         ],
       ),
     );
-  }
-
-  void _logout() {
-    authBloc.logout();
-    Navigator.of(context).popUntil(ModalRoute.withName('/'));
   }
 }
