@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../blocs/theme_bloc.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   @override
@@ -7,13 +10,21 @@ class AppearanceSettingsPage extends StatefulWidget {
 
 class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
   bool _darkThemeEnabled = false;
+  ThemeBloc themeBloc;
 
-  _AppearanceSettingsPageState() {
-    // TODO: use bloc or something to store theme state and mirror to shared preferences
+  void _toggleDarkTheme() {
+    if (_darkThemeEnabled) {
+      themeBloc.dispatch(ActivateDefaultTheme());
+      setState(() => _darkThemeEnabled = false);
+    } else {
+      themeBloc.dispatch(ActivateDarkTheme());
+      setState(() => _darkThemeEnabled = true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    themeBloc = BlocProvider.of<ThemeBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Aussehen'),
@@ -23,9 +34,10 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           ListTile(
             title: Text('Dunkles Theme'),
             trailing: Switch(
-              onChanged: (bool value) => _darkThemeEnabled = value,
+              onChanged: (bool value) => _toggleDarkTheme(),
               value: _darkThemeEnabled,
             ),
+            onTap: () => _toggleDarkTheme(),
           ),
         ],
       ),
