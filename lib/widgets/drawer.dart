@@ -19,8 +19,6 @@ class MainDrawer extends StatefulWidget {
 }
 
 class _MainDrawerState extends State<MainDrawer> {
-  User _currentUser;
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
