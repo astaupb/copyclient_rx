@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,8 +20,11 @@ class MainDrawer extends StatefulWidget {
 }
 
 class _MainDrawerState extends State<MainDrawer> {
+  AuthBloc authBloc;
+
   @override
   Widget build(BuildContext context) {
+    authBloc = BlocProvider.of<AuthBloc>(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -68,42 +72,45 @@ class _MainDrawerState extends State<MainDrawer> {
             },
           ),
           ListTile(
-              title: Text('Einstellungen'),
-              trailing: Icon(Icons.settings),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/settings');
-              }),
+            title: Text('Einstellungen'),
+            trailing: Icon(Icons.settings),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/settings');
+            },
+          ),
           ListTile(
-              title: Text('Transaktionsjournal'),
-              trailing: Icon(Icons.local_atm),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/transactions');
-              }),
+            title: Text('Transaktionsjournal'),
+            trailing: Icon(Icons.local_atm),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/transactions');
+            },
+          ),
           ListTile(
-              title: Text('Über'),
-              trailing: Icon(Icons.help),
-              onTap: () {
-                Navigator.of(context).pop();
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SimpleDialog(
-                        title: Text('AStA Copyclient'),
-                        contentPadding: EdgeInsets.all(24.0),
-                        children: <Widget>[
-                          Text('Version 0.1.0+1'),
-                          Text('Copyright 2019 AStA Paderborn'),
-                          RaisedButton(
-                            child: Text('Lizenzen'),
-                            onPressed: () => showLicensePage(context: context),
-                          )
-                        ],
-                      );
-                    });
-                //showAboutDialog(context: context);
-              }),
+            title: Text('Über'),
+            trailing: Icon(Icons.help),
+            onTap: () {
+              Navigator.of(context).pop();
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SimpleDialog(
+                    title: Text('AStA Copyclient'),
+                    contentPadding: EdgeInsets.all(24.0),
+                    children: <Widget>[
+                      Text('Version 0.1.0+1'),
+                      Text('Copyright 2019 AStA Paderborn'),
+                      RaisedButton(
+                        child: Text('Lizenzen'),
+                        onPressed: () => showLicensePage(context: context),
+                      )
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           Divider(),
           ListTile(
             title: Text('Logout'),
@@ -123,5 +130,8 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  void _logout() {}
+  void _logout() {
+    authBloc.logout();
+    Navigator.of(context).popUntil(ModalRoute.withName('/'));
+  }
 }
