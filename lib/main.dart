@@ -36,6 +36,7 @@ class CopyclientState extends State<Copyclient> {
         builder: (BuildContext context, ThemeState state) => MaterialApp(
               title: 'Copyclient',
               routes: routes,
+              initialRoute: '/',
               theme: state.theme,
             ),
       ),
