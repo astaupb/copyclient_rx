@@ -21,29 +21,24 @@ class _DrawerHeaderState extends State<DrawerHeader> {
       builder: (BuildContext context, state) {
         if (state.isResult) {
           return UserAccountsDrawerHeader(
-            accountName:
-                Text(state.value.username, style: TextStyle(fontSize: 27.0)),
-            accountEmail:
-                Text('Restliches Guthaben: ${state.value.credit.toString()}'),
+            accountName: Text(
+              state.value?.username,
+              style: TextStyle(fontSize: 27.0),
+            ),
+            accountEmail: Text(
+              'Restliches Guthaben: ${state.value?.credit?.toString()}',
+            ),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage(
-                    _headerImages[
-                        math.Random().nextInt(_headerImages.length)],
+                    _headerImages[math.Random().nextInt(_headerImages.length)],
                   ),
                   fit: BoxFit.fill),
             ),
           );
         } else {
-          return UserAccountsDrawerHeader(
-            accountName: Text(''),
-            accountEmail: Text('Restliches Guthaben: '),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(_headerImages[
-                      math.Random().nextInt(_headerImages.length)]),
-                  fit: BoxFit.fill),
-            ),
+          return Center(
+            child: CircularProgressIndicator(),
           );
         }
       },
