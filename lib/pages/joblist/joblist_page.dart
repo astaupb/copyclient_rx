@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:blocs_copyclient/joblist.dart';
-import 'package:blocs_copyclient/journal.dart';
-import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/upload.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
+import '../jobdetails/jobdetails.dart';
 import 'joblist_tile.dart';
 
 class JoblistPage extends StatefulWidget {
@@ -31,8 +31,10 @@ class _JoblistPageState extends State<JoblistPage> {
               child: BlocBuilder<UserEvent, UserState>(
                 bloc: BlocProvider.of<UserBloc>(context),
                 builder: (BuildContext context, UserState state) {
-                  if (state.isResult) return Text('${state.value.credit}€');
-                  else return Text('0,00€');
+                  if (state.isResult)
+                    return Text('${state.value.credit}€');
+                  else
+                    return Text('0,00€');
                 },
               ),
               onPressed: () => Navigator.of(context).pushNamed('/transactions'),
@@ -65,7 +67,17 @@ class _JoblistPageState extends State<JoblistPage> {
                     itemCount: state.value.length,
                     itemBuilder: (BuildContext context, int index) {
                       if (state.value[index] != null)
-                        return JoblistTile(context, index, state.value[index]);
+                        return JoblistTile(
+                          context,
+                          index,
+                          state.value[index],
+                          onPress: (int index) => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      JobdetailsPage(state.value[index]),
+                                ),
+                              ),
+                        );
                     },
                   );
                 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import 'pages/root_page.dart';
 import 'blocs/theme_bloc.dart';
+import 'pages/root_page.dart';
 
 void main() => runApp(Copyclient());
 

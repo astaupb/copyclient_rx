@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/backend_sunrise.dart';
-import 'joblist/joblist.dart';
 import '../routes.dart';
 import 'login/login.dart';
 
