@@ -42,8 +42,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<String>Used to choose file to upload from the media library</String>
+	<string>Used to choose file to upload from the media library</string>
 	<key>NSCameraUsageDescription</key>
-	<String>Used if user wants to upload a photo directly from camera</String>
+	<string>Used if user wants to upload a photo directly from camera</string>
 </dict>
 </plist>
