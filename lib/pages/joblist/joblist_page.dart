@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/journal.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,16 @@ class _JoblistPageState extends State<JoblistPage> {
         appBar: AppBar(
           title: Text('Jobliste'),
           actions: <Widget>[
+            MaterialButton(
+              child: BlocBuilder<UserEvent, UserState>(
+                bloc: BlocProvider.of<UserBloc>(context),
+                builder: (BuildContext context, UserState state) {
+                  if (state.isResult) return Text('${state.value.credit}€');
+                  else return Text('0,00€');
+                },
+              ),
+              onPressed: () => Navigator.of(context).pushNamed('/transactions'),
+            ),
             IconButton(
               tooltip: 'Dokument hochladen',
               icon: Icon(Icons.note_add),
