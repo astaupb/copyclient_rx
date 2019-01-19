@@ -2,6 +2,7 @@ import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
+import 'package:blocs_copyclient/journal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/backend_sunrise.dart';
 import 'joblist/joblist.dart';
+import '../routes.dart';
 import 'login/login.dart';
 
 class RootPage extends StatefulWidget {
@@ -26,6 +28,7 @@ class _RootPageState extends State<RootPage> {
   JoblistBloc joblistBloc;
   UserBloc userBloc;
   UploadBloc uploadBloc;
+  JournalBloc journalBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +40,7 @@ class _RootPageState extends State<RootPage> {
           if (state.isUnauthorized) {
             return LoginPage();
           } else if (state.isBusy) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           } else if (state.isAuthorized) {
             // AUTHORIZED AND READY TO HUSTLE
             joblistBloc = JoblistBloc(backend);
@@ -51,13 +52,26 @@ class _RootPageState extends State<RootPage> {
             uploadBloc = UploadBloc(backend);
             uploadBloc.onStart(state.token);
 
+            journalBloc = JournalBloc(backend);
+            journalBloc.onStart(state.token);
+
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
               child: BlocProvider<UserBloc>(
                 bloc: userBloc,
                 child: BlocProvider<UploadBloc>(
                   bloc: uploadBloc,
-                  child: JoblistPage(),
+                  child: BlocProvider<JournalBloc>(
+                    bloc: journalBloc,
+                    child: Navigator(
+                      initialRoute: '/',
+                      onGenerateRoute: (RouteSettings settings) {
+                        return MaterialPageRoute(
+                          builder: routes[settings.name],
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             );

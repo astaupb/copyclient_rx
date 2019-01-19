@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import 'routes.dart';
+import 'pages/root_page.dart';
 import 'blocs/theme_bloc.dart';
 
 void main() => runApp(Copyclient());
@@ -35,8 +35,7 @@ class CopyclientState extends State<Copyclient> {
         bloc: themeBloc,
         builder: (BuildContext context, ThemeState state) => MaterialApp(
               title: 'Copyclient',
-              routes: routes,
-              initialRoute: '/',
+              home: RootPage(),
               theme: state.theme,
             ),
       ),

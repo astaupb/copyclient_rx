@@ -5,8 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class UserSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: use user bloc again when user routes give me something
-    //final UserBloc userBloc = BlocProvider.of<UserBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Benutzer'),
@@ -21,20 +19,25 @@ class UserSettingsPage extends StatelessWidget {
                 color: Colors.grey[700],
                 child: Padding(
                   padding: EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Text(
-                        'Name',
-                        textScaleFactor: 1.5,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text(
-                        'x,xx€',
-                        textScaleFactor: 1.2,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
+                  child: BlocBuilder(
+                    bloc: BlocProvider.of<UserBloc>(context),
+                    builder: (BuildContext context, UserState state) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Text(
+                            state.value?.username,
+                            textScaleFactor: 1.5,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Text(
+                            state.value?.credit?.toString(),
+                            textScaleFactor: 1.2,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
