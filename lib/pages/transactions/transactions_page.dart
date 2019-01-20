@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocs_copyclient/journal.dart';
 
+import 'transactions_tile.dart';
+
 class TransactionsPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _TransactionsPageState();
@@ -16,20 +18,39 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
       body: BlocBuilder<JournalEvent, JournalState>(
         bloc: BlocProvider.of<JournalBloc>(context),
-        builder: (BuildContext context, JournalState state) => (state.isResult)
-            ? ListView.builder(
-                itemCount: state.value.transactions.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final item = state.value.transactions[index];
-                  return ListTile(
-                    title: Text(item.description),
-                    trailing: Text(
-                      item.value.toString(),
-                    ),
+        builder: (BuildContext context, JournalState state) {
+          if (state.isResult) {
+            final reverseList = state.value.transactions.reversed.toList();
+            return ListView.builder(
+              itemCount: state.value.transactions.length + 1,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
+                  return Column(
+                    children: <Widget>[
+                      ListTile(
+                        title: Text(
+                          'Aktuelles Guthaben:',
+                          textScaleFactor: 1.1,
+                        ),
+                        trailing: Text(
+                          '${state.value.credit.toStringAsFixed(2)} €',
+                          textScaleFactor: 1.3,
+                        ),
+                      ),
+                    ],
                   );
-                },
-              )
-            : Center(child: CircularProgressIndicator()),
+                }
+
+                return Container(
+                  color: (index % 2 == 1) ? Colors.black12 : null,
+                  child: TransactionsTile(reverseList[index - 1]),
+                );
+              },
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }
