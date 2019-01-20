@@ -39,7 +39,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
             ),
             onTap: () => _toggleDarkTheme(),
           ),
-        ],
+        ].expand((Widget tile) => [tile, Divider(height: 0.0)]).toList(),
       ),
     );
   }

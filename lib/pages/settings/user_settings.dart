@@ -31,7 +31,7 @@ class UserSettingsPage extends StatelessWidget {
                             style: TextStyle(color: Colors.white),
                           ),
                           Text(
-                            state.value?.credit?.toString(),
+                            '${state.value?.credit?.toStringAsFixed(2)}€',
                             textScaleFactor: 1.2,
                             style: TextStyle(color: Colors.white),
                           ),
@@ -42,9 +42,9 @@ class UserSettingsPage extends StatelessWidget {
                 ),
               ),
               Spacer(),
+              Divider(),
             ],
           ),
-          Divider(),
           ListTile(
             title: Text('Passwort ändern'),
             onTap: () => _showPasswordDialog(),
@@ -57,7 +57,7 @@ class UserSettingsPage extends StatelessWidget {
             title: Text('Guthaben manuell aufladen'),
             onTap: () => _showCreditTokenDialog(),
           ),
-        ],
+        ].expand((Widget tile) => [tile, Divider(height: 0.0)]).toList(),
       ),
     );
   }
