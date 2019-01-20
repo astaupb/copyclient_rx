@@ -26,7 +26,7 @@ class _DrawerHeaderState extends State<DrawerHeader> {
               style: TextStyle(fontSize: 27.0),
             ),
             accountEmail: Text(
-              'Restliches Guthaben: ${state.value?.credit?.toString()}',
+              'Restliches Guthaben: ${state.value?.credit?.toStringAsFixed(2)}€',
             ),
             decoration: BoxDecoration(
               image: DecorationImage(
