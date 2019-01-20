@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
+import '../../widgets/centered_text.dart';
 import '../jobdetails/jobdetails.dart';
 import 'joblist_tile.dart';
 
@@ -54,13 +55,10 @@ class _JoblistPageState extends State<JoblistPage> {
             builder: (BuildContext context, JoblistState state) {
               if (state.isResult) {
                 if (state.value.length == 0) {
-                  return Center(
-                    child: Padding(
-                      child: Text(
-                          'Die Jobliste ist aktuell leer. Oben rechts kannst du neue Dokumente hochladen.'),
-                      padding: EdgeInsets.only(left: 40.0, right: 40.0),
-                    ),
-                  );
+                  return CenteredText('''
+                    Die Jobliste ist aktuell leer. 
+                    Oben rechts kannst du neue Dokumente hochladen.
+                    ''');
                 } else {
                   final reverseList = state.value.reversed.toList();
                   return ListView.builder(
@@ -89,6 +87,8 @@ class _JoblistPageState extends State<JoblistPage> {
                     },
                   );
                 }
+              } else if (state.isException) {
+                return CenteredText(state.error.toString());
               } else {
                 return Center(child: CircularProgressIndicator());
               }

@@ -26,7 +26,7 @@ class JoblistTile extends ListTile {
   Widget get leading => IconButton(
         icon: Icon(Icons.print),
         onPressed: () async => BlocProvider.of<JoblistBloc>(context)
-            .onPrint(await BarcodeScanner.scan(), index),
+            .onPrintbyId(await BarcodeScanner.scan(), job.id),
       );
 
   @override
