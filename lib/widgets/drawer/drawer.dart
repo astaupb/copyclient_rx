@@ -2,6 +2,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info/package_info.dart';
 
 import 'drawer_header.dart' as my;
 
@@ -45,7 +46,8 @@ class MainDrawer extends StatelessWidget {
           ListTile(
             title: Text('Über'),
             trailing: Icon(Icons.help),
-            onTap: () {
+            onTap: () async {
+              PackageInfo packageInfo = await PackageInfo.fromPlatform();
               Navigator.of(context).pop();
               showDialog(
                 context: context,
@@ -54,8 +56,11 @@ class MainDrawer extends StatelessWidget {
                     title: Text('AStA Copyclient'),
                     contentPadding: EdgeInsets.all(24.0),
                     children: <Widget>[
-                      Text('Version 0.1.0+1'),
-                      Text('Copyright 2019 AStA Paderborn'),
+                      Divider(),
+                      Text('Paketname: \n${packageInfo.packageName}'),
+                      Text('\nVersion: \n${packageInfo.version}+${packageInfo.buildNumber}'),
+                      Divider(),
+                      Text('Copyright © AStA Paderborn 2019'),
                       RaisedButton(
                         child: Text('Lizenzen'),
                         onPressed: () => showLicensePage(context: context),
