@@ -1,4 +1,4 @@
-import 'package:barcode_scan/barcode_scan.dart';
+//import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +22,7 @@ class MainDrawer extends StatelessWidget {
             trailing: Icon(Icons.credit_card),
             onTap: () async {
               try {
-                String token = await BarcodeScanner.scan();
+                //String token = await BarcodeScanner.scan();
                 // TODO: AYYYY
               } catch (e) {}
             },

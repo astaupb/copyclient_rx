@@ -1,6 +1,6 @@
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+//import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../widgets/details_dialog.dart';
 import '../../widgets/joboption_switches.dart';
@@ -17,7 +17,7 @@ class JobdetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    //JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(_job.jobInfo.filename),

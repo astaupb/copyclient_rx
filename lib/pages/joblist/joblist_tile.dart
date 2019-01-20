@@ -1,7 +1,6 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter/material.dart';
-import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class JoblistTile extends ListTile {
@@ -26,7 +25,7 @@ class JoblistTile extends ListTile {
   Widget get leading => IconButton(
         icon: Icon(Icons.print),
         onPressed: () async => BlocProvider.of<JoblistBloc>(context)
-            .onPrintbyId(await BarcodeScanner.scan(), job.id),
+            .onPrintById(await BarcodeScanner.scan(), job.id),
       );
 
   @override

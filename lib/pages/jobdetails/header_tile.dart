@@ -40,7 +40,7 @@ class _HeaderTileState extends State<HeaderTile> {
               DateTime.fromMillisecondsSinceEpoch(_job.timestamp * 1000)
                   .toString()
                   .split('.')[0]),
-          trailing: HeartPin(_job),
+          trailing: HeartPin(_job.id),
         ),
         ListTile(
           trailing: Column(
@@ -66,7 +66,7 @@ class _HeaderTileState extends State<HeaderTile> {
                           target = await BarcodeScanner.scan();
                           if (target != null) {
                             BlocProvider.of<JoblistBloc>(context)
-                                .onPrintbyId(target, _job.id);
+                                .onPrintById(target, _job.id);
                             Navigator.of(context).pop();
                           }
                         } catch (e) {

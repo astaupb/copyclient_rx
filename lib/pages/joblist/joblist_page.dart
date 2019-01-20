@@ -55,10 +55,14 @@ class _JoblistPageState extends State<JoblistPage> {
             builder: (BuildContext context, JoblistState state) {
               if (state.isResult) {
                 if (state.value.length == 0) {
-                  return CenteredText('''
-                    Die Jobliste ist aktuell leer. 
-                    Oben rechts kannst du neue Dokumente hochladen.
-                    ''');
+                  return GestureDetector(
+                    onTap: () =>
+                        BlocProvider.of<JoblistBloc>(context).onRefresh(),
+                    child: CenteredText('''
+Die Jobliste ist aktuell leer. 
+Oben rechts kannst du neue Dokumente hochladen.
+                    '''),
+                  );
                 } else {
                   final reverseList = state.value.reversed.toList();
                   return ListView.builder(

@@ -1,5 +1,5 @@
-import 'package:blocs_copyclient/job.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/src/models/joboptions.dart';
 import 'package:flutter/material.dart';
 
 ///
