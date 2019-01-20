@@ -1,8 +1,8 @@
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
-import 'package:blocs_copyclient/journal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +13,8 @@ import '../routes.dart';
 import 'login/login.dart';
 
 class RootPage extends StatefulWidget {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   RootPage({Key key}) : super(key: key);
 
   @override
@@ -62,13 +64,20 @@ class _RootPageState extends State<RootPage> {
                   bloc: uploadBloc,
                   child: BlocProvider<JournalBloc>(
                     bloc: journalBloc,
-                    child: Navigator(
-                      initialRoute: '/',
-                      onGenerateRoute: (RouteSettings settings) {
-                        return MaterialPageRoute(
-                          builder: routes[settings.name],
-                        );
-                      },
+                    child: WillPopScope(
+                      onWillPop: () async => !await _onWillPop(),
+                      child: Navigator(
+                        key: widget.navigatorKey,
+                        initialRoute: '/',
+                        onGenerateRoute: (RouteSettings settings) {
+                          return MaterialPageRoute(
+                            settings: settings,
+                            maintainState: true,
+                            builder: (context) =>
+                                routes[settings.name](context),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -82,5 +91,11 @@ class _RootPageState extends State<RootPage> {
         },
       ),
     );
+  }
+
+  Future<bool> _onWillPop() async {
+    final NavigatorState navigator = widget.navigatorKey.currentState;
+    assert(navigator != null);
+    return await navigator.maybePop();
   }
 }
