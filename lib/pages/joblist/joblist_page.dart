@@ -63,20 +63,27 @@ class _JoblistPageState extends State<JoblistPage> {
                   );
                 } else {
                   return ListView.builder(
-                    itemExtent: 80.0,
+                    reverse: true,
+                    itemExtent: 72.0,
                     itemCount: state.value.length,
                     itemBuilder: (BuildContext context, int index) {
                       if (state.value[index] != null)
-                        return JoblistTile(
-                          context,
-                          index,
-                          state.value[index],
-                          onPress: (int index) => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      JobdetailsPage(state.value[index]),
-                                ),
-                              ),
+                        return Column(
+                          children: <Widget>[
+                            JoblistTile(
+                              context,
+                              index,
+                              state.value[index],
+                              onPress: (int index) =>
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          JobdetailsPage(state.value[index]),
+                                    ),
+                                  ),
+                            ),
+                            Divider(height: 0.0),
+                          ],
                         );
                     },
                   );

@@ -5,7 +5,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class JoblistTile extends ListTile {
-  static const double height = 80.0;
+  static const double height = 64.0;
   final Job job;
   final int index;
   final BuildContext context;
@@ -20,7 +20,7 @@ class JoblistTile extends ListTile {
 
   @override
   EdgeInsetsGeometry get contentPadding =>
-      EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 4.0);
+      EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
 
   @override
   Widget get leading => IconButton(
