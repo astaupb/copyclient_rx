@@ -19,6 +19,7 @@ dependencies:
   bloc: ^0.7.5
   file_picker: ^1.1.1
   package_info: ^0.3.2+1
+  after_layout: ^1.0.7
 
 dev_dependencies:
   flutter_test:

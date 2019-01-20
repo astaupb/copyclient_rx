@@ -40,11 +40,7 @@ class _RootPageState extends State<RootPage> {
       child: BlocBuilder<AuthEvent, AuthState>(
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
-          if (state.isUnauthorized) {
-            return LoginPage();
-          } else if (state.isBusy) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state.isAuthorized) {
+          if (state.isAuthorized) {
             // AUTHORIZED AND READY TO HUSTLE
             joblistBloc = JoblistBloc(backend);
             joblistBloc.onStart(state.token);
@@ -91,11 +87,19 @@ class _RootPageState extends State<RootPage> {
                 ),
               ),
             );
-          } else {
-            if (state.isException) {
-              return Center(child: Text(state.error.toString()));
-            }
           }
+          if (state.isException) {
+            return LoginPage(
+              startSnack: SnackBar(
+                content: Text('Fehler: ${state.error.toString()}'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+          if (state.isBusy) {
+            return Scaffold();
+          }
+          return LoginPage();
         },
       ),
     );
