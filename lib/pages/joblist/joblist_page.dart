@@ -32,7 +32,7 @@ class _JoblistPageState extends State<JoblistPage> {
                 bloc: BlocProvider.of<UserBloc>(context),
                 builder: (BuildContext context, UserState state) {
                   if (state.isResult)
-                    return Text('${state.value.credit}€');
+                    return Text('${state.value.credit.toStringAsFixed(2)}€');
                   else
                     return Text('0,00€');
                 },
@@ -62,25 +62,26 @@ class _JoblistPageState extends State<JoblistPage> {
                     ),
                   );
                 } else {
+                  final reverseList = state.value.reversed.toList();
                   return ListView.builder(
-                    reverse: true,
                     itemExtent: 72.0,
-                    itemCount: state.value.length,
+                    itemCount: reverseList.length,
                     itemBuilder: (BuildContext context, int index) {
-                      if (state.value[index] != null)
+                      if (reverseList[index] != null)
                         return Column(
                           children: <Widget>[
                             JoblistTile(
                               context,
                               index,
-                              state.value[index],
-                              onPress: (int index) =>
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          JobdetailsPage(state.value[index]),
-                                    ),
+                              reverseList[index],
+                              onPress: (int index) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        JobdetailsPage(reverseList[index]),
                                   ),
+                                );
+                              },
                             ),
                             Divider(height: 0.0),
                           ],
