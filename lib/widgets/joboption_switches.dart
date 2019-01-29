@@ -30,21 +30,23 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
       builder: (BuildContext context, JoblistState state) {
         return Column(
           children: <Widget>[
-            (job.jobInfo.colored > 0) ? ListTile(
-              onTap: () {
-                job.jobOptions.color = !job.jobOptions.color;
-                joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
-              },
-              leading: Icon(Icons.palette),
-              title: Text('Farbe'),
-              trailing: Switch(
-                onChanged: (val) {
-                  job.jobOptions.color = val;
-                  joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
-                },
-                value: job.jobOptions.color,
-              ),
-            ) : null,
+            (job.jobInfo.colored > 0)
+                ? ListTile(
+                    onTap: () {
+                      job.jobOptions.color = !job.jobOptions.color;
+                      joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                    },
+                    leading: Icon(Icons.palette),
+                    title: Text('Farbe'),
+                    trailing: Switch(
+                      onChanged: (val) {
+                        job.jobOptions.color = val;
+                        joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                      },
+                      value: job.jobOptions.color,
+                    ),
+                  )
+                : null,
             (job.jobInfo.pagecount * job.jobOptions.copies < 2)
                 ? null
                 : Column(

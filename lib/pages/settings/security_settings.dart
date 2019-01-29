@@ -13,9 +13,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         title: Text('Angemeldete Geräte'),
       ),
       body: ListView(
-        children: <Widget>[
-          
-        ],
+        children: <Widget>[],
       ),
     );
   }

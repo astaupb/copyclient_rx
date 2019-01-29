@@ -58,7 +58,8 @@ class MainDrawer extends StatelessWidget {
                     children: <Widget>[
                       Divider(),
                       Text('Paketname: \n${packageInfo.packageName}'),
-                      Text('\nVersion: \n${packageInfo.version}+${packageInfo.buildNumber}'),
+                      Text(
+                          '\nVersion: \n${packageInfo.version}+${packageInfo.buildNumber}'),
                       Divider(),
                       Text('Copyright © AStA Paderborn 2019'),
                       RaisedButton(

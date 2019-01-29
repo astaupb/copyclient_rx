@@ -33,9 +33,10 @@ class _JoblistPageState extends State<JoblistPage> {
                 bloc: BlocProvider.of<UserBloc>(context),
                 builder: (BuildContext context, UserState state) {
                   if (state.isResult)
-                    return Text('${state.value.credit.toStringAsFixed(2)}€');
+                    return Text(
+                        '${(state.value.credit / 100).toStringAsFixed(2)} €');
                   else
-                    return Text('0,00€');
+                    return Text('0,00 €');
                 },
               ),
               onPressed: () => Navigator.of(context).pushNamed('/transactions'),

@@ -17,11 +17,7 @@ class TransactionsTile extends ListTile {
   get onTap => () => null;
 
   @override
-  Widget get subtitle => new Text(
-        DateTime.fromMillisecondsSinceEpoch(transaction.timestamp * 1000)
-            .toString()
-            .split('.')[0],
-      );
+  Widget get subtitle => new Text(transaction.timestamp);
 
   @override
   Widget get title => Text(transaction.description);
@@ -35,7 +31,7 @@ class TransactionsTile extends ListTile {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  '${transaction.value.toStringAsFixed(2)} €',
+                  '${(transaction.value / 100.0).toStringAsFixed(2)} €',
                   textScaleFactor: 1.3,
                   style: (transaction.value < 0)
                       ? TextStyle(color: Colors.red)

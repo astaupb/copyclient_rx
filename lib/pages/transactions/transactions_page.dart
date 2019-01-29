@@ -36,7 +36,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             textScaleFactor: 1.1,
                           ),
                           trailing: Text(
-                            '${state.value.credit.toStringAsFixed(2)} €',
+                            '${(state.value.credit / 100.0).toStringAsFixed(2)} €',
                             textScaleFactor: 1.3,
                           ),
                         ),
