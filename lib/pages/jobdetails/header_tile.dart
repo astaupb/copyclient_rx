@@ -51,14 +51,14 @@ class _HeaderTileState extends State<HeaderTile> {
                 label: Padding(
                   padding: EdgeInsets.only(right: 16.0),
                   child: Text(
-                      '${(_estimatePrice(_job) / 100.0).toStringAsFixed(2)} €'),
+                      '${((_job.priceEstimation) / 100.0).toStringAsFixed(2)} €'),
                 ),
                 icon: Padding(
                   padding: EdgeInsets.only(left: 16.0),
                   child: Icon(Icons.print),
                 ),
                 onPressed: ((userBloc.user.credit -
-                            (_estimatePrice(_job) / 100.0)) >
+                            (_job.priceEstimation / 100.0)) >
                         0)
                     ? () async {
                         String target;
@@ -79,9 +79,9 @@ class _HeaderTileState extends State<HeaderTile> {
                     : null,
               ),
               Text(
-                ((userBloc.user.credit - (_estimatePrice(_job) / 100.0)) > 0)
-                    ? 'Neues Guthaben vmtl.: ${(userBloc.user.credit - (_estimatePrice(_job) / 100.0)).toStringAsFixed(2)} €'
-                    : 'Fehlendes Guthaben: ${((userBloc.user.credit - (_estimatePrice(_job) / 100.0)) * -1).toStringAsFixed(2)} €',
+                ((userBloc.user.credit - (_job.priceEstimation / 100.0)) > 0)
+                    ? 'Neues Guthaben vmtl.: ${(userBloc.user.credit - (_job.priceEstimation / 100.0)).toStringAsFixed(2)} €'
+                    : 'Fehlendes Guthaben: ${((userBloc.user.credit - (_job.priceEstimation / 100.0)) * -1).toStringAsFixed(2)} €',
                 textAlign: TextAlign.left,
                 style: TextStyle(color: Colors.black54),
                 textScaleFactor: 0.8,
@@ -91,32 +91,5 @@ class _HeaderTileState extends State<HeaderTile> {
         ),
       ],
     );
-  }
-
-  int _estimatePrice(Job job, {basePrice: 2}) {
-    int _basePrice = basePrice;
-    int _colorPrice = 10;
-    int _colorPages = job.jobInfo.colored;
-    int _totalPages = job.jobInfo.pagecount;
-
-    if (job.jobOptions.a3 || job.jobInfo.a3) {
-      _basePrice *= 2;
-      _colorPrice *= 2;
-    }
-
-    if (job.jobOptions.nup == 4 && _totalPages > 3) {
-      _totalPages = _totalPages ~/ 4 + ((_totalPages % 4 > 0) ? 1 : 0);
-    } else if (job.jobOptions.nup == 4 && _totalPages <= 4) {
-      _totalPages = 1;
-    }
-
-    if (job.jobOptions.nup == 2 && _totalPages > 1)
-      _totalPages = _totalPages ~/ 2 + _totalPages % 2;
-
-    _basePrice *= ((_totalPages - _colorPages) * job.jobOptions.copies);
-    if (_colorPages > 0 && job.jobOptions.color)
-      _basePrice += (_colorPages * job.jobOptions.copies * _colorPrice);
-
-    return _basePrice;
   }
 }
