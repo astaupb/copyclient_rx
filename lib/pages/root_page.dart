@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/journal.dart';
@@ -12,6 +13,7 @@ import 'package:http/http.dart' as http;
 import '../models/backend_sunrise.dart';
 import '../routes.dart';
 import 'login/login.dart';
+import '../token_store.dart';
 
 class RootPage extends StatefulWidget {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -26,12 +28,21 @@ class _RootPageState extends State<RootPage> {
   static final http.Client client = http.Client();
   static final Backend backend = BackendSunrise(client);
 
+  TokenStore store = TokenStore()..openDb();
+
   AuthBloc authBloc = AuthBloc(backend: backend);
   JoblistBloc joblistBloc;
   UserBloc userBloc;
   UploadBloc uploadBloc;
   JournalBloc journalBloc;
   PreviewBloc previewBloc;
+
+  String _token;
+
+  _RootPageState() {
+    _token = store.currentToken;
+    if (_token != null) authBloc.tokenLogin(_token);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +52,7 @@ class _RootPageState extends State<RootPage> {
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
           if (state.isAuthorized) {
+            if (state.persistent) store.insertToken(state.token);
             // AUTHORIZED AND READY TO HUSTLE
             joblistBloc = JoblistBloc(backend);
             joblistBloc.onStart(state.token);
@@ -87,17 +99,19 @@ class _RootPageState extends State<RootPage> {
                 ),
               ),
             );
-          }
-          if (state.isException) {
+          } else if (state.isException) {
             return LoginPage(
               startSnack: SnackBar(
                 content: Text('Fehler: ${state.error.toString()}'),
                 duration: Duration(seconds: 3),
               ),
             );
-          }
-          if (state.isBusy) {
+          } else if (state.isBusy) {
             return Scaffold();
+          } else {
+            if (store.currentToken != null) {
+              if (!state.persistent) store.clearTokens();
+            }
           }
           return LoginPage();
         },

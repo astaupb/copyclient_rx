@@ -4,8 +4,13 @@ import 'package:logging/logging.dart';
 
 import 'blocs/theme_bloc.dart';
 import 'pages/root_page.dart';
+import 'token_store.dart';
 
-void main() => runApp(Copyclient());
+void main() async {
+  TokenStore store = TokenStore();
+  await store.openDb();
+  runApp(Copyclient());
+}
 
 class Copyclient extends StatefulWidget {
   Copyclient() {
