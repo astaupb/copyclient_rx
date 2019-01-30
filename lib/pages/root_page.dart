@@ -28,7 +28,7 @@ class _RootPageState extends State<RootPage> {
   static final http.Client client = http.Client();
   static final Backend backend = BackendSunrise(client);
 
-  TokenStore store = TokenStore()..openDb();
+  TokenStore store = TokenStore();
 
   AuthBloc authBloc = AuthBloc(backend: backend);
   JoblistBloc joblistBloc;
@@ -108,9 +108,9 @@ class _RootPageState extends State<RootPage> {
             );
           } else if (state.isBusy) {
             return Scaffold();
-          } else {
+          } else if (state.isUnauthorized) {
             if (store.currentToken != null) {
-              if (!state.persistent) store.clearTokens();
+              store.clearTokens();
             }
           }
           return LoginPage();
