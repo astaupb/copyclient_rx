@@ -31,7 +31,7 @@ class UserSettingsPage extends StatelessWidget {
                             style: TextStyle(color: Colors.white),
                           ),
                           Text(
-                            '${state.value?.credit?.toStringAsFixed(2)}€',
+                            '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
                             textScaleFactor: 1.2,
                             style: TextStyle(color: Colors.white),
                           ),
