@@ -1,6 +1,8 @@
 import 'package:after_layout/after_layout.dart';
+import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../widgets/teal_outline_button.dart';
 import '../register_page.dart';
@@ -8,8 +10,9 @@ import 'login_form.dart';
 
 class LoginPage extends StatefulWidget {
   final SnackBar startSnack;
+  final AuthBloc authBloc;
 
-  const LoginPage({Key key, this.startSnack}) : super(key: key);
+  const LoginPage({Key key, this.startSnack, this.authBloc}) : super(key: key);
 
   @override
   LoginPageState createState() {
@@ -52,7 +55,9 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
               ),
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => RegisterPage()));
+                  builder: (BuildContext context) =>
+                      RegisterPage(authBloc: widget.authBloc),
+                ));
               },
             )
           : null,

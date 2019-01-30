@@ -5,6 +5,7 @@ import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/preview.dart';
+import 'package:blocs_copyclient/src/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,9 +101,19 @@ class _RootPageState extends State<RootPage> {
               ),
             );
           } else if (state.isException) {
+            String snackText = 'Fehler: ${state.error}';
+            int code = (state.error as ApiException).statusCode;
+            if (code == 401) {
+              snackText = 'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
+            } else if(code == 400 || (code > 401 && code < 500)) {
+              snackText = 'Fehler: Anfrage war fehlerhaft. Falls mehr Fehler auftreten bitte App neu starten';
+            } else if(code >= 500 && code < 600) {
+              snackText = 'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
+            }
+            SnackBar snackBar;
             return LoginPage(
               startSnack: SnackBar(
-                content: Text('Fehler: ${state.error.toString()}'),
+                content: Text(snackText),
                 duration: Duration(seconds: 3),
               ),
             );
@@ -113,7 +124,7 @@ class _RootPageState extends State<RootPage> {
               store.clearTokens();
             }
           }
-          return LoginPage();
+          return LoginPage(authBloc: authBloc);
         },
       ),
     );
