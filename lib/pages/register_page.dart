@@ -1,17 +1,131 @@
+import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class RegisterPage extends StatefulWidget {
+  final AuthBloc authBloc;
+
+  const RegisterPage({Key key, this.authBloc}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _password = '';
+  String _retypedPassword = '';
+  String _username = '';
+
+  bool showPw1 = false;
+  bool showPw2 = false;
+
+  _RegisterPageState();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Registrieren')),
-      body: Placeholder(),
+      body: ListView(
+        children: <Widget>[
+          Form(
+            key: _formKey,
+            autovalidate: true,
+            child: Card(
+              margin: EdgeInsets.all(8.0),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 16.0, left: 8.0, right: 8.0),
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      decoration: InputDecoration(
+                          labelText: 'Benutzername', hintText: 'maxmuster'),
+                      validator: (value) {
+                        if (value.length < 1)
+                          return 'Ein Benutzername muss mindestens 2 Zeichen enthalten';
+                        if (value.contains('/') ||
+                            value.contains('.') ||
+                            value.contains(':'))
+                          return 'Ein Benutzername darf kein / . oder : enthalten';
+                        return null;
+                      },
+                      onSaved: (value) => _username = value,
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        isDense: true,
+                        labelText: 'Passwort',
+                        suffix: IconButton(
+                            iconSize: 20.0,
+                            icon: Icon(Icons.remove_red_eye,
+                                color: (showPw1)
+                                    ? Colors.lightBlueAccent
+                                    : Colors.grey),
+                            onPressed: () =>
+                                setState(() => showPw1 = !showPw1)),
+                      ),
+                      obscureText: !showPw1,
+                      validator: (value) {
+                        if (value.length > 5) {
+                          _password = value;
+                        } else {
+                          return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
+                        }
+                      },
+                      onSaved: (value) => _password = value,
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        isDense: true,
+                        labelText: 'Passwort bestätigen',
+                        suffix: IconButton(
+                          iconSize: 20.0,
+                          icon: Icon(
+                            Icons.remove_red_eye,
+                            color: (showPw2)
+                                ? Colors.lightBlueAccent
+                                : Colors.grey,
+                          ),
+                          onPressed: () => setState(() => showPw2 = !showPw2),
+                        ),
+                      ),
+                      obscureText: !showPw2,
+                      validator: (value) {
+                        if (value.length < 5)
+                          return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
+                        else if (value != _password)
+                          return 'Die Passwörter müssen miteinander übereinstimmen';
+                        return null;
+                      },
+                      onSaved: (value) => _retypedPassword = value,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: RaisedButton(
+              textColor: Colors.white,
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  _formKey.currentState.save();
+                  widget.authBloc.register(_username, _password);
+                  var listener;
+                  listener = widget.authBloc.state.listen((AuthState state) {
+                    if (state.isAuthorized) {
+                      Navigator.pop(context);
+                      listener.cancel();
+                    }
+                  });
+                }
+              },
+              child: Text('Registrieren'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
