@@ -39,7 +39,8 @@ class _JoblistPageState extends State<JoblistPage> {
                     return Text(
                         '${(state.value.credit / 100).toStringAsFixed(2)} €');
                   } else
-                    return Text('${((lastCredit ?? 0) / 100.0).toStringAsFixed(2)} €');
+                    return Text(
+                        '${((lastCredit ?? 0) / 100.0).toStringAsFixed(2)} €');
                 },
               ),
               onPressed: () => Navigator.of(context).pushNamed('/transactions'),

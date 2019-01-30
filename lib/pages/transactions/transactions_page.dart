@@ -45,7 +45,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                   return Container(
                     color: (index % 2 == 1) ? Colors.black12 : null,
-                    child: TransactionsTile(state.value.transactions[index - 1]),
+                    child:
+                        TransactionsTile(state.value.transactions[index - 1]),
                   );
                 },
               );
