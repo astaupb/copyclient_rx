@@ -20,6 +20,8 @@ class JoblistPage extends StatefulWidget {
 }
 
 class _JoblistPageState extends State<JoblistPage> {
+  int lastCredit;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -32,11 +34,12 @@ class _JoblistPageState extends State<JoblistPage> {
               child: BlocBuilder<UserEvent, UserState>(
                 bloc: BlocProvider.of<UserBloc>(context),
                 builder: (BuildContext context, UserState state) {
-                  if (state.isResult)
+                  if (state.isResult) {
+                    lastCredit = state.value.credit;
                     return Text(
                         '${(state.value.credit / 100).toStringAsFixed(2)} €');
-                  else
-                    return Text('0,00 €');
+                  } else
+                    return Text('${((lastCredit ?? 0) / 100.0).toStringAsFixed(2)} €');
                 },
               ),
               onPressed: () => Navigator.of(context).pushNamed('/transactions'),
@@ -118,6 +121,7 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   Future<void> _onRefresh() async {
     JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    UserBloc userBloc = BlocProvider.of<UserBloc>(context);
     var listener;
     listener = joblistBloc.state.listen((JoblistState state) {
       if (state.isResult) {
@@ -125,6 +129,7 @@ Oben rechts kannst du neue Dokumente hochladen.
         return;
       }
     });
+    userBloc.onRefresh();
     joblistBloc.onRefresh();
   }
 
