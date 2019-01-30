@@ -23,7 +23,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
           bloc: BlocProvider.of<JournalBloc>(context),
           builder: (BuildContext context, JournalState state) {
             if (state.isResult) {
-              final reverseList = state.value.transactions.reversed.toList();
               return ListView.builder(
                 itemCount: state.value.transactions.length + 1,
                 itemBuilder: (BuildContext context, int index) {
@@ -46,7 +45,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                   return Container(
                     color: (index % 2 == 1) ? Colors.black12 : null,
-                    child: TransactionsTile(reverseList[index - 1]),
+                    child: TransactionsTile(state.value.transactions[index - 1]),
                   );
                 },
               );
