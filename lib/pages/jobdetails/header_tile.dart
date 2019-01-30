@@ -86,8 +86,8 @@ class _HeaderTileState extends State<HeaderTile> {
                   Text(
                     ((userBloc.user.credit - (_job.priceEstimation / 100.0)) >
                             0)
-                        ? 'Neues Guthaben vmtl.: ${(userBloc.user.credit - (_job.priceEstimation / 100.0)).toStringAsFixed(2)} €'
-                        : 'Fehlendes Guthaben: ${((userBloc.user.credit - (_job.priceEstimation / 100.0)) * -1).toStringAsFixed(2)} €',
+                        ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
+                        : 'Fehlendes Guthaben: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
                     textAlign: TextAlign.left,
                     style: TextStyle(color: Colors.black54),
                     textScaleFactor: 0.8,
