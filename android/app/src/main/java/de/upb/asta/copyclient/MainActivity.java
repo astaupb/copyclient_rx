@@ -1,4 +1,4 @@
-package de.upb.asta.copyclientrx;
+package de.upb.asta.copyclient;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

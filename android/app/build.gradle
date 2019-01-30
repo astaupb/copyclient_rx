@@ -21,6 +21,18 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def keystoreLoaded = false;
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+
+try {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystoreLoaded = true;
+} catch (Exception e) {
+    println('Exception thrown loading the keyconfig\nYou may add one in key.properties under the android root folder');
+    keystoreLoaded = false;
+}
+
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
@@ -33,7 +45,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "de.upb.asta.copyclientrx"
+        applicationId "de.upb.asta.copyclient"
         minSdkVersion 16
         targetSdkVersion 27
         versionCode flutterVersionCode.toInteger()
@@ -41,11 +53,24 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+	        if (keystoreLoaded) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }  
+        }
+    }
+    
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            if (keystoreLoaded) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
         }
     }
 }
