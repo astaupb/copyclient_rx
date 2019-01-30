@@ -13,6 +13,7 @@ class HeartPin extends StatefulWidget {
 
 class _HeartPinState extends State<HeartPin> {
   int jobId;
+  bool last_keep;
 
   _HeartPinState(this.jobId);
 
@@ -22,39 +23,22 @@ class _HeartPinState extends State<HeartPin> {
     return BlocBuilder<JoblistEvent, JoblistState>(
       bloc: joblistBloc,
       builder: (BuildContext context, JoblistState state) {
+        Job job;
         if (state.isResult) {
-          Job job = state.value[joblistBloc.getIndexById(jobId)];
-          if (job.jobOptions.keep) {
-            return IconButton(
-              color: Color(0xffff58ad),
-              splashColor: Color(0xffff8ddf),
-              icon: Icon(Icons.favorite),
-              onPressed: () {
-                job.jobOptions.keep = false;
-                joblistBloc.onUpdateOptionsById(jobId, job.jobOptions);
-              },
-            );
-          } else {
-            return IconButton(
-              color: Color(0xffff58ad),
-              splashColor: Color(0xffff8ddf),
-              icon: Icon(Icons.favorite_border),
-              onPressed: () {
-                job.jobOptions.keep = true;
-                joblistBloc.onUpdateOptionsById(jobId, job.jobOptions);
-              },
-            );
-          }
-        } else {
-          return IconButton(
-            onPressed: () => null,
-            icon: Icon(
-              Icons.favorite,
-              color: Colors.grey,
-            ),
-          );
+          job = state.value[joblistBloc.getIndexById(jobId)];
+          last_keep = job.jobOptions.keep;
         }
-      },
+        bool keep = job?.jobOptions?.keep ?? last_keep ?? false;
+            return IconButton(
+              color: Color(0xffff58ad),
+              splashColor: Color(0xffff8ddf),
+              icon: Icon(keep ? Icons.favorite : Icons.favorite_border),
+              onPressed: () {
+                job.jobOptions.keep = !keep;
+                joblistBloc.onUpdateOptionsById(jobId, job.jobOptions);
+              },
+            );
+      }
     );
   }
 }
