@@ -1,5 +1,8 @@
 //import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/journal.dart';
+import 'package:blocs_copyclient/src/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info/package_info.dart';
@@ -12,6 +15,7 @@ class MainDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
+    final JournalBloc journalBloc = BlocProvider.of<JournalBloc>(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -22,9 +26,33 @@ class MainDrawer extends StatelessWidget {
             trailing: Icon(Icons.credit_card),
             onTap: () async {
               try {
-                //String token = await BarcodeScanner.scan();
-                // TODO: AYYYY
-              } catch (e) {}
+                String token = await BarcodeScanner.scan();
+                journalBloc.onAddTransaction(token);
+                var listener;
+                listener = journalBloc.state.listen((JournalState state) {
+                  if (state.isResult) {
+                    Navigator.pop(context);
+                    listener.cancel();
+                  } else if (state.isException) {
+                    ApiException error = state.error;
+                    String snackText = 'Fehler: $error';
+                    if (error.statusCode == 472) {
+                      snackText =
+                          'Fehler: Dieser Token wurde bereits verbraucht';
+                    } else if (error.statusCode == 401) {
+                      snackText =
+                          'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
+                    }
+                    SnackBar snackBar = SnackBar(
+                      content: Text(snackText),
+                      duration: Duration(seconds: 3),
+                    );
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  }
+                });
+              } catch (e) {
+                print(e.toString());
+              }
             },
           ),
           ListTile(
