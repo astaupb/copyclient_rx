@@ -62,35 +62,39 @@ class _HeaderTileState extends State<HeaderTile> {
                       padding: EdgeInsets.only(left: 16.0),
                       child: Icon(Icons.print),
                     ),
-                    onPressed: ((userBloc.user.credit -
-                                (_job.priceEstimation / 100.0)) >
-                            0)
-                        ? () async {
-                            String target;
-                            try {
-                              target = await BarcodeScanner.scan();
-                              if (target != null) {
-                                BlocProvider.of<JoblistBloc>(context)
-                                    .onPrintById(target, _job.id);
-                                Navigator.of(context).pop();
-                              }
-                            } catch (e) {
-                              print('MetaTile: $e');
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Es wurde kein Drucker ausgewählt')));
-                            }
-                          }
-                        : null,
+                    onPressed: () async {
+                      String target;
+                      try {
+                        target = await BarcodeScanner.scan();
+                        if (target != null) {
+                          BlocProvider.of<JoblistBloc>(context)
+                              .onPrintById(target, _job.id);
+                          Navigator.of(context).pop();
+                        }
+                      } catch (e) {
+                        print('MetaTile: $e');
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text('Es wurde kein Drucker ausgewählt')));
+                      }
+                    },
                   ),
-                  Text(
-                    ((userBloc.user.credit - (_job.priceEstimation / 100.0)) >
-                            0)
-                        ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
-                        : 'Fehlendes Guthaben: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(color: Colors.black54),
-                    textScaleFactor: 0.8,
+                  BlocBuilder(
+                    bloc: userBloc,
+                    builder: (BuildContext context, UserState state) {
+                      if (state.isResult) {
+                        return Text(
+                          ((userBloc.user.credit -
+                                      (_job.priceEstimation / 100.0)) >
+                                  0)
+                              ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
+                              : 'Fehlendes Guthaben: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(color: Colors.black54),
+                          textScaleFactor: 0.8,
+                        );
+                      }
+                      return Container(width: 0.0, height: 0.0);
+                    },
                   ),
                 ],
               ),

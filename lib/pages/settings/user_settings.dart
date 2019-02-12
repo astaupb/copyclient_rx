@@ -22,21 +22,25 @@ class UserSettingsPage extends StatelessWidget {
                   child: BlocBuilder(
                     bloc: BlocProvider.of<UserBloc>(context),
                     builder: (BuildContext context, UserState state) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          Text(
-                            state.value?.username,
-                            textScaleFactor: 1.5,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
-                            textScaleFactor: 1.2,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      );
+                      if (state.isResult) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            Text(
+                              state.value?.name,
+                              textScaleFactor: 1.5,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
+                              textScaleFactor: 1.2,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
                     },
                   ),
                 ),

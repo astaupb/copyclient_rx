@@ -16,32 +16,39 @@ class DrawerHeader extends StatefulWidget {
 class _DrawerHeaderState extends State<DrawerHeader> {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserEvent, UserState>(
-      bloc: BlocProvider.of<UserBloc>(context),
-      builder: (BuildContext context, state) {
-        if (state.isResult) {
-          return UserAccountsDrawerHeader(
-            accountName: Text(
-              state.value?.username,
-              style: TextStyle(fontSize: 27.0),
-            ),
-            accountEmail: Text(
+    return UserAccountsDrawerHeader(
+      accountName: BlocBuilder<UserEvent, UserState>(
+        bloc: BlocProvider.of<UserBloc>(context),
+        builder: (BuildContext context, state) {
+          if (state.isResult) {
+            return Text(state.value?.name, style: TextStyle(fontSize: 27.0));
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+      accountEmail: BlocBuilder<UserEvent, UserState>(
+        bloc: BlocProvider.of<UserBloc>(context),
+        builder: (BuildContext context, state) {
+          if (state.isResult) {
+            return Text(
               'Restliches Guthaben: ${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
-            ),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-                    _headerImages[math.Random().nextInt(_headerImages.length)],
-                  ),
-                  fit: BoxFit.fill),
-            ),
-          );
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
+            );
+          } else {
+            return Container(width: 0.0, height: 0.0);
+          }
+        },
+      ),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+            _headerImages[math.Random().nextInt(_headerImages.length)],
+          ),
+          fit: BoxFit.fill,
+        ),
+      ),
     );
   }
 }
