@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/backend_sunrise.dart';
+import '../models/backend_shiva.dart';
 import '../routes.dart';
 import 'login/login.dart';
 import '../token_store.dart';
@@ -27,7 +27,7 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   static final http.Client client = http.Client();
-  static final Backend backend = BackendSunrise(client);
+  static final Backend backend = BackendShiva(client);
 
   TokenStore store = TokenStore();
 
