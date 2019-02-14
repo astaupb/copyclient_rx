@@ -13,7 +13,7 @@ class HeartPin extends StatefulWidget {
 
 class _HeartPinState extends State<HeartPin> {
   int jobId;
-  bool last_keep;
+  bool lastKeep;
 
   _HeartPinState(this.jobId);
 
@@ -21,23 +21,24 @@ class _HeartPinState extends State<HeartPin> {
   Widget build(BuildContext context) {
     JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return BlocBuilder<JoblistEvent, JoblistState>(
-        bloc: joblistBloc,
-        builder: (BuildContext context, JoblistState state) {
-          Job job;
-          if (state.isResult) {
-            job = state.value[joblistBloc.getIndexById(jobId)];
-            last_keep = job.jobOptions.keep;
-          }
-          bool keep = job?.jobOptions?.keep ?? last_keep ?? false;
-          return IconButton(
-            color: Color(0xffff58ad),
-            splashColor: Color(0xffff8ddf),
-            icon: Icon(keep ? Icons.favorite : Icons.favorite_border),
-            onPressed: () {
-              job.jobOptions.keep = !keep;
-              joblistBloc.onUpdateOptionsById(jobId, job.jobOptions);
-            },
-          );
-        });
+      bloc: joblistBloc,
+      builder: (BuildContext context, JoblistState state) {
+        Job job;
+        if (state.isResult) {
+          job = state.value[joblistBloc.getIndexById(jobId)];
+          lastKeep = job.jobOptions.keep;
+        }
+        bool keep = job?.jobOptions?.keep ?? lastKeep ?? false;
+        return IconButton(
+          color: Color(0xffff58ad),
+          splashColor: Color(0xffff8ddf),
+          icon: Icon(keep ? Icons.favorite : Icons.favorite_border),
+          onPressed: () {
+            job.jobOptions.keep = !keep;
+            joblistBloc.onUpdateOptionsById(jobId, job.jobOptions);
+          },
+        );
+      },
+    );
   }
 }

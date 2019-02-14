@@ -110,7 +110,6 @@ class _RootPageState extends State<RootPage> {
             } else if(code >= 500 && code < 600) {
               snackText = 'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
             }
-            SnackBar snackBar;
             return LoginPage(
               startSnack: SnackBar(
                 content: Text(snackText),

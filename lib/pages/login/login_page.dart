@@ -2,7 +2,6 @@ import 'package:after_layout/after_layout.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../widgets/teal_outline_button.dart';
 import '../register_page.dart';

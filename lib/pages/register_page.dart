@@ -13,14 +13,17 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _password = '';
-  String _retypedPassword = '';
-  String _username = '';
+  String _password;
+  String _retypedPassword;
+  String _username;
 
   bool showPw1 = false;
   bool showPw2 = false;
 
-  _RegisterPageState();
+  _RegisterPageState()
+      : _password = '',
+        _retypedPassword = '',
+        _username = '';
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   children: <Widget>[
                     TextFormField(
+                      initialValue: _username,
                       decoration: InputDecoration(
                           labelText: 'Benutzername', hintText: 'maxmuster'),
                       validator: (value) {
@@ -52,6 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       onSaved: (value) => _username = value,
                     ),
                     TextFormField(
+                      initialValue: _password,
                       decoration: InputDecoration(
                         isDense: true,
                         labelText: 'Passwort',
@@ -75,6 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       onSaved: (value) => _password = value,
                     ),
                     TextFormField(
+                      initialValue: _retypedPassword,
                       decoration: InputDecoration(
                         isDense: true,
                         labelText: 'Passwort bestätigen',
