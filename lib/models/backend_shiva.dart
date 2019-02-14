@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:blocs_copyclient/src/models/backend.dart';
+import 'package:blocs_copyclient/backend.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 

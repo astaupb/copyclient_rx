@@ -2,7 +2,7 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/journal.dart';
-import 'package:blocs_copyclient/src/exceptions.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info/package_info.dart';

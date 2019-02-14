@@ -5,7 +5,7 @@ import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/preview.dart';
-import 'package:blocs_copyclient/src/exceptions.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
