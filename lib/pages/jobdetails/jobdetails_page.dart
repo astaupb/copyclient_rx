@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/details_dialog.dart';
 import '../../widgets/joboption_switches.dart';
 import '../../widgets/preview_grid.dart';
+import 'job_deletion_modal.dart';
 import 'header_tile.dart';
 
 ///
@@ -22,6 +23,14 @@ class JobdetailsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(_job.jobInfo.filename),
         actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () => showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return JobDeletionModal(_job.id);
+                }),
+          ),
           IconButton(
             icon: Icon(Icons.info),
             onPressed: () => showDialog(
