@@ -105,7 +105,7 @@ class MainDrawer extends StatelessWidget {
             title: Text('Logout'),
             trailing: Icon(Icons.exit_to_app),
             onTap: () {
-              authBloc.deleteToken();
+              authBloc.logout();
               Navigator.of(context).popUntil(ModalRoute.withName('/'));
             },
           ),
