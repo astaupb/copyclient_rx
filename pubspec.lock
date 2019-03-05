@@ -21,20 +21,20 @@ packages:
       name: barcode_scan
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.8"
+    version: "1.0.0"
   bloc:
     dependency: "direct main"
     description:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.8"
+    version: "0.9.3"
   blocs_copyclient:
     dependency: "direct main"
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "6e0757f3115a79428443a969dd5aeeaa8a0eafe9"
+      resolved-ref: "3ad970cd2087c9b75b2ab7f66f725d877fd3aabe"
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
     version: "0.1.0"
@@ -91,7 +91,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.12"
+    version: "0.7.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -152,7 +152,7 @@ packages:
       name: package_info
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.2+1"
+    version: "0.4.0+1"
   path:
     dependency: transitive
     description:
@@ -160,6 +160,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.2"
+  pedantic:
+    dependency: transitive
+    description:
+      name: pedantic
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.0"
   quiver:
     dependency: transitive
     description:
@@ -185,14 +192,14 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.1"
+    version: "1.5.4"
   sqflite:
     dependency: "direct main"
     description:
       name: sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   stack_trace:
     dependency: transitive
     description:
@@ -220,21 +227,21 @@ packages:
       name: synchronized
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2+1"
+    version: "2.1.0"
   term_glyph:
     dependency: transitive
     description:
       name: term_glyph
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   test_api:
     dependency: transitive
     description:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.1"
+    version: "0.2.2"
   typed_data:
     dependency: transitive
     description:
@@ -250,5 +257,5 @@ packages:
     source: hosted
     version: "2.0.8"
 sdks:
-  dart: ">=2.0.0 <3.0.0"
+  dart: ">=2.1.0 <3.0.0"
   flutter: ">=0.1.4 <2.0.0"
