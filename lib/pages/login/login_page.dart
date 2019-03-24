@@ -36,7 +36,7 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
           children: <Widget>[
             Image.asset(
               'images/icon_hires.png',
-              height: 200.0,
+              height: 175,
             ),
             LoginForm(),
             Builder(builder: (BuildContext context) {
