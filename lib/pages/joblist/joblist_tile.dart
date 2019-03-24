@@ -50,7 +50,7 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get trailing => Container(
-        width: 112.0,
+        width: 128.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -60,6 +60,16 @@ class JoblistTile extends ListTile {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    Column(
+                      children: <Widget>[
+                        Icon(
+                          Icons.favorite,
+                          color: (job.jobOptions.keep)
+                              ? Color(0xffff58ad)
+                              : Colors.grey,
+                        )
+                      ],
+                    ),
                     Column(
                       children: [
                         Icon(Icons.color_lens,
@@ -93,7 +103,10 @@ class JoblistTile extends ListTile {
             ),
             MaterialButton(
               color: Colors.teal[800],
-              child: Icon(Icons.print, color: Colors.white,),
+              child: Icon(
+                Icons.print,
+                color: Colors.white,
+              ),
               onPressed: () async => BlocProvider.of<JoblistBloc>(context)
                   .onPrintById(await BarcodeScanner.scan(), job.id),
             ),
