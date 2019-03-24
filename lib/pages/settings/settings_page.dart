@@ -24,10 +24,10 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () =>
                 Navigator.of(context).pushNamed('/settings/appearance'),
           ),
-          ListTile(
+          /*ListTile(
             title: Text('Angemeldete Geräte'),
             onTap: () => Navigator.of(context).pushNamed('/settings/security'),
-          ),
+          ),*/
         ].expand((Widget tile) => [tile, Divider(height: 0.0)]).toList(),
       ),
     );
