@@ -22,11 +22,7 @@ class JoblistTile extends ListTile {
       EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
 
   @override
-  Widget get leading => IconButton(
-        icon: Icon(Icons.print),
-        onPressed: () async => BlocProvider.of<JoblistBloc>(context)
-            .onPrintById(await BarcodeScanner.scan(), job.id),
-      );
+  Widget get leading => null;
 
   @override
   get onLongPress => () => onLongTap(index);
@@ -54,41 +50,52 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get trailing => Container(
-        width: 60.0,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        width: 112.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Icon(Icons.color_lens,
-                        color: (job.jobInfo.colored > 0)
-                            ? Colors.teal[800]
-                            : Colors.grey),
+                    Column(
+                      children: [
+                        Icon(Icons.color_lens,
+                            color: (job.jobInfo.colored > 0)
+                                ? Colors.teal[800]
+                                : Colors.grey),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Icon(Icons.photo_size_select_large,
+                            color: (job.jobInfo.a3 || job.jobOptions.a3)
+                                ? Colors.teal[800]
+                                : Colors.grey),
+                      ],
+                    ),
                   ],
                 ),
-                Column(
+                Divider(height: 8.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.photo_size_select_large,
-                        color: (job.jobInfo.a3 || job.jobOptions.a3)
-                            ? Colors.teal[800]
-                            : Colors.grey),
+                    Icon(Icons.filter_none, color: Colors.black38, size: 19.0),
+                    Text(
+                      ' ${job.jobInfo.pagecount.toString()}',
+                      textAlign: TextAlign.right,
+                    ),
                   ],
                 ),
               ],
             ),
-            Divider(height: 8.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.filter_none, color: Colors.black38, size: 19.0),
-                Text(
-                  ' ${job.jobInfo.pagecount.toString()}',
-                  textAlign: TextAlign.right,
-                ),
-              ],
+            MaterialButton(
+              color: Colors.teal[800],
+              child: Icon(Icons.print, color: Colors.white,),
+              onPressed: () async => BlocProvider.of<JoblistBloc>(context)
+                  .onPrintById(await BarcodeScanner.scan(), job.id),
             ),
           ],
         ),
