@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
+import 'package:blocs_copyclient/exceptions.dart';
+import 'package:blocs_copyclient/auth.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -137,6 +139,10 @@ Oben rechts kannst du neue Dokumente hochladen.
                   );
                 }
               } else if (state.isException) {
+                if ((state.error as ApiException).statusCode == 401) {
+                  BlocProvider.of<AuthBloc>(context).logout();
+                  Navigator.pop(context);
+                }
                 return ListView(
                   children: <Widget>[
                     ListTile(
