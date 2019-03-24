@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../widgets/centered_text.dart';
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import '../jobdetails/jobdetails.dart';

@@ -2,6 +2,8 @@ import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'change_password_dialog.dart';
+
 class UserSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,8 @@ class UserSettingsPage extends StatelessWidget {
           ),
           ListTile(
             title: Text('Passwort ändern'),
-            onTap: () => _showPasswordDialog(),
+            onTap: () => _showPasswordDialog(
+                context, BlocProvider.of<UserBloc>(context)),
           ),
           ListTile(
             title: Text('Namen/SN ändern'),
@@ -66,8 +69,11 @@ class UserSettingsPage extends StatelessWidget {
     );
   }
 
-  void _showPasswordDialog() {
-    // TODO: show that password dialog
+  void _showPasswordDialog(BuildContext context, UserBloc userBloc) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) =>
+            ChangePasswordDialog(userBloc: userBloc));
   }
 
   void _showUsernameDialog() {
