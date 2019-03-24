@@ -53,7 +53,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 },
               );
             } else if (state.isException) {
-              return CenteredText(state.error.toString());
+              return ListView(
+                children: <Widget>[CenteredText(state.error.toString())],
+              );
             } else {
               return Center(child: CircularProgressIndicator());
             }
