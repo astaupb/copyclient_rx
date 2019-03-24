@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'change_password_dialog.dart';
+import 'change_name_dialog.dart';
 
 class UserSettingsPage extends StatelessWidget {
   @override
@@ -58,7 +59,8 @@ class UserSettingsPage extends StatelessWidget {
           ),
           ListTile(
             title: Text('Namen/SN ändern'),
-            onTap: () => _showUsernameDialog(),
+            onTap: () => _showUsernameDialog(
+                context, BlocProvider.of<UserBloc>(context)),
           ),
           ListTile(
             title: Text('Guthaben manuell aufladen'),
@@ -71,13 +73,17 @@ class UserSettingsPage extends StatelessWidget {
 
   void _showPasswordDialog(BuildContext context, UserBloc userBloc) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) =>
-            ChangePasswordDialog(userBloc: userBloc));
+      context: context,
+      builder: (BuildContext context) =>
+          ChangePasswordDialog(userBloc: userBloc),
+    );
   }
 
-  void _showUsernameDialog() {
-    // TODO: also this username dialog
+  void _showUsernameDialog(BuildContext context, UserBloc userBloc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ChangeNameDialog(userBloc: userBloc),
+    );
   }
 
   void _showCreditTokenDialog() {}
