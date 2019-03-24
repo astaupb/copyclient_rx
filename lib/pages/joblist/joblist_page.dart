@@ -83,10 +83,36 @@ Oben rechts kannst du neue Dokumente hochladen.
                           children: <Widget>[
                             Dismissible(
                               key: Key(reverseList[index].id.toString()),
-                              onDismissed: (DismissDirection direction) {
-                                joblistBloc.onDeleteById(reverseList[index].id);
-                              },
+                              onDismissed: (DismissDirection direction) =>
+                                  _onTileDismissed(
+                                      context, reverseList[index].id),
                               background: _dismissableBackground(),
+                              confirmDismiss: (DismissDirection diection) {
+                                bool keepJob = false;
+                                SnackBar snack = SnackBar(
+                                  duration: Duration(seconds: 2),
+                                  content: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      MaterialButton(
+                                        child:
+                                            Text('Löschen rückgängig machen'),
+                                        onPressed: () {
+                                          keepJob = true;
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                );
+
+                                ScaffoldFeatureController snackController =
+                                    Scaffold.of(context).showSnackBar(snack);
+
+                                if (keepJob) snackController.close();
+
+                                return snackController.closed
+                                    .then((val) => !keepJob);
+                              },
                               child: JoblistTile(
                                 context,
                                 index,
@@ -99,6 +125,10 @@ Oben rechts kannst du neue Dokumente hochladen.
                                     ),
                                   );
                                 },
+                                onLongTap: (int index) => _onLongTapped(
+                                    context,
+                                    reverseList[index].id,
+                                    reverseList[index].jobOptions),
                               ),
                             ),
                             Divider(height: 0.0),
@@ -125,6 +155,18 @@ Oben rechts kannst du neue Dokumente hochladen.
     );
   }
 
+  Container _dismissableBackground() => Container(
+        color: Colors.redAccent,
+        child: Row(
+          children: <Widget>[
+            Text('Job löschen', style: TextStyle(color: Colors.white)),
+            Spacer(),
+            Icon(Icons.delete, color: Colors.white),
+          ],
+        ),
+        padding: EdgeInsets.all(20.0),
+      );
+
   Future<String> _getFilePath() async {
     String filePath;
     try {
@@ -137,17 +179,22 @@ Oben rechts kannst du neue Dokumente hochladen.
     return '';
   }
 
-  Container _dismissableBackground() => Container(
-        color: Colors.redAccent,
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.delete, color: Colors.white),
-            Spacer(),
-            Icon(Icons.delete, color: Colors.white),
-          ],
-        ),
-        padding: EdgeInsets.all(20.0),
-      );
+  void _onLongTapped(BuildContext context, int id, JobOptions options) {
+    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    JobOptions newOptions = options;
+
+    newOptions.keep = !newOptions.keep;
+    joblistBloc.onUpdateOptionsById(id, newOptions);
+
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        duration: Duration(seconds: 1),
+        content: Text((newOptions.keep)
+            ? 'Job wird behalten'
+            : 'Job wird nicht mehr behalten'),
+      ),
+    );
+  }
 
   Future<void> _onRefresh() async {
     JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
@@ -168,6 +215,11 @@ Oben rechts kannst du neue Dokumente hochladen.
     String filePath = await _getFilePath();
     uploadBloc.onUpload(File(filePath).readAsBytesSync(),
         filename: filePath.split('/').last);
+  }
+
+  void _onTileDismissed(BuildContext context, int id) async {
+    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    joblistBloc.onDeleteById(id);
   }
 
   Future<bool> _onWillPop() {
