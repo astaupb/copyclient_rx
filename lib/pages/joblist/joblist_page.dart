@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/upload.dart';
@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../widgets/centered_text.dart';
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
-import '../../widgets/centered_text.dart';
 import '../jobdetails/jobdetails.dart';
 import 'joblist_tile.dart';
 
@@ -25,6 +25,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   Widget build(BuildContext context) {
+    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return WillPopScope(
       onWillPop: () => _onWillPop(),
       child: Scaffold(
@@ -57,7 +58,7 @@ class _JoblistPageState extends State<JoblistPage> {
         body: RefreshIndicator(
           onRefresh: () => _onRefresh(),
           child: BlocBuilder<JoblistEvent, JoblistState>(
-            bloc: BlocProvider.of<JoblistBloc>(context),
+            bloc: joblistBloc,
             builder: (BuildContext context, JoblistState state) {
               if (state.isResult) {
                 if (state.value.length == 0) {
@@ -80,18 +81,25 @@ Oben rechts kannst du neue Dokumente hochladen.
                       if (reverseList[index] != null)
                         return Column(
                           children: <Widget>[
-                            JoblistTile(
-                              context,
-                              index,
-                              reverseList[index],
-                              onPress: (int index) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        JobdetailsPage(reverseList[index]),
-                                  ),
-                                );
+                            Dismissible(
+                              key: Key(reverseList[index].id.toString()),
+                              onDismissed: (DismissDirection direction) {
+                                joblistBloc.onDeleteById(reverseList[index].id);
                               },
+                              background: _dismissableBackground(),
+                              child: JoblistTile(
+                                context,
+                                index,
+                                reverseList[index],
+                                onPress: (int index) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          JobdetailsPage(reverseList[index]),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                             Divider(height: 0.0),
                           ],
@@ -101,12 +109,12 @@ Oben rechts kannst du neue Dokumente hochladen.
                 }
               } else if (state.isException) {
                 return ListView(
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(state.error.toString()),
-                      )
-                    ],
-                  );
+                  children: <Widget>[
+                    ListTile(
+                      title: Text(state.error.toString()),
+                    )
+                  ],
+                );
               } else {
                 return Center(child: CircularProgressIndicator());
               }
@@ -128,6 +136,18 @@ Oben rechts kannst du neue Dokumente hochladen.
     }
     return '';
   }
+
+  Container _dismissableBackground() => Container(
+        color: Colors.redAccent,
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.delete, color: Colors.white),
+            Spacer(),
+            Icon(Icons.delete, color: Colors.white),
+          ],
+        ),
+        padding: EdgeInsets.all(20.0),
+      );
 
   Future<void> _onRefresh() async {
     JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
