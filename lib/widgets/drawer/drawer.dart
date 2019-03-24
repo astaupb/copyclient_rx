@@ -3,6 +3,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/exceptions.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info/package_info.dart';
@@ -29,9 +30,10 @@ class MainDrawer extends StatelessWidget {
                 String token = await BarcodeScanner.scan();
                 journalBloc.onAddTransaction(token);
                 var listener;
-                listener = journalBloc.state.listen((JournalState state) {
+                listener = journalBloc.state.listen((JournalState state) async {
                   if (state.isResult) {
-                    Navigator.pop(context);
+                    Future.delayed(Duration(seconds: 2)).then((val) =>
+                        BlocProvider.of<UserBloc>(context).onRefresh());
                     listener.cancel();
                   } else if (state.isException) {
                     ApiException error = state.error;
@@ -42,6 +44,9 @@ class MainDrawer extends StatelessWidget {
                     } else if (error.statusCode == 401) {
                       snackText =
                           'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
+                    } else if (error.statusCode == 400) {
+                      snackText =
+                          'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
                     }
                     SnackBar snackBar = SnackBar(
                       content: Text(snackText),
