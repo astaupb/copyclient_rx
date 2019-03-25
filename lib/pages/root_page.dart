@@ -112,6 +112,9 @@ class _RootPageState extends State<RootPage> {
             } else if (code >= 500 && code < 600) {
               snackText =
                   'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
+            } else if (code == 0) {
+              snackText =
+                  'Der Login dauert zu lange, bitte überprüfe deine Internetverbindung';
             }
             return LoginPage(
               startSnack: SnackBar(
@@ -123,8 +126,8 @@ class _RootPageState extends State<RootPage> {
             return Scaffold(
               body: Center(
                   child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircularProgressIndicator(),
                   Text('Einloggen...'),
