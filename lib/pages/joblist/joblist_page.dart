@@ -317,8 +317,8 @@ Oben rechts kannst du neue Dokumente hochladen.
     printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
     String target;
     try {
-      target = "44332";
-      //target = await BarcodeScanner.scan();
+      //target = "44332";
+      target = await BarcodeScanner.scan();
     } catch (e) {
       setState(() => currentIndex = 0);
     }
