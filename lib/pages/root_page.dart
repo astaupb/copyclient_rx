@@ -1,12 +1,14 @@
 import 'dart:async';
+
 import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/pdf_download.dart';
+import 'package:blocs_copyclient/preview.dart';
+import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
-import 'package:blocs_copyclient/preview.dart';
-import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,8 +16,8 @@ import 'package:http/http.dart' as http;
 
 import '../models/backend_shiva.dart';
 import '../routes.dart';
-import 'login/login.dart';
 import '../token_store.dart';
+import 'login/login.dart';
 
 class RootPage extends StatefulWidget {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -39,6 +41,7 @@ class _RootPageState extends State<RootPage> {
   JournalBloc journalBloc;
   PreviewBloc previewBloc;
   PdfBloc pdfBloc;
+  PrintQueueBloc printQueueBloc;
 
   String _token;
 
@@ -75,6 +78,9 @@ class _RootPageState extends State<RootPage> {
             pdfBloc = PdfBloc(backend);
             pdfBloc.onStart(state.token);
 
+            printQueueBloc = PrintQueueBloc(backend);
+            printQueueBloc.onStart(state.token);
+
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
               child: BlocProvider<UserBloc>(
@@ -87,19 +93,22 @@ class _RootPageState extends State<RootPage> {
                       bloc: previewBloc,
                       child: BlocProvider<PdfBloc>(
                         bloc: pdfBloc,
-                        child: WillPopScope(
-                          onWillPop: () async => !await _onWillPop(),
-                          child: Navigator(
-                            key: widget.navigatorKey,
-                            initialRoute: '/',
-                            onGenerateRoute: (RouteSettings settings) {
-                              return MaterialPageRoute(
-                                settings: settings,
-                                maintainState: true,
-                                builder: (context) =>
-                                    routes[settings.name](context),
-                              );
-                            },
+                        child: BlocProvider<PrintQueueBloc>(
+                          bloc: printQueueBloc,
+                          child: WillPopScope(
+                            onWillPop: () async => !await _onWillPop(),
+                            child: Navigator(
+                              key: widget.navigatorKey,
+                              initialRoute: '/',
+                              onGenerateRoute: (RouteSettings settings) {
+                                return MaterialPageRoute(
+                                  settings: settings,
+                                  maintainState: true,
+                                  builder: (context) =>
+                                      routes[settings.name](context),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

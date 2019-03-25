@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
-import 'package:blocs_copyclient/exceptions.dart';
-import 'package:blocs_copyclient/auth.dart';
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,7 +25,14 @@ class JoblistPage extends StatefulWidget {
 }
 
 class _JoblistPageState extends State<JoblistPage> {
+  PrintQueueBloc printQueueBloc;
+
+  Timer printerLockTimer;
+  Timer printerLockRefresher;
+
   int lastCredit;
+  int currentIndex = 0;
+  int remainingLockTime = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -156,8 +166,122 @@ Oben rechts kannst du neue Dokumente hochladen.
             },
           ),
         ),
+        bottomNavigationBar: BubbleBottomBar(
+          opacity: .2,
+          currentIndex: currentIndex,
+          onTap: _changePage,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          elevation: 8,
+          items: <BubbleBottomBarItem>[
+            BubbleBottomBarItem(
+                backgroundColor: Colors.red,
+                icon: Icon(
+                  Icons.list,
+                  color: Colors.black,
+                ),
+                activeIcon: Icon(
+                  Icons.list,
+                  color: Colors.red,
+                ),
+                title: Text("Listenansicht")),
+            BubbleBottomBarItem(
+              backgroundColor: Colors.deepPurple,
+              icon: Icon(
+                Icons.scanner,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                Icons.scanner,
+                color: Colors.deepPurple,
+              ),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Text("Zur Liste Scannen"),
+                  Text(
+                    'Verbleibend: $remainingLockTime Sekunden',
+                    textScaleFactor: 0.75,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  void deactivate() {
+    _cancelTimers();
+    _unlockPrinter();
+    currentIndex = 0;
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _cancelTimers();
+    _unlockPrinter();
+    super.dispose();
+  }
+
+  void _cancelTimers() {
+    if (printerLockRefresher != null && printerLockRefresher.isActive)
+      printerLockRefresher.cancel();
+    if (printerLockTimer != null && printerLockTimer.isActive)
+      printerLockTimer.cancel();
+  }
+
+  void _changePage(int index) {
+    setState(() {
+      if (currentIndex == 0)
+        currentIndex = 1;
+      else
+        currentIndex = 0;
+    });
+    if (currentIndex == 1) {
+      // TODO: load dispatcher queue
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => Dialog(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                        'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du scannen willst.'),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        MaterialButton(
+                          textColor: Colors.black87,
+                          child: Text('Abbrechen'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        MaterialButton(
+                          textColor: Colors.black87,
+                          child: Text('Okay'),
+                          onPressed: () {
+                            _lockPrinter();
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
+    } else {
+      _cancelTimers();
+      remainingLockTime = 0;
+      _unlockPrinter();
+    }
   }
 
   Container _dismissableBackground() => Container(
@@ -182,6 +306,52 @@ Oben rechts kannst du neue Dokumente hochladen.
       print("Error while picking the file: " + e.toString());
     }
     return '';
+  }
+
+  void _lockPrinter() async {
+    printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
+    String target;
+    try {
+      //target = "44332";
+      target = await BarcodeScanner.scan();
+    } catch (e) {
+      setState(() => currentIndex = 0);
+    }
+
+    if (target != null) {
+      printQueueBloc.setDeviceId(int.tryParse(target));
+      printQueueBloc.onLockDevice();
+
+      remainingLockTime = 60;
+
+      printerLockTimer = Timer.periodic(
+        const Duration(seconds: 1),
+        (Timer t) => setState(() => remainingLockTime -= 1),
+      );
+
+      printerLockRefresher = Timer.periodic(
+        const Duration(seconds: 50),
+        (Timer t) {
+          printQueueBloc.onLockDevice();
+          setState(() => remainingLockTime = 60);
+        },
+      );
+    } else {
+      setState(() => currentIndex = 0);
+    }
+  }
+
+  void _unlockPrinter() async {
+    printQueueBloc.onRefresh();
+    String uid;
+    StreamSubscription listener;
+    listener =  printQueueBloc.state.listen((PrintQueueState state) {
+      if (state.isLocked) {
+        uid = state.lockUid;
+        printQueueBloc.onDelete(uid);
+        listener.cancel();
+      }
+    });
   }
 
   void _onLongTapped(BuildContext context, int id, JobOptions options) {
