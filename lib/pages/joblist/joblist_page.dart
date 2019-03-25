@@ -29,6 +29,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
   Timer printerLockTimer;
   Timer printerLockRefresher;
+  Timer jobTimer;
 
   int lastCredit;
 
@@ -234,6 +235,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       printerLockRefresher.cancel();
     if (printerLockTimer != null && printerLockTimer.isActive)
       printerLockTimer.cancel();
+    if (jobTimer != null && jobTimer.isActive) jobTimer.cancel();
   }
 
   void _changePage(int index) {
@@ -315,8 +317,8 @@ Oben rechts kannst du neue Dokumente hochladen.
     printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
     String target;
     try {
-      //target = "44332";
-      target = await BarcodeScanner.scan();
+      target = "44332";
+      //target = await BarcodeScanner.scan();
     } catch (e) {
       setState(() => currentIndex = 0);
     }
@@ -341,6 +343,9 @@ Oben rechts kannst du neue Dokumente hochladen.
           setState(() => remainingLockTime = 60);
         },
       );
+
+      jobTimer = Timer.periodic(const Duration(seconds: 5),
+          (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
     } else {
       setState(() => currentIndex = 0);
     }
