@@ -266,7 +266,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                     );
                   }
                 } else
-                  return Placeholder();
+                  return Center(child: CircularProgressIndicator());
               });
         });
   }
