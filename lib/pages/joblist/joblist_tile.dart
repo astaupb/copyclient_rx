@@ -14,8 +14,10 @@ class JoblistTile extends ListTile {
 
   final bool chosen;
 
+  final String directPrinter;
+
   JoblistTile(this.context, this.index, this.job,
-      {this.onLongTap, this.onPress, this.chosen = false});
+      {this.onLongTap, this.onPress, this.chosen = false, this.directPrinter});
 
   @override
   EdgeInsetsGeometry get contentPadding =>
@@ -108,7 +110,11 @@ class JoblistTile extends ListTile {
                 color: Colors.white,
               ),
               onPressed: () async => BlocProvider.of<JoblistBloc>(context)
-                  .onPrintById(await BarcodeScanner.scan(), job.id),
+                  .onPrintById(
+                      (directPrinter == null)
+                          ? await BarcodeScanner.scan()
+                          : directPrinter,
+                      job.id),
             ),
           ],
         ),

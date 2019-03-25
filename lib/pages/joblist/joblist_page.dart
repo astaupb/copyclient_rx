@@ -31,8 +31,10 @@ class _JoblistPageState extends State<JoblistPage> {
   Timer printerLockRefresher;
 
   int lastCredit;
+
   int currentIndex = 0;
   int remainingLockTime = 0;
+  String lockedPrinter;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +142,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                                     context,
                                     reverseList[index].id,
                                     reverseList[index].jobOptions),
+                                directPrinter: lockedPrinter,
                               ),
                             ),
                             Divider(height: 0.0),
@@ -322,6 +325,8 @@ Oben rechts kannst du neue Dokumente hochladen.
       printQueueBloc.setDeviceId(int.tryParse(target));
       printQueueBloc.onLockDevice();
 
+      setState(() => lockedPrinter = target);
+
       remainingLockTime = 60;
 
       printerLockTimer = Timer.periodic(
@@ -345,10 +350,11 @@ Oben rechts kannst du neue Dokumente hochladen.
     printQueueBloc.onRefresh();
     String uid;
     StreamSubscription listener;
-    listener =  printQueueBloc.state.listen((PrintQueueState state) {
+    listener = printQueueBloc.state.listen((PrintQueueState state) {
       if (state.isLocked) {
         uid = state.lockUid;
         printQueueBloc.onDelete(uid);
+        lockedPrinter = null;
         listener.cancel();
       }
     });
