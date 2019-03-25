@@ -224,6 +224,12 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   @override
+  void initState() {
+    currentIndex = 0;
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _cancelTimers();
     _unlockPrinter();
@@ -265,7 +271,10 @@ Oben rechts kannst du neue Dokumente hochladen.
                         MaterialButton(
                           textColor: Colors.black87,
                           child: Text('Abbrechen'),
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () {
+                            setState(() => currentIndex = 0);
+                            Navigator.pop(context);
+                          },
                         ),
                         MaterialButton(
                           textColor: Colors.black87,
