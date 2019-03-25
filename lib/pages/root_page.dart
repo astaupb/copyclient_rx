@@ -104,11 +104,14 @@ class _RootPageState extends State<RootPage> {
             String snackText = 'Fehler: ${state.error}';
             int code = (state.error as ApiException).statusCode;
             if (code == 401) {
-              snackText = 'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
-            } else if(code == 400 || (code > 401 && code < 500)) {
-              snackText = 'Fehler: Anfrage war fehlerhaft. Falls mehr Fehler auftreten bitte App neu starten';
-            } else if(code >= 500 && code < 600) {
-              snackText = 'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
+              snackText =
+                  'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
+            } else if (code == 400 || (code > 401 && code < 500)) {
+              snackText =
+                  'Fehler: Anfrage war fehlerhaft. Falls mehr Fehler auftreten bitte App neu starten';
+            } else if (code >= 500 && code < 600) {
+              snackText =
+                  'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
             }
             return LoginPage(
               startSnack: SnackBar(
@@ -117,7 +120,17 @@ class _RootPageState extends State<RootPage> {
               ),
             );
           } else if (state.isBusy) {
-            return Scaffold();
+            return Scaffold(
+              body: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CircularProgressIndicator(),
+                  Text('Einloggen...'),
+                ],
+              )),
+            );
           } else if (state.isUnauthorized) {
             if (store.currentToken != null) {
               store.clearTokens();
