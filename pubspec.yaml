@@ -1,7 +1,7 @@
 name: copyclient_rx
 description: Yet another reactive copyclient rewrite
 
-version: 1.0.0-rc3+26
+version: 1.0.0-rc4+27
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
