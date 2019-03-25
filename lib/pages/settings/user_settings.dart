@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'change_password_dialog.dart';
-import 'change_name_dialog.dart';
+import 'user_dialogs/change_password_dialog.dart';
+import 'user_dialogs/change_name_dialog.dart';
+import 'user_dialogs/redeem_token_dialog.dart';
 
 class UserSettingsPage extends StatelessWidget {
   @override
@@ -64,7 +68,8 @@ class UserSettingsPage extends StatelessWidget {
           ),
           ListTile(
             title: Text('Guthaben manuell aufladen'),
-            onTap: () => _showCreditTokenDialog(),
+            onTap: () => _showCreditTokenDialog(
+                context, BlocProvider.of<JournalBloc>(context)),
           ),
         ].expand((Widget tile) => [tile, Divider(height: 0.0)]).toList(),
       ),
@@ -86,5 +91,14 @@ class UserSettingsPage extends StatelessWidget {
     );
   }
 
-  void _showCreditTokenDialog() {}
+  void _showCreditTokenDialog(
+      BuildContext context, JournalBloc journalBloc) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) =>
+          RedeemTokenDialog(journalBloc: journalBloc),
+    );
+    Future.delayed(Duration(seconds: 2))
+        .then((val) => BlocProvider.of<UserBloc>(context).onRefresh());
+  }
 }

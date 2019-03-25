@@ -1,4 +1,5 @@
-//import 'package:barcode_scan/barcode_scan.dart';
+import 'dart:async';
+
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/journal.dart';
