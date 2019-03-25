@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/journal.dart';
+import 'package:blocs_copyclient/pdf_download.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/preview.dart';
@@ -37,6 +38,7 @@ class _RootPageState extends State<RootPage> {
   UploadBloc uploadBloc;
   JournalBloc journalBloc;
   PreviewBloc previewBloc;
+  PdfBloc pdfBloc;
 
   String _token;
 
@@ -70,6 +72,9 @@ class _RootPageState extends State<RootPage> {
             previewBloc = PreviewBloc(backend);
             previewBloc.onStart(state.token);
 
+            pdfBloc = PdfBloc(backend);
+            pdfBloc.onStart(state.token);
+
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
               child: BlocProvider<UserBloc>(
@@ -80,19 +85,22 @@ class _RootPageState extends State<RootPage> {
                     bloc: journalBloc,
                     child: BlocProvider<PreviewBloc>(
                       bloc: previewBloc,
-                      child: WillPopScope(
-                        onWillPop: () async => !await _onWillPop(),
-                        child: Navigator(
-                          key: widget.navigatorKey,
-                          initialRoute: '/',
-                          onGenerateRoute: (RouteSettings settings) {
-                            return MaterialPageRoute(
-                              settings: settings,
-                              maintainState: true,
-                              builder: (context) =>
-                                  routes[settings.name](context),
-                            );
-                          },
+                      child: BlocProvider<PdfBloc>(
+                        bloc: pdfBloc,
+                        child: WillPopScope(
+                          onWillPop: () async => !await _onWillPop(),
+                          child: Navigator(
+                            key: widget.navigatorKey,
+                            initialRoute: '/',
+                            onGenerateRoute: (RouteSettings settings) {
+                              return MaterialPageRoute(
+                                settings: settings,
+                                maintainState: true,
+                                builder: (context) =>
+                                    routes[settings.name](context),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
