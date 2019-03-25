@@ -81,7 +81,8 @@ class JobdetailsPage extends StatelessWidget {
       content: Text('Fehler beim Download der PDF'),
     );
     const SnackBar downloadSnack = SnackBar(
-      content: Text('Fehler beim Download der PDF'),
+      duration: const Duration(seconds: 30),
+      content: Text('Lade PDF...'),
     );
     PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
 
@@ -89,7 +90,8 @@ class JobdetailsPage extends StatelessWidget {
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
     pdfBloc.onGetPdf(_job.id);
-    pdfBloc.state.skip(1).listen((PdfState state) async {
+    Scaffold.of(context).showSnackBar(downloadSnack);
+    pdfBloc.state.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == _job.id) {
         final String _basePath = (await (Directory(
                     (await getExternalStorageDirectory()).path + '/Download')
@@ -103,8 +105,6 @@ class JobdetailsPage extends StatelessWidget {
 
         Scaffold.of(context).removeCurrentSnackBar();
         Scaffold.of(context).showSnackBar(doneSnack);
-      } else if (state.isBusy) {
-        Scaffold.of(context).showSnackBar(downloadSnack);
       } else if (state.isException) {
         Scaffold.of(context).showSnackBar(errorSnack);
       }
