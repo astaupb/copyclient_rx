@@ -144,6 +144,13 @@ Oben rechts kannst du neue Dokumente hochladen.
                                     reverseList[index].id,
                                     reverseList[index].jobOptions),
                                 directPrinter: lockedPrinter,
+                                onPressPrint: () async =>
+                                    BlocProvider.of<JoblistBloc>(context)
+                                        .onPrintById(
+                                            (lockedPrinter == null)
+                                                ? await BarcodeScanner.scan()
+                                                : lockedPrinter,
+                                            reverseList[index].id),
                               ),
                             ),
                             Divider(height: 0.0),
@@ -227,6 +234,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void initState() {
     currentIndex = 0;
     super.initState();
+    _cancelTimers();
   }
 
   @override
@@ -237,11 +245,9 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _cancelTimers() {
-    if (printerLockRefresher != null && printerLockRefresher.isActive)
-      printerLockRefresher.cancel();
-    if (printerLockTimer != null && printerLockTimer.isActive)
-      printerLockTimer.cancel();
-    if (jobTimer != null && jobTimer.isActive) jobTimer.cancel();
+    if (printerLockRefresher != null) printerLockRefresher.cancel();
+    if (printerLockTimer != null) printerLockTimer.cancel();
+    if (jobTimer != null) jobTimer.cancel();
   }
 
   void _changePage(int index) {
@@ -340,21 +346,24 @@ Oben rechts kannst du neue Dokumente hochladen.
 
       remainingLockTime = 60;
 
-      printerLockTimer = Timer.periodic(
-        const Duration(seconds: 1),
-        (Timer t) => setState(() => remainingLockTime -= 1),
-      );
+      if (printerLockTimer == null)
+        printerLockTimer = Timer.periodic(
+          const Duration(seconds: 1),
+          (Timer t) => setState(() => remainingLockTime -= 1),
+        );
 
-      printerLockRefresher = Timer.periodic(
-        const Duration(seconds: 50),
-        (Timer t) {
-          printQueueBloc.onLockDevice();
-          setState(() => remainingLockTime = 60);
-        },
-      );
+      if (printerLockRefresher == null)
+        printerLockRefresher = Timer.periodic(
+          const Duration(seconds: 50),
+          (Timer t) {
+            printQueueBloc.onLockDevice();
+            setState(() => remainingLockTime = 60);
+          },
+        );
 
-      jobTimer = Timer.periodic(const Duration(seconds: 5),
-          (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
+      if (jobTimer == null)
+        jobTimer = Timer.periodic(const Duration(seconds: 5),
+            (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
     } else {
       setState(() => currentIndex = 0);
     }
@@ -368,7 +377,12 @@ Oben rechts kannst du neue Dokumente hochladen.
       if (state.isLocked) {
         uid = state.lockUid;
         printQueueBloc.onDelete(uid);
-        lockedPrinter = null;
+        setState(
+          () {
+            lockedPrinter = null;
+            currentIndex = 0;
+          },
+        );
         listener.cancel();
       }
     });
