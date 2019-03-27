@@ -1,7 +1,5 @@
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class JoblistTile extends ListTile {
   static const double height = 64.0;
