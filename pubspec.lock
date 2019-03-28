@@ -30,13 +30,13 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.10.0"
+    version: "0.11.0"
   blocs_copyclient:
     dependency: "direct main"
     description:
       path: "."
       ref: HEAD
-      resolved-ref: ff079270cc3ea4fa59d800a45a784ce6266f0d38
+      resolved-ref: a25d4054b03aa522a43595f66d3011018543edc1
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
     version: "0.1.0"
@@ -93,7 +93,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0"
+    version: "0.9.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
