@@ -180,7 +180,7 @@ Oben rechts kannst du neue Dokumente hochladen.
         bottomNavigationBar: BubbleBottomBar(
           opacity: .2,
           currentIndex: currentIndex,
-          onTap: _changePage,
+          onTap: (int index) => _changePage(index),
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           elevation: 8,
           items: <BubbleBottomBarItem>[
@@ -250,16 +250,13 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobTimer != null) jobTimer.cancel();
   }
 
-  void _changePage(int index) {
+  void _changePage(int index) async {
     setState(() {
-      if (currentIndex == 0)
-        currentIndex = 1;
-      else
-        currentIndex = 0;
+      currentIndex = index;
     });
     if (currentIndex == 1) {
       // TODO: load dispatcher queue
-      showDialog(
+      int dialogResult = await showDialog<int>(
         context: context,
         builder: (BuildContext context) => Dialog(
               child: Padding(
@@ -277,18 +274,12 @@ Oben rechts kannst du neue Dokumente hochladen.
                         MaterialButton(
                           textColor: Colors.black87,
                           child: Text('Abbrechen'),
-                          onPressed: () {
-                            setState(() => currentIndex = 0);
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop<int>(context, 1),
                         ),
                         MaterialButton(
                           textColor: Colors.black87,
                           child: Text('Okay'),
-                          onPressed: () {
-                            _lockPrinter();
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop<int>(context, 0),
                         ),
                       ],
                     ),
@@ -297,6 +288,11 @@ Oben rechts kannst du neue Dokumente hochladen.
               ),
             ),
       );
+      if (dialogResult == 0) {
+        _lockPrinter();
+      } else {
+        setState(() => currentIndex = 0);
+      }
     } else {
       _cancelTimers();
       remainingLockTime = 0;
@@ -346,24 +342,24 @@ Oben rechts kannst du neue Dokumente hochladen.
 
       remainingLockTime = 60;
 
-      if (printerLockTimer == null)
-        printerLockTimer = Timer.periodic(
-          const Duration(seconds: 1),
-          (Timer t) => setState(() => remainingLockTime -= 1),
-        );
+      if (printerLockTimer != null) printerLockTimer.cancel();
+      printerLockTimer = Timer.periodic(
+        const Duration(seconds: 1),
+        (Timer t) => setState(() => remainingLockTime -= 1),
+      );
 
-      if (printerLockRefresher == null)
-        printerLockRefresher = Timer.periodic(
-          const Duration(seconds: 50),
-          (Timer t) {
-            printQueueBloc.onLockDevice();
-            setState(() => remainingLockTime = 60);
-          },
-        );
+      if (printerLockRefresher != null) printerLockRefresher.cancel();
+      printerLockRefresher = Timer.periodic(
+        const Duration(seconds: 50),
+        (Timer t) {
+          printQueueBloc.onLockDevice();
+          setState(() => remainingLockTime = 60);
+        },
+      );
 
-      if (jobTimer == null)
-        jobTimer = Timer.periodic(const Duration(seconds: 5),
-            (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
+      if (jobTimer != null) jobTimer.cancel();
+      jobTimer = Timer.periodic(const Duration(seconds: 5),
+          (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
     } else {
       setState(() => currentIndex = 0);
     }
