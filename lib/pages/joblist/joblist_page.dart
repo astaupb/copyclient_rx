@@ -201,7 +201,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   @override
   void deactivate() {
     _cancelTimers();
-    _unlockPrinter();
+    if (lockedPrinter != null) _unlockPrinter();
     currentIndex = 0;
     super.deactivate();
   }
@@ -209,7 +209,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   @override
   void dispose() {
     _cancelTimers();
-    _unlockPrinter();
+    if (lockedPrinter != null) _unlockPrinter();
     super.dispose();
   }
 
