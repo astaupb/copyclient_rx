@@ -4,11 +4,8 @@ import 'package:logging/logging.dart';
 
 import 'blocs/theme_bloc.dart';
 import 'pages/root_page.dart';
-import 'token_store.dart';
 
-void main() async {
-  TokenStore store = TokenStore();
-  await store.openDb();
+void main() {
   runApp(Copyclient());
 }
 

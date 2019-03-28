@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
-import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/exceptions.dart';
+import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info/package_info.dart';
 
+import '../../token_store.dart';
 import 'drawer_header.dart' as my;
 
 class MainDrawer extends StatelessWidget {
@@ -110,8 +111,9 @@ class MainDrawer extends StatelessWidget {
           ListTile(
             title: Text('Logout'),
             trailing: Icon(Icons.exit_to_app),
-            onTap: () {
+            onTap: () async {
               authBloc.logout();
+              await TokenStore().clearTokens();
               Navigator.of(context).popUntil(ModalRoute.withName('/'));
             },
           ),

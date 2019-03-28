@@ -45,7 +45,16 @@ class _RootPageState extends State<RootPage> {
 
   String _token;
 
-  _RootPageState() {
+  _RootPageState();
+
+  @override
+  void initState() {
+    _checkExistingToken();
+    super.initState();
+  }
+
+  void _checkExistingToken() async {
+    await store.openDb();
     _token = store.currentToken;
     if (_token != null) authBloc.tokenLogin(_token);
   }
@@ -139,22 +148,21 @@ class _RootPageState extends State<RootPage> {
                 duration: Duration(seconds: 3),
               ),
             );
-          } else if (state.isBusy) {
+          } else if (state.isBusy || state.isInit) {
             return Scaffold(
               body: Center(
-                  child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  CircularProgressIndicator(),
-                  Text('Einloggen...'),
-                ],
-              )),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    (state.isBusy)
+                        ? Text('Einloggen...')
+                        : Text('Lade Datenbanken...'),
+                  ],
+                ),
+              ),
             );
-          } else if (state.isUnauthorized) {
-            if (store.currentToken != null) {
-              store.clearTokens();
-            }
           }
           return LoginPage(authBloc: authBloc);
         },
