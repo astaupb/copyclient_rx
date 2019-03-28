@@ -45,8 +45,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   get initialState => ThemeState.copyshopTheme();
 
   @override
-  Stream<ThemeState> mapEventToState(
-      ThemeState currentState, ThemeEvent event) async* {
+  Stream<ThemeState> mapEventToState(ThemeEvent event) async* {
     if (event is ChangeTheme) {
       yield ThemeState.custom(event.newTheme);
     }

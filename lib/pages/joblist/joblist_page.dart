@@ -372,7 +372,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     listener = printQueueBloc.state.listen((PrintQueueState state) {
       if (state.isLocked) {
         uid = state.lockUid;
-        printQueueBloc.onDelete(uid);
+        printQueueBloc.onDelete();
         setState(
           () {
             lockedPrinter = null;
