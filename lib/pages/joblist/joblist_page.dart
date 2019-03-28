@@ -101,32 +101,8 @@ Oben rechts kannst du neue Dokumente hochladen.
                                   _onTileDismissed(
                                       context, reverseList[index].id),
                               background: _dismissableBackground(),
-                              confirmDismiss: (DismissDirection diection) {
-                                bool keepJob = false;
-                                SnackBar snack = SnackBar(
-                                  duration: Duration(seconds: 2),
-                                  content: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: <Widget>[
-                                      MaterialButton(
-                                        child:
-                                            Text('Löschen rückgängig machen'),
-                                        onPressed: () {
-                                          keepJob = true;
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                );
-
-                                ScaffoldFeatureController snackController =
-                                    Scaffold.of(context).showSnackBar(snack);
-
-                                if (keepJob) snackController.close();
-
-                                return snackController.closed
-                                    .then((val) => !keepJob);
-                              },
+                              confirmDismiss: (DismissDirection direction) =>
+                                  _onConfirmDismiss(context, direction),
                               child: JoblistTile(
                                 context,
                                 index,
@@ -231,17 +207,17 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   @override
-  void initState() {
-    currentIndex = 0;
-    super.initState();
-    _cancelTimers();
-  }
-
-  @override
   void dispose() {
     _cancelTimers();
     _unlockPrinter();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    currentIndex = 0;
+    super.initState();
+    _cancelTimers();
   }
 
   void _cancelTimers() {
@@ -365,23 +341,30 @@ Oben rechts kannst du neue Dokumente hochladen.
     }
   }
 
-  void _unlockPrinter() async {
-    printQueueBloc.onRefresh();
-    String uid;
-    StreamSubscription listener;
-    listener = printQueueBloc.state.listen((PrintQueueState state) {
-      if (state.isLocked) {
-        uid = state.lockUid;
-        printQueueBloc.onDelete();
-        setState(
-          () {
-            lockedPrinter = null;
-            currentIndex = 0;
-          },
-        );
-        listener.cancel();
-      }
-    });
+  Future<bool> _onConfirmDismiss(
+      BuildContext context, DismissDirection diection) async {
+    bool keepJob = false;
+    SnackBar snack = SnackBar(
+      duration: Duration(seconds: 1),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          MaterialButton(
+            child: Text('Löschen rückgängig machen'),
+            onPressed: () {
+              keepJob = true;
+            },
+          )
+        ],
+      ),
+    );
+
+    ScaffoldFeatureController snackController =
+        Scaffold.of(context).showSnackBar(snack);
+
+    if (keepJob) snackController.close();
+
+    return snackController.closed.then((val) => !keepJob);
   }
 
   void _onLongTapped(BuildContext context, int id, JobOptions options) {
@@ -433,5 +416,24 @@ Oben rechts kannst du neue Dokumente hochladen.
           builder: (context) => ExitAppAlert(),
         ) ??
         false;
+  }
+
+  void _unlockPrinter() async {
+    printQueueBloc.onRefresh();
+    String uid;
+    StreamSubscription listener;
+    listener = printQueueBloc.state.listen((PrintQueueState state) {
+      if (state.isLocked) {
+        uid = state.lockUid;
+        printQueueBloc.onDelete();
+        setState(
+          () {
+            lockedPrinter = null;
+            currentIndex = 0;
+          },
+        );
+        listener.cancel();
+      }
+    });
   }
 }
