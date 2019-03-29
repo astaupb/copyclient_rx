@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,39 +19,44 @@ class JoboptionSwitches extends StatefulWidget {
 enum OptionType { DUPLEX, COPIES, COLLATE, A3, RANGE, NUP, NUPPAGEORDER, KEEP }
 
 class _JoboptionSwitchesState extends State<JoboptionSwitches> {
-  Job job;
+  Job _job;
+  StreamSubscription jobListener;
 
-  FocusNode rangeFocus = FocusNode();
-  TextEditingController rangeController;
   String newRange = '';
 
-  _JoboptionSwitchesState(this.job);
+  _JoboptionSwitchesState(this._job);
 
   @override
   Widget build(BuildContext context) {
     final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
-    rangeController = TextEditingController(text: job.jobOptions.range)
-      ..addListener(() => newRange = rangeController.text);
+    if (jobListener != null) jobListener.cancel();
+    jobListener = joblistBloc.state.listen((JoblistState state) {
+      if (state.isResult) {
+        setState(() {
+          _job = state.value.singleWhere((Job job) => job.id == _job.id);
+        });
+      }
+    });
     return Column(
       children: <Widget>[
-        (job.jobInfo.colored > 0)
+        (_job.jobInfo.colored > 0)
             ? ListTile(
                 onTap: () {
-                  job.jobOptions.color = !job.jobOptions.color;
-                  joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                  _job.jobOptions.color = !_job.jobOptions.color;
+                  joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                 },
                 leading: Icon(Icons.palette),
                 title: Text('Farbe'),
                 trailing: Switch(
                   onChanged: (val) {
-                    job.jobOptions.color = val;
-                    joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                    _job.jobOptions.color = val;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                   },
-                  value: job.jobOptions.color,
+                  value: _job.jobOptions.color,
                 ),
               )
             : null,
-        (job.jobInfo.pagecount * job.jobOptions.copies < 2)
+        (_job.jobInfo.pagecount * _job.jobOptions.copies < 2)
             ? null
             : Column(
                 children: <Widget>[
@@ -62,16 +69,15 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                         {1: 'Lange Kante'},
                         {2: 'Kurze Kante'},
                       ]
-                          .map((Map<int, String> duplex) =>
-                              DropdownMenuItem<int>(
+                          .map((Map<int, String> duplex) => DropdownMenuItem<int>(
                                 value: duplex.keys.single,
                                 child: Text(duplex.values.single),
                               ))
                           .toList(),
-                      value: job.jobOptions.duplex,
+                      value: _job.jobOptions.duplex,
                       onChanged: (val) {
-                        job.jobOptions.duplex = val;
-                        joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                        _job.jobOptions.duplex = val;
+                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                       },
                     ),
                   ),
@@ -80,17 +86,17 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
               ),
         ListTile(
           onTap: () {
-            job.jobOptions.a3 = !job.jobOptions.a3;
-            joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+            _job.jobOptions.a3 = !_job.jobOptions.a3;
+            joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
           },
           leading: Icon(Icons.photo_size_select_large),
           title: Text('A3'),
           trailing: Switch(
             onChanged: (val) {
-              job.jobOptions.a3 = val;
-              joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+              _job.jobOptions.a3 = val;
+              joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
             },
-            value: job.jobOptions.a3,
+            value: _job.jobOptions.a3,
           ),
         ),
         Divider(indent: 10.0),
@@ -102,21 +108,19 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
             width: 100.0,
             child: Row(
               children: <Widget>[
-                (job.jobOptions.copies > 1)
+                (_job.jobOptions.copies > 1)
                     ? Expanded(
                         flex: 1,
                         child: IconButton(
                           icon: Icon(Icons.expand_more),
                           onPressed: () {
-                            if (job.jobOptions.copies > 1) {
-                              job.jobOptions.copies--;
-                              joblistBloc.onUpdateOptionsById(
-                                  job.id, job.jobOptions);
+                            if (_job.jobOptions.copies > 1) {
+                              _job.jobOptions.copies--;
+                              joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                             } else
                               Scaffold.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                      'Nicht weniger als eine Kopie möglich'),
+                                  content: Text('Nicht weniger als eine Kopie möglich'),
                                 ),
                               );
                           },
@@ -129,7 +133,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 Expanded(
                   flex: 1,
                   child: Text(
-                    job.jobOptions.copies.toString(),
+                    _job.jobOptions.copies.toString(),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -138,9 +142,9 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                   child: IconButton(
                     icon: Icon(Icons.expand_less),
                     onPressed: () {
-                      if (job.jobOptions.copies < 1000) {
-                        job.jobOptions.copies++;
-                        joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                      if (_job.jobOptions.copies < 1000) {
+                        _job.jobOptions.copies++;
+                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                       } else
                         Scaffold.of(context).showSnackBar(
                           SnackBar(
@@ -154,47 +158,40 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
             ),
           ),
         ),
-        (job.jobOptions.copies > 1)
+        (_job.jobOptions.copies > 1)
             ? ListTile(
                 onTap: () {
-                  job.jobOptions.collate = !job.jobOptions.collate;
-                  joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                  _job.jobOptions.collate = !_job.jobOptions.collate;
+                  joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                 },
                 leading: null,
                 title: Text('Gleiche Seiten zusammenstellen'),
                 trailing: Switch(
                   onChanged: (val) {
-                    job.jobOptions.collate = val;
-                    joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                    _job.jobOptions.collate = val;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                   },
-                  value: job.jobOptions.collate,
+                  value: _job.jobOptions.collate,
                 ),
               )
             : null,
+        Divider(indent: 10.0),
         ListTile(
-          onTap: () =>
-              FocusScope.of(context).requestFocus(rangeFocus), //open text edit
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) => _rangeDialog(context, joblistBloc));
+          }, //open text edit
           title: Text('Seitenbereich'),
-          trailing: Container(
-            width: 180.0,
-            child: TextFormField(
-              focusNode: rangeFocus,
-              autocorrect: false,
-              controller: rangeController,
-              onEditingComplete: () => joblistBloc.onUpdateOptionsById(
-                  job.id, job.jobOptions..range = newRange),
-              onFieldSubmitted: (val) => joblistBloc.onUpdateOptionsById(
-                  job.id, job.jobOptions..range = val),
-            ),
-          ),
+          trailing: Text(_job.jobOptions.range),
         ),
         Divider(indent: 10.0),
-        ((job.jobInfo.pagecount * job.jobOptions.copies) > 1)
+        ((_job.jobInfo.pagecount * _job.jobOptions.copies) > 1)
             ? ListTile(
                 onTap: null,
                 title: Text('Seiten pro Blatt'),
                 trailing: DropdownButton(
-                  items: (((job.jobInfo.pagecount * job.jobOptions.copies) > 2)
+                  items: (((_job.jobInfo.pagecount /** _job.jobOptions.copies*/) > 2)
                           ? [1, 2, 4]
                           : [1, 2])
                       .map(
@@ -204,15 +201,15 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                             ),
                       )
                       .toList(),
-                  value: job.jobOptions.nup,
+                  value: _job.jobOptions.nup,
                   onChanged: (val) {
-                    job.jobOptions.nup = val;
-                    joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                    _job.jobOptions.nup = val;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                   },
                 ),
               )
             : null,
-        (job.jobOptions.nup > 2)
+        (_job.jobOptions.nup > 2)
             ? ListTile(
                 onTap: null,
                 title: Text('Reihenfolge auf Blatt'),
@@ -230,10 +227,10 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                             ),
                       )
                       .toList(),
-                  value: job.jobOptions.nupPageOrder,
+                  value: _job.jobOptions.nupPageOrder,
                   onChanged: (val) {
-                    job.jobOptions.nupPageOrder = val;
-                    joblistBloc.onUpdateOptionsById(job.id, job.jobOptions);
+                    _job.jobOptions.nupPageOrder = val;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                   },
                 ),
               )
@@ -241,6 +238,47 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
       ].where((widget) => widget != null).toList(),
     );
   }
+
+  @override
+  void deactivate() {
+    if (jobListener != null) jobListener.cancel();
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    if (jobListener != null) jobListener.cancel();
+    super.dispose();
+  }
+
+  Dialog _rangeDialog(BuildContext context, JoblistBloc joblistBloc) => Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                TextField(
+                  controller: TextEditingController(text: _job.jobOptions.range),
+                  autofocus: true,
+                  autocorrect: false,
+                  onChanged: (String text) => newRange = text,
+                ),
+                MaterialButton(
+                  textColor: Colors.black87,
+                  child: Text('Okay'),
+                  onPressed: () {
+                    _job.jobOptions.range = newRange;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 
   Map<int, String> _translateNupOrder(NupPageOrder order) {
     switch (order) {
