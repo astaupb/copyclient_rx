@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +36,15 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
         setState(() {
           _job = state.value.singleWhere((Job job) => job.id == _job.id);
         });
+      } else if (state.isException) {
+        if ((state.error as ApiException).statusCode == 400) {
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'Der angegebene Seitenbereich ist falsch formatiert oder liegt außerhalb des Seitenbereichs'),
+            duration: Duration(seconds: 2),
+          ));
+          joblistBloc.onRefresh();
+        }
       }
     });
     return Column(
