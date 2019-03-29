@@ -183,7 +183,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 builder: (BuildContext context) => _rangeDialog(context, joblistBloc));
           }, //open text edit
           title: Text('Seitenbereich'),
-          trailing: Text(_job.jobOptions.range),
+          trailing: Text(_job.jobOptions.range.isEmpty ? 'Alle' : _job.jobOptions.range),
         ),
         Divider(indent: 10.0),
         ((_job.jobInfo.pagecount * _job.jobOptions.copies) > 1)
