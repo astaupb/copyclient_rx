@@ -66,6 +66,8 @@ class _JoblistPageState extends State<JoblistPage> {
                                   content: Text('Ausgewählte Jobs wurden abgeschickt'),
                                   duration: Duration(seconds: 1),
                                 ));
+                                selectedIds.clear();
+                                setState(() => selectableTiles = false);
                               } catch (e) {
                                 Scaffold.of(context).showSnackBar(SnackBar(
                                   content: Text('Kein Drucker ausgewählt'),
@@ -175,58 +177,68 @@ Oben rechts kannst du neue Dokumente hochladen.
                               background: _dismissableBackground(),
                               confirmDismiss: (DismissDirection direction) =>
                                   _onConfirmDismiss(context, direction),
-                              child: JoblistTile(
-                                context,
-                                index,
-                                reverseList[index],
-                                onPress: (int index) {
-                                  if (selectableTiles) {
-                                    setState(() {
-                                      if (selectedIds.contains(reverseList[index].id))
-                                        selectedIds.remove(reverseList[index].id);
-                                      else
-                                        selectedIds.add(reverseList[index].id);
-                                    });
-                                  } else {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) =>
-                                            JobdetailsPage(reverseList[index]),
-                                      ),
-                                    );
-                                  }
-                                },
-                                onLongTap: (int index) => _onLongTapped(
-                                    context, reverseList[index].id, reverseList[index].jobOptions),
-                                directPrinter: lockedPrinter,
-                                onPressPrint: () async {
-                                  if (!selectableTiles) {
-                                    try {
-                                      String target = await BarcodeScanner.scan();
-                                      BlocProvider.of<JoblistBloc>(context).onPrintById(
-                                          (lockedPrinter == null) ? target : lockedPrinter,
-                                          reverseList[index].id);
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                        content: Text(
-                                            '${reverseList[index].jobInfo.title} wurde abgeschickt'),
-                                        duration: Duration(seconds: 1),
-                                      ));
-                                    } catch (e) {
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                        content: Text('Kein Drucker ausgewählt'),
-                                        duration: Duration(seconds: 1),
-                                      ));
-                                    }
-                                  } else {
-                                    setState(() {
-                                      if (selectedIds.contains(reverseList[index].id))
-                                        selectedIds.remove(reverseList[index].id);
-                                      else
-                                        selectedIds.add(reverseList[index].id);
-                                    });
-                                  }
-                                },
-                                chosen: selectedIds.contains(reverseList[index].id),
+                              child: Container(
+                                color: (selectableTiles)
+                                    ? (selectedIds.contains(reverseList[index].id))
+                                        ? Colors.black12
+                                        : null
+                                    : null,
+                                child: ListTileTheme(
+                                  selectedColor: Colors.black,
+                                  child: JoblistTile(
+                                    context,
+                                    index,
+                                    reverseList[index],
+                                    onPress: (int index) {
+                                      if (selectableTiles) {
+                                        setState(() {
+                                          if (selectedIds.contains(reverseList[index].id))
+                                            selectedIds.remove(reverseList[index].id);
+                                          else
+                                            selectedIds.add(reverseList[index].id);
+                                        });
+                                      } else {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                JobdetailsPage(reverseList[index]),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    onLongTap: (int index) => _onLongTapped(context,
+                                        reverseList[index].id, reverseList[index].jobOptions),
+                                    directPrinter: lockedPrinter,
+                                    onPressPrint: () async {
+                                      if (!selectableTiles) {
+                                        try {
+                                          String target = await BarcodeScanner.scan();
+                                          BlocProvider.of<JoblistBloc>(context).onPrintById(
+                                              (lockedPrinter == null) ? target : lockedPrinter,
+                                              reverseList[index].id);
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text(
+                                                '${reverseList[index].jobInfo.title} wurde abgeschickt'),
+                                            duration: Duration(seconds: 1),
+                                          ));
+                                        } catch (e) {
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text('Kein Drucker ausgewählt'),
+                                            duration: Duration(seconds: 1),
+                                          ));
+                                        }
+                                      } else {
+                                        setState(() {
+                                          if (selectedIds.contains(reverseList[index].id))
+                                            selectedIds.remove(reverseList[index].id);
+                                          else
+                                            selectedIds.add(reverseList[index].id);
+                                        });
+                                      }
+                                    },
+                                    chosen: selectedIds.contains(reverseList[index].id),
+                                  ),
+                                ),
                               ),
                             ),
                             Divider(height: 0.0),
