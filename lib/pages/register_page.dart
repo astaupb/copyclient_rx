@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterPage extends StatefulWidget {
   final AuthBloc authBloc;
@@ -17,6 +21,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String _retypedPassword;
   String _username;
 
+  StreamSubscription authListener;
+
   bool showPw1 = false;
   bool showPw2 = false;
 
@@ -26,112 +32,153 @@ class _RegisterPageState extends State<RegisterPage> {
         _username = '';
 
   @override
+  void dispose() {
+    if (authListener != null) authListener.cancel();
+    super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    if (authListener != null) authListener.cancel();
+    super.deactivate();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Registrieren')),
       body: ListView(
         children: <Widget>[
-          Form(
-            key: _formKey,
-            autovalidate: true,
-            child: Card(
-              margin: EdgeInsets.all(8.0),
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 16.0, left: 8.0, right: 8.0),
-                child: Column(
-                  children: <Widget>[
-                    TextFormField(
-                      initialValue: _username,
-                      decoration: InputDecoration(
-                          labelText: 'Benutzername', hintText: 'maxmuster'),
-                      validator: (value) {
-                        if (value.length < 1)
-                          return 'Ein Benutzername muss mindestens 2 Zeichen enthalten';
-                        if (value.contains('/') ||
-                            value.contains('.') ||
-                            value.contains(':'))
-                          return 'Ein Benutzername darf kein / . oder : enthalten';
-                        return null;
-                      },
-                      onSaved: (value) => _username = value,
-                    ),
-                    TextFormField(
-                      initialValue: _password,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        labelText: 'Passwort',
-                        suffix: IconButton(
-                            iconSize: 20.0,
-                            icon: Icon(Icons.remove_red_eye,
-                                color: (showPw1)
-                                    ? Colors.lightBlueAccent
-                                    : Colors.grey),
-                            onPressed: () =>
-                                setState(() => showPw1 = !showPw1)),
-                      ),
-                      obscureText: !showPw1,
-                      validator: (value) {
-                        if (value.length > 5) {
-                          _password = value;
-                        } else {
-                          return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
-                        }
-                      },
-                      onSaved: (value) => _password = value,
-                    ),
-                    TextFormField(
-                      initialValue: _retypedPassword,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        labelText: 'Passwort bestätigen',
-                        suffix: IconButton(
-                          iconSize: 20.0,
-                          icon: Icon(
-                            Icons.remove_red_eye,
-                            color: (showPw2)
-                                ? Colors.lightBlueAccent
-                                : Colors.grey,
-                          ),
-                          onPressed: () => setState(() => showPw2 = !showPw2),
-                        ),
-                      ),
-                      obscureText: !showPw2,
-                      validator: (value) {
-                        if (value.length < 5)
-                          return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
-                        else if (value != _password)
-                          return 'Die Passwörter müssen miteinander übereinstimmen';
-                        return null;
-                      },
-                      onSaved: (value) => _retypedPassword = value,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: RaisedButton(
-              textColor: Colors.white,
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  _formKey.currentState.save();
-                  widget.authBloc.register(_username, _password);
-                  var listener;
-                  listener = widget.authBloc.state.listen((AuthState state) {
-                    if (state.isAuthorized) {
-                      Navigator.pop(context);
-                      listener.cancel();
-                    }
-                  });
+          _registerForm(),
+          BlocBuilder<AuthEvent, AuthState>(
+            bloc: widget.authBloc,
+            builder: (BuildContext context, AuthState state) {
+              if (authListener != null) authListener.cancel();
+              authListener = widget.authBloc.state.listen((AuthState state) {
+                if (state.isRegistered) {
+                  ScaffoldFeatureController snackbarFeatureController = Scaffold.of(context)
+                      .showSnackBar(SnackBar(
+                          content: Text('Registrierung erfolgreich'),
+                          duration: Duration(seconds: 2)));
+                  snackbarFeatureController.closed.then((val) => Navigator.pop(context));
+                } else if (state.isException) {
+                  SnackBar snack;
+                  ApiException error = state.error as ApiException;
+                  if (error.statusCode == 470) {
+                    snack = SnackBar(
+                        content: Text('Dieser Nutzername ist schon vergeben'),
+                        duration: Duration(seconds: 2));
+                  } else if (error.statusCode == 471) {
+                    snack = SnackBar(
+                        content: Text(
+                            'Nutzername oder Passwort enthält unerlaubte Zeichen oder ist zu lang (> 32 Zeichen)'),
+                        duration: Duration(seconds: 2));
+                  } else if (error.statusCode >= 500) {
+                    snack = SnackBar(
+                        content: Text('Serverfehler - Bitte versuche es in einer Minute noch mal'),
+                        duration: Duration(seconds: 2));
+                  }
+
+                  Scaffold.of(context).showSnackBar(snack);
+                  authListener.cancel();
                 }
-              },
-              child: Text('Registrieren'),
-            ),
+              });
+
+              return Padding(
+                padding: EdgeInsets.all(16.0),
+                child: RaisedButton(
+                  textColor: Colors.white,
+                  onPressed: () => _onPressedButton(context, widget.authBloc),
+                  child: Text('Registrieren'),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
+
+  void _onPressedButton(BuildContext context, AuthBloc authBloc) {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      authBloc.register(_username, _password);
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text('Registriert neuen Nutzer...'),
+        duration: Duration(seconds: 2),
+      ));
+    }
+  }
+
+  Form _registerForm() => Form(
+        key: _formKey,
+        autovalidate: true,
+        child: Card(
+          margin: EdgeInsets.all(8.0),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 16.0, left: 8.0, right: 8.0),
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  initialValue: _username,
+                  decoration: InputDecoration(labelText: 'Benutzername', hintText: 'maxmuster'),
+                  validator: (value) {
+                    if (value.length < 1)
+                      return 'Ein Benutzername muss mindestens 2 Zeichen enthalten';
+                    if (value.contains('/') || value.contains('.') || value.contains(':'))
+                      return 'Ein Benutzername darf kein / . oder : enthalten';
+                    return null;
+                  },
+                  onSaved: (value) => _username = value,
+                ),
+                TextFormField(
+                  initialValue: _password,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: 'Passwort',
+                    suffix: IconButton(
+                        iconSize: 20.0,
+                        icon: Icon(Icons.remove_red_eye,
+                            color: (showPw1) ? Colors.lightBlueAccent : Colors.grey),
+                        onPressed: () => setState(() => showPw1 = !showPw1)),
+                  ),
+                  obscureText: !showPw1,
+                  validator: (value) {
+                    if (value.length > 5) {
+                      _password = value;
+                    } else {
+                      return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
+                    }
+                  },
+                  onSaved: (value) => _password = value,
+                ),
+                TextFormField(
+                  initialValue: _retypedPassword,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: 'Passwort bestätigen',
+                    suffix: IconButton(
+                      iconSize: 20.0,
+                      icon: Icon(
+                        Icons.remove_red_eye,
+                        color: (showPw2) ? Colors.lightBlueAccent : Colors.grey,
+                      ),
+                      onPressed: () => setState(() => showPw2 = !showPw2),
+                    ),
+                  ),
+                  obscureText: !showPw2,
+                  validator: (value) {
+                    if (value.length < 5)
+                      return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
+                    else if (value != _password)
+                      return 'Die Passwörter müssen miteinander übereinstimmen';
+                    return null;
+                  },
+                  onSaved: (value) => _retypedPassword = value,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }

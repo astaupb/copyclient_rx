@@ -36,7 +36,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a25d4054b03aa522a43595f66d3011018543edc1
+      resolved-ref: "1b243371d025fe393588689f1b68bd6a4ba78613"
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
     version: "0.1.0"
@@ -53,7 +53,7 @@ packages:
       name: bubble_bottom_bar
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.1.0"
   charcode:
     dependency: transitive
     description:

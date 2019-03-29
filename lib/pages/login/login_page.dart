@@ -23,8 +23,7 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
   BuildContext _context;
   @override
   void afterFirstLayout(BuildContext context) {
-    if (widget.startSnack != null)
-      Scaffold.of(_context).showSnackBar(widget.startSnack);
+    if (widget.startSnack != null) Scaffold.of(_context).showSnackBar(widget.startSnack);
   }
 
   @override
@@ -53,10 +52,11 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
                 textAlign: TextAlign.center,
               ),
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      RegisterPage(authBloc: widget.authBloc),
-                ));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => RegisterPage(authBloc: widget.authBloc),
+                  ),
+                );
               },
             )
           : null,

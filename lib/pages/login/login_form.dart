@@ -25,25 +25,29 @@ class _LoginFormState extends State<LoginForm> {
           padding: EdgeInsets.all(20.0),
           child: Card(
             child: Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Nutzername/SN'),
-                      validator: (val) =>
-                          val.length < 1 ? 'Nutzername benötigt' : null,
-                      onSaved: (val) => _username = val.trim(),
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
-                      autocorrect: false,
+                    BlocBuilder(
+                      bloc: BlocProvider.of<AuthBloc>(context),
+                      builder: (BuildContext context, AuthState state) {
+                        return TextFormField(
+                          controller: TextEditingController(
+                              text: (state.isRegistered) ? state.username : ''),
+                          decoration: InputDecoration(labelText: 'Nutzername/SN'),
+                          validator: (val) => val.length < 1 ? 'Nutzername benötigt' : null,
+                          onSaved: (val) => _username = val.trim(),
+                          obscureText: false,
+                          keyboardType: TextInputType.text,
+                          autocorrect: false,
+                        );
+                      },
                     ),
                     TextFormField(
                       decoration: InputDecoration(labelText: 'Passwort'),
-                      validator: (val) =>
-                          val.length < 1 ? 'Passwort benötigt' : null,
+                      validator: (val) => val.length < 1 ? 'Passwort benötigt' : null,
                       onSaved: (val) => _password = val.trim(),
                       obscureText: true,
                       keyboardType: TextInputType.text,
@@ -59,8 +63,7 @@ class _LoginFormState extends State<LoginForm> {
           children: <Widget>[
             Expanded(
               child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 8.0),
+                padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 8.0),
                 child: RaisedButton(
                   onPressed: () => _submitForm(),
                   child: Text('Login'),
@@ -73,11 +76,9 @@ class _LoginFormState extends State<LoginForm> {
           children: <Widget>[
             Expanded(
               child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 80.0, right: 80.0, bottom: 8.0),
+                padding: const EdgeInsets.only(left: 80.0, right: 80.0, bottom: 8.0),
                 child: TealOutlineButton(
-                  onPressed: () =>
-                      setState(() => _stayLoggedIn = !_stayLoggedIn),
+                  onPressed: () => setState(() => _stayLoggedIn = !_stayLoggedIn),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
