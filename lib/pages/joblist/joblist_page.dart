@@ -106,7 +106,7 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                   IconButton(
                     tooltip: 'Mehrfachauswahl beenden',
-                    icon: Icon(Icons.exit_to_app),
+                    icon: Icon(Icons.clear),
                     onPressed: () => setState(
                           () {
                             selectedIds = [];
@@ -199,13 +199,33 @@ Oben rechts kannst du neue Dokumente hochladen.
                                 onLongTap: (int index) => _onLongTapped(
                                     context, reverseList[index].id, reverseList[index].jobOptions),
                                 directPrinter: lockedPrinter,
-                                onPressPrint: () async => (!selectableTiles)
-                                    ? BlocProvider.of<JoblistBloc>(context).onPrintById(
-                                        (lockedPrinter == null)
-                                            ? await BarcodeScanner.scan()
-                                            : lockedPrinter,
-                                        reverseList[index].id)
-                                    : selectedIds.add(reverseList[index].id),
+                                onPressPrint: () async {
+                                  if (!selectableTiles) {
+                                    try {
+                                      String target = await BarcodeScanner.scan();
+                                      BlocProvider.of<JoblistBloc>(context).onPrintById(
+                                          (lockedPrinter == null) ? target : lockedPrinter,
+                                          reverseList[index].id);
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                        content: Text(
+                                            '${reverseList[index].jobInfo.title} wurde abgeschickt'),
+                                        duration: Duration(seconds: 1),
+                                      ));
+                                    } catch (e) {
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                        content: Text('Kein Drucker ausgewählt'),
+                                        duration: Duration(seconds: 1),
+                                      ));
+                                    }
+                                  } else {
+                                    setState(() {
+                                      if (selectedIds.contains(reverseList[index].id))
+                                        selectedIds.remove(reverseList[index].id);
+                                      else
+                                        selectedIds.add(reverseList[index].id);
+                                    });
+                                  }
+                                },
                                 chosen: selectedIds.contains(reverseList[index].id),
                               ),
                             ),
