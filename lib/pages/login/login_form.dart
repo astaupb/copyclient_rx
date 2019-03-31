@@ -19,6 +19,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
     return Column(
       children: <Widget>[
         Padding(
@@ -31,11 +32,11 @@ class _LoginFormState extends State<LoginForm> {
                 child: Column(
                   children: [
                     BlocBuilder(
-                      bloc: BlocProvider.of<AuthBloc>(context),
+                      bloc: authBloc,
                       builder: (BuildContext context, AuthState state) {
                         TextEditingController _usernameController = TextEditingController(
                             text: (state.isRegistered) ? state.username : _username);
-                        _usernameController.addListener(() => _username =_usernameController.text);
+                        _usernameController.addListener(() => _username = _usernameController.text);
                         return TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(labelText: 'Nutzername/SN'),
@@ -67,7 +68,7 @@ class _LoginFormState extends State<LoginForm> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 8.0),
                 child: RaisedButton(
-                  onPressed: () => _submitForm(),
+                  onPressed: () => _submitForm(authBloc),
                   child: Text('Login'),
                 ),
               ),
@@ -108,10 +109,9 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm(AuthBloc authBloc) {
     final FormState _form = _formKey.currentState;
     _form.save();
-    final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
     authBloc.login(_username, _password, persistent: _stayLoggedIn);
   }
 }
