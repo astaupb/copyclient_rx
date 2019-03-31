@@ -31,6 +31,9 @@ class _JoblistPageState extends State<JoblistPage> {
   Timer printerLockRefresher;
   Timer jobTimer;
 
+  StreamSubscription copyListener;
+  DateTime copyStartTime;
+
   int lastCredit;
 
   int currentIndex = 0;
@@ -416,11 +419,11 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _changePage(int index) async {
+    // TODO: load dispatcher queue
     setState(() {
       currentIndex = index;
     });
     if (currentIndex == 1) {
-      // TODO: load dispatcher queue
       int dialogResult = await showDialog<int>(
         context: context,
         builder: (BuildContext context) => Dialog(
@@ -455,6 +458,61 @@ Oben rechts kannst du neue Dokumente hochladen.
       );
       if (dialogResult == 0) {
         _lockPrinter();
+      } else {
+        setState(() => currentIndex = 0);
+      }
+    } else if (currentIndex == 2) {
+      //  TODO: handle copying
+      int dialogResult = await showDialog<int>(
+        context: context,
+        builder: (BuildContext context) => Dialog(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                        'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du kopieren willst.\n\nAchtung: Gescannte Dokumente werden sofort in Schwarz Weiß ausgedruckt'),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        MaterialButton(
+                          textColor: Colors.black87,
+                          child: Text('Abbrechen'),
+                          onPressed: () => Navigator.pop<int>(context, 1),
+                        ),
+                        MaterialButton(
+                          textColor: Colors.black87,
+                          child: Text('Okay'),
+                          onPressed: () => Navigator.pop<int>(context, 0),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      );
+      if (dialogResult == 0) {
+        _lockPrinter();
+        // TODO: listen for the jobs and print
+        copyStartTime = DateTime.now();
+        copyListener = BlocProvider.of<JoblistBloc>(context).state.listen(
+          (JoblistState state) {
+            if (state.isResult) {
+              for (Job job in state.value.where(
+                  (Job job) => (job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch)) {
+                BlocProvider.of<JoblistBloc>(context).onPrintById(lockedPrinter, job.id);
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  duration: Duration(seconds: 2),
+                  content: Text('${job.jobInfo.filename} wird kopiert...'),
+                ));
+              }
+            }
+          },
+        );
       } else {
         setState(() => currentIndex = 0);
       }
@@ -522,7 +580,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       );
 
       if (jobTimer != null) jobTimer.cancel();
-      jobTimer = Timer.periodic(const Duration(seconds: 5),
+      jobTimer = Timer.periodic(const Duration(seconds: 3),
           (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
     } else {
       setState(() => currentIndex = 0);
