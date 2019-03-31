@@ -201,9 +201,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 onTap: null,
                 title: Text('Seiten pro Blatt'),
                 trailing: DropdownButton(
-                  items: (((_job.jobInfo.pagecount /** _job.jobOptions.copies*/) > 2)
-                          ? [1, 2, 4]
-                          : [1, 2])
+                  items: [1, 2, 4]
                       .map(
                         (int value) => DropdownMenuItem<int>(
                               value: value,
