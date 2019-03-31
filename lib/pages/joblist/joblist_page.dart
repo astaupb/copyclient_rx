@@ -18,6 +18,7 @@ import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import '../jobdetails/jobdetails.dart';
 import 'joblist_tile.dart';
+import 'joblist_deletion_modal.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -61,6 +62,8 @@ class _JoblistPageState extends State<JoblistPage> {
         if (error.statusCode == 401) {
           BlocProvider.of<AuthBloc>(context).logout();
           Navigator.pop(context);
+        } else if (error.statusCode == 404) {
+          text = 'Der angeforderte Job existiert nicht mehr';
         } else if (error.statusCode == 423) {
           text =
               'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
@@ -85,6 +88,17 @@ class _JoblistPageState extends State<JoblistPage> {
           title: Text('Jobliste'),
           actions: (selectableTiles)
               ? <Widget>[
+                  Builder(
+                    builder: (BuildContext context) => IconButton(
+                          tooltip: 'Ausgewählte löschen',
+                          icon: Icon(Icons.delete),
+                          onPressed: () => showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      JoblistDeletionModal(selectedIds))
+                              .then((val) => setState(() => selectableTiles = false)),
+                        ),
+                  ),
                   Builder(
                     builder: (BuildContext context) => IconButton(
                           tooltip: 'Ausgewählte drucken',
@@ -576,7 +590,7 @@ Oben rechts kannst du neue Dokumente hochladen.
           children: <Widget>[
             Text('Job löschen', style: TextStyle(color: Colors.white)),
             Spacer(),
-            Icon(Icons.delete, color: Colors.white),
+            Icon(Icons.delete_sweep, color: Colors.white),
           ],
         ),
         padding: EdgeInsets.all(20.0),
