@@ -33,9 +33,11 @@ class _LoginFormState extends State<LoginForm> {
                     BlocBuilder(
                       bloc: BlocProvider.of<AuthBloc>(context),
                       builder: (BuildContext context, AuthState state) {
+                        TextEditingController _usernameController = TextEditingController(
+                            text: (state.isRegistered) ? state.username : _username);
+                        _usernameController.addListener(() => _username =_usernameController.text);
                         return TextFormField(
-                          controller: TextEditingController(
-                              text: (state.isRegistered) ? state.username : ''),
+                          controller: _usernameController,
                           decoration: InputDecoration(labelText: 'Nutzername/SN'),
                           validator: (val) => val.length < 1 ? 'Nutzername benötigt' : null,
                           onSaved: (val) => _username = val.trim(),
@@ -46,7 +48,7 @@ class _LoginFormState extends State<LoginForm> {
                       },
                     ),
                     TextFormField(
-                      decoration: InputDecoration(labelText: 'Passwort'),
+                      decoration: InputDecoration(labelText: 'Passwort/PIN'),
                       validator: (val) => val.length < 1 ? 'Passwort benötigt' : null,
                       onSaved: (val) => _password = val.trim(),
                       obscureText: true,
