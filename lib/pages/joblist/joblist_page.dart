@@ -37,6 +37,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
   StreamSubscription copyListener;
   DateTime copyStartTime;
+  StreamSubscription printQueueListener;
 
   List<Job> pastJobs = [];
 
@@ -247,22 +248,28 @@ Oben rechts kannst du neue Dokumente hochladen.
                                     directPrinter: lockedPrinter,
                                     onPressPrint: () async {
                                       if (!selectableTiles) {
-                                        try {
-                                          String target = await BarcodeScanner.scan();
-                                          BlocProvider.of<JoblistBloc>(context).onPrintById(
-                                              (lockedPrinter == null) ? target : lockedPrinter,
-                                              reverseList[index].id);
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text(
-                                                '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
-                                            duration: Duration(seconds: 1),
-                                          ));
-                                        } catch (e) {
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text('Kein Drucker ausgewählt'),
-                                            duration: Duration(seconds: 1),
-                                          ));
+                                        String target;
+                                        if (lockedPrinter != null) {
+                                          target = lockedPrinter;
+                                        } else {
+                                          try {
+                                            target = await BarcodeScanner.scan();
+                                          } catch (e) {
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text('Kein Drucker ausgewählt'),
+                                              duration: Duration(seconds: 1),
+                                            ));
+                                          }
                                         }
+
+                                        BlocProvider.of<JoblistBloc>(context).onPrintById(
+                                            (lockedPrinter == null) ? target : lockedPrinter,
+                                            reverseList[index].id);
+                                        Scaffold.of(context).showSnackBar(SnackBar(
+                                          content: Text(
+                                              '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
+                                          duration: Duration(seconds: 1),
+                                        ));
                                       } else {
                                         setState(() {
                                           if (selectedIds.contains(reverseList[index].id))
@@ -353,7 +360,14 @@ Oben rechts kannst du neue Dokumente hochladen.
                         ),
                       ],
                     ),
-                    title: Text("Scanner"),
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text("Scanner"),
+                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                            textScaleFactor: 0.7),
+                      ],
+                    ),
                   ),
                   BubbleBottomBarItem(
                     backgroundColor: Colors.indigo,
@@ -393,7 +407,14 @@ Oben rechts kannst du neue Dokumente hochladen.
                         ),
                       ],
                     ),
-                    title: Text("Kopierer"),
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text("Kopierer"),
+                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                            textScaleFactor: 0.7),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -408,6 +429,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (lockedPrinter != null) _unlockPrinter();
     if (copyListener != null) copyListener.cancel();
     if (jobListener != null) jobListener.cancel();
+    if (printQueueListener != null) printQueueListener.cancel();
     currentIndex = 0;
     super.deactivate();
   }
@@ -418,6 +440,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (lockedPrinter != null) _unlockPrinter();
     if (copyListener != null) copyListener.cancel();
     if (jobListener != null) jobListener.cancel();
+    if (printQueueListener != null) printQueueListener.cancel();
     currentIndex = 0;
     super.dispose();
   }
@@ -437,6 +460,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _changePage(BuildContext context, int index) async {
     // TODO: load dispatcher queue
     if (copyListener != null) copyListener.cancel();
+    if (printQueueListener != null) printQueueListener.cancel();
     setState(() {
       currentIndex = index;
     });
@@ -534,7 +558,10 @@ Oben rechts kannst du neue Dokumente hochladen.
           },
         );
       } else {
-        setState(() => currentIndex = 0);
+        setState(() {
+          currentIndex = 0;
+          lockedPrinter = null;
+        });
       }
     } else {
       _cancelTimers();
@@ -581,6 +608,22 @@ Oben rechts kannst du neue Dokumente hochladen.
     }
 
     if (target != null) {
+      printQueueListener = printQueueBloc.state.listen((PrintQueueState state) {
+        if (state.isException) {
+          if ((state.error as ApiException).statusCode == 423)
+            Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
+                duration: Duration(seconds: 3),
+                content: Text(
+                    'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.')));
+
+          setState(() {
+            currentIndex = 0;
+            lockedPrinter = null;
+          });
+          printQueueBloc.onRefresh();
+        }
+      });
+
       printQueueBloc.setDeviceId(int.tryParse(target));
       printQueueBloc.onLockDevice();
 
