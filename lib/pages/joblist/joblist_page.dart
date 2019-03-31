@@ -407,6 +407,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     _cancelTimers();
     if (lockedPrinter != null) _unlockPrinter();
     if (copyListener != null) copyListener.cancel();
+    if (jobListener != null) jobListener.cancel();
     currentIndex = 0;
     super.deactivate();
   }
@@ -416,6 +417,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     _cancelTimers();
     if (lockedPrinter != null) _unlockPrinter();
     if (copyListener != null) copyListener.cancel();
+    if (jobListener != null) jobListener.cancel();
     currentIndex = 0;
     super.dispose();
   }
@@ -477,7 +479,6 @@ Oben rechts kannst du neue Dokumente hochladen.
         setState(() => currentIndex = 0);
       }
     } else if (currentIndex == 2) {
-      //  TODO: handle copying
       int dialogResult = await showDialog<int>(
         context: context,
         builder: (BuildContext context) => Dialog(
@@ -678,11 +679,9 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   void _unlockPrinter() async {
     printQueueBloc.onRefresh();
-    String uid;
     StreamSubscription listener;
     listener = printQueueBloc.state.listen((PrintQueueState state) {
       if (state.isLocked) {
-        uid = state.lockUid;
         printQueueBloc.onDelete();
         setState(
           () {
