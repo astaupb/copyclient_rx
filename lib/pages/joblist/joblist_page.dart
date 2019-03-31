@@ -256,7 +256,8 @@ Oben rechts kannst du neue Dokumente hochladen.
                 } else if (error.statusCode == 404) {
                   joblistBloc.onRefresh();
                 } else if (error.statusCode >= 500) {
-                  text = 'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
+                  text =
+                      'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
                 } else {
                   text = error.toString();
                 }
@@ -290,16 +291,44 @@ Oben rechts kannst du neue Dokumente hochladen.
                   Icons.list,
                   color: Colors.red,
                 ),
-                title: Text("Listenansicht")),
+                title: Text("Liste")),
             BubbleBottomBarItem(
               backgroundColor: Colors.deepPurple,
-              icon: Icon(
-                Icons.scanner,
-                color: Colors.black,
+              icon: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.scanner,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.picture_as_pdf,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                ],
               ),
-              activeIcon: Icon(
-                Icons.scanner,
-                color: Colors.deepPurple,
+              activeIcon: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.scanner,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.picture_as_pdf,
+                    color: Colors.black,
+                  ),
+                ],
               ),
               title: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -311,6 +340,46 @@ Oben rechts kannst du neue Dokumente hochladen.
                   )
                 ],
               ),
+            ),
+            BubbleBottomBarItem(
+              backgroundColor: Colors.indigo,
+              icon: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.scanner,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.print,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              activeIcon: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.scanner,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 16.0,
+                    color: Colors.black,
+                  ),
+                  Icon(
+                    Icons.print,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              title: Text("Kopierer"),
             ),
           ],
         ),
