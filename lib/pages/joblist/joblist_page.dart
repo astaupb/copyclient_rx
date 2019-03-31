@@ -29,6 +29,11 @@ class _JoblistPageState extends State<JoblistPage> {
 
   Timer printerLockRefresher;
   Timer jobTimer;
+  StreamSubscription jobListener;
+
+  BuildContext _scaffoldContext;
+  String text = '';
+  bool newException = true;
 
   StreamSubscription copyListener;
   DateTime copyStartTime;
@@ -47,6 +52,31 @@ class _JoblistPageState extends State<JoblistPage> {
   @override
   Widget build(BuildContext context) {
     JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    jobListener = joblistBloc.state.listen((JoblistState state) {
+      if (state.isException) {
+        joblistBloc.onRefresh();
+        ApiException error = (state.error as ApiException);
+
+        if (error.statusCode == 401) {
+          BlocProvider.of<AuthBloc>(context).logout();
+          Navigator.pop(context);
+        } else if (error.statusCode == 423) {
+          text =
+              'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
+        } else if (error.statusCode >= 500) {
+          text = 'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
+        } else {
+          text = error.toString();
+        }
+        currentIndex = 0;
+        if (newException)
+          Scaffold.of(_scaffoldContext)
+              .showSnackBar(SnackBar(duration: Duration(seconds: 3), content: Text(text)));
+        newException = false;
+      } else if (state.isResult) {
+        newException = true;
+      }
+    });
     return WillPopScope(
       onWillPop: () => _onWillPop(),
       child: Scaffold(
@@ -153,6 +183,7 @@ class _JoblistPageState extends State<JoblistPage> {
           child: BlocBuilder<JoblistEvent, JoblistState>(
             bloc: joblistBloc,
             builder: (BuildContext context, JoblistState state) {
+              _scaffoldContext = context;
               if (state.isResult) {
                 pastJobs = state.value.reversed.toList();
                 if (state.value.length == 0) {
@@ -252,33 +283,6 @@ Oben rechts kannst du neue Dokumente hochladen.
                     },
                   );
                 }
-              } else if (state.isException) {
-                ApiException error = (state.error as ApiException);
-                String text = '';
-                if (error.statusCode == 401) {
-                  BlocProvider.of<AuthBloc>(context).logout();
-                  Navigator.pop(context);
-                } else if (error.statusCode == 404) {
-                  joblistBloc.onRefresh();
-                } else if (error.statusCode == 423) {
-                  text =
-                      'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
-                } else if (error.statusCode >= 500) {
-                  text =
-                      'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
-                } else {
-                  text = error.toString();
-                }
-                currentIndex = 0;
-                return ListView.builder(
-                  itemCount: pastJobs.length,
-                  itemExtent: 72.0,
-                  itemBuilder: (BuildContext context, int index) {
-                    Scaffold.of(context).showSnackBar(
-                        SnackBar(duration: Duration(seconds: 3), content: Text(text)));
-                    return JoblistTile(context, index, pastJobs[index]);
-                  },
-                );
               } else {
                 return ListView.builder(
                   itemCount: pastJobs.length,

@@ -54,9 +54,6 @@ class _HeaderTileState extends State<HeaderTile> {
                           bloc: BlocProvider.of<PdfBloc>(context),
                           builder: (BuildContext context, PdfState state) {
                             if (state.isResult || state.isInit) {
-                              print((state.value
-                                  .contains((PdfFile file) => file.id == _job.id)
-                                  .toString()));
                               Iterable idResults = state.value.where((PdfFile file) => file.id == _job.id);
                               return Text(
                                 (idResults.length == 1)
