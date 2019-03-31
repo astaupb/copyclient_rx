@@ -265,9 +265,25 @@ Oben rechts kannst du neue Dokumente hochladen.
                                         String target;
                                         if (lockedPrinter != null) {
                                           target = lockedPrinter;
+                                          BlocProvider.of<JoblistBloc>(context).onPrintById(
+                                              (lockedPrinter == null) ? target : lockedPrinter,
+                                              reverseList[index].id);
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text(
+                                                '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
+                                            duration: Duration(seconds: 1),
+                                          ));
                                         } else {
                                           try {
                                             target = await BarcodeScanner.scan();
+                                            BlocProvider.of<JoblistBloc>(context).onPrintById(
+                                                (lockedPrinter == null) ? target : lockedPrinter,
+                                                reverseList[index].id);
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text(
+                                                  '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
+                                              duration: Duration(seconds: 1),
+                                            ));
                                           } catch (e) {
                                             Scaffold.of(context).showSnackBar(SnackBar(
                                               content: Text('Kein Drucker ausgewählt'),
@@ -275,15 +291,6 @@ Oben rechts kannst du neue Dokumente hochladen.
                                             ));
                                           }
                                         }
-
-                                        BlocProvider.of<JoblistBloc>(context).onPrintById(
-                                            (lockedPrinter == null) ? target : lockedPrinter,
-                                            reverseList[index].id);
-                                        Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text(
-                                              '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
-                                          duration: Duration(seconds: 1),
-                                        ));
                                       } else {
                                         setState(() {
                                           if (selectedIds.contains(reverseList[index].id))
