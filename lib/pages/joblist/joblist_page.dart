@@ -248,14 +248,22 @@ Oben rechts kannst du neue Dokumente hochladen.
                   );
                 }
               } else if (state.isException) {
-                if ((state.error as ApiException).statusCode == 401) {
+                ApiException error = (state.error as ApiException);
+                String text = '';
+                if (error.statusCode == 401) {
                   BlocProvider.of<AuthBloc>(context).logout();
                   Navigator.pop(context);
+                } else if (error.statusCode == 404) {
+                  joblistBloc.onRefresh();
+                } else if (error.statusCode >= 500) {
+                  text = 'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
+                } else {
+                  text = error.toString();
                 }
                 return ListView(
                   children: <Widget>[
                     ListTile(
-                      title: Text(state.error.toString()),
+                      title: Text(text),
                     )
                   ],
                 );
