@@ -27,12 +27,13 @@ class JoblistPage extends StatefulWidget {
 class _JoblistPageState extends State<JoblistPage> {
   PrintQueueBloc printQueueBloc;
 
-  Timer printerLockTimer;
   Timer printerLockRefresher;
   Timer jobTimer;
 
   StreamSubscription copyListener;
   DateTime copyStartTime;
+
+  List<Job> pastJobs = [];
 
   int lastCredit;
 
@@ -153,6 +154,7 @@ class _JoblistPageState extends State<JoblistPage> {
             bloc: joblistBloc,
             builder: (BuildContext context, JoblistState state) {
               if (state.isResult) {
+                pastJobs = state.value.reversed.toList();
                 if (state.value.length == 0) {
                   return ListView(
                     children: <Widget>[
@@ -221,7 +223,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                                               reverseList[index].id);
                                           Scaffold.of(context).showSnackBar(SnackBar(
                                             content: Text(
-                                                '${reverseList[index].jobInfo.title} wurde abgeschickt'),
+                                                '${reverseList[index].jobInfo.filename} wurde abgeschickt'),
                                             duration: Duration(seconds: 1),
                                           ));
                                         } catch (e) {
@@ -258,133 +260,139 @@ Oben rechts kannst du neue Dokumente hochladen.
                   Navigator.pop(context);
                 } else if (error.statusCode == 404) {
                   joblistBloc.onRefresh();
+                } else if (error.statusCode == 423) {
+                  text =
+                      'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
                 } else if (error.statusCode >= 500) {
                   text =
                       'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
                 } else {
                   text = error.toString();
                 }
-                return ListView(
-                  children: <Widget>[
-                    ListTile(
-                      title: Text(text),
-                    )
-                  ],
+                currentIndex = 0;
+                return ListView.builder(
+                  itemCount: pastJobs.length,
+                  itemExtent: 72.0,
+                  itemBuilder: (BuildContext context, int index) {
+                    Scaffold.of(context).showSnackBar(
+                        SnackBar(duration: Duration(seconds: 3), content: Text(text)));
+                    return JoblistTile(context, index, pastJobs[index]);
+                  },
                 );
               } else {
-                return Center(child: CircularProgressIndicator());
+                return ListView.builder(
+                  itemCount: pastJobs.length,
+                  itemExtent: 72.0,
+                  itemBuilder: (BuildContext context, int index) {
+                    return JoblistTile(context, index, pastJobs[index]);
+                  },
+                );
               }
             },
           ),
         ),
-        bottomNavigationBar: BubbleBottomBar(
-          opacity: .2,
-          currentIndex: currentIndex,
-          onTap: (int index) => _changePage(index),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          elevation: 8,
-          items: <BubbleBottomBarItem>[
-            BubbleBottomBarItem(
-                backgroundColor: Colors.red,
-                icon: Icon(
-                  Icons.list,
-                  color: Colors.black,
-                ),
-                activeIcon: Icon(
-                  Icons.list,
-                  color: Colors.red,
-                ),
-                title: Text("Liste")),
-            BubbleBottomBarItem(
-              backgroundColor: Colors.deepPurple,
-              icon: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.scanner,
-                    size: 16.0,
-                    color: Colors.black,
+        bottomNavigationBar: Builder(
+          builder: (BuildContext context) => BubbleBottomBar(
+                opacity: .2,
+                currentIndex: currentIndex,
+                onTap: (int index) => _changePage(context, index),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                elevation: 8,
+                items: <BubbleBottomBarItem>[
+                  BubbleBottomBarItem(
+                    backgroundColor: Colors.red,
+                    icon: Icon(
+                      Icons.cancel,
+                      color: Colors.black,
+                    ),
+                    activeIcon: Icon(
+                      Icons.list,
+                      color: Colors.red,
+                    ),
+                    title: Text("Liste"),
                   ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    size: 16.0,
-                    color: Colors.black,
+                  BubbleBottomBarItem(
+                    backgroundColor: Colors.deepPurple,
+                    icon: Column(
+                      children: <Widget>[
+                        Icon(
+                          Icons.scanner,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.picture_as_pdf,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    activeIcon: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.scanner,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.picture_as_pdf,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    title: Text("Scanner"),
                   ),
-                  Icon(
-                    Icons.picture_as_pdf,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              activeIcon: Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.scanner,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.picture_as_pdf,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              title: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Text("Zur Liste Scannen"),
-                  Text(
-                    'Verbleibend: $remainingLockTime Sekunden',
-                    textScaleFactor: 0.75,
-                  )
-                ],
-              ),
-            ),
-            BubbleBottomBarItem(
-              backgroundColor: Colors.indigo,
-              icon: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.scanner,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.print,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              activeIcon: Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.scanner,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: 16.0,
-                    color: Colors.black,
-                  ),
-                  Icon(
-                    Icons.print,
-                    color: Colors.black,
+                  BubbleBottomBarItem(
+                    backgroundColor: Colors.indigo,
+                    icon: Column(
+                      children: <Widget>[
+                        Icon(
+                          Icons.scanner,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.print,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    activeIcon: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.scanner,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16.0,
+                          color: Colors.black,
+                        ),
+                        Icon(
+                          Icons.print,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                    title: Text("Kopierer"),
                   ),
                 ],
               ),
-              title: Text("Kopierer"),
-            ),
-          ],
         ),
       ),
     );
@@ -394,6 +402,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void deactivate() {
     _cancelTimers();
     if (lockedPrinter != null) _unlockPrinter();
+    if (copyListener != null) copyListener.cancel();
     currentIndex = 0;
     super.deactivate();
   }
@@ -402,24 +411,26 @@ Oben rechts kannst du neue Dokumente hochladen.
   void dispose() {
     _cancelTimers();
     if (lockedPrinter != null) _unlockPrinter();
+    if (copyListener != null) copyListener.cancel();
+    currentIndex = 0;
     super.dispose();
   }
 
   @override
   void initState() {
     currentIndex = 0;
-    super.initState();
     _cancelTimers();
+    super.initState();
   }
 
   void _cancelTimers() {
     if (printerLockRefresher != null) printerLockRefresher.cancel();
-    if (printerLockTimer != null) printerLockTimer.cancel();
     if (jobTimer != null) jobTimer.cancel();
   }
 
-  void _changePage(int index) async {
+  void _changePage(BuildContext context, int index) async {
     // TODO: load dispatcher queue
+    if (copyListener != null) copyListener.cancel();
     setState(() {
       currentIndex = index;
     });
@@ -496,19 +507,23 @@ Oben rechts kannst du neue Dokumente hochladen.
             ),
       );
       if (dialogResult == 0) {
+        JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
         _lockPrinter();
-        // TODO: listen for the jobs and print
         copyStartTime = DateTime.now();
-        copyListener = BlocProvider.of<JoblistBloc>(context).state.listen(
+        copyListener = joblistBloc.state.listen(
           (JoblistState state) {
             if (state.isResult) {
               for (Job job in state.value.where(
                   (Job job) => (job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch)) {
-                BlocProvider.of<JoblistBloc>(context).onPrintById(lockedPrinter, job.id);
-                Scaffold.of(context).showSnackBar(SnackBar(
-                  duration: Duration(seconds: 2),
-                  content: Text('${job.jobInfo.filename} wird kopiert...'),
-                ));
+                joblistBloc.onPrintById(lockedPrinter, job.id);
+                //joblistBloc.onDeleteById(job.id);
+                copyStartTime = DateTime.now();
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    duration: Duration(seconds: 2),
+                    content: Text('${job.jobInfo.filename} wird kopiert...'),
+                  ),
+                );
               }
             }
           },
@@ -549,11 +564,15 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _lockPrinter() async {
     printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
     String target;
-    try {
-      //target = "44332";
-      target = await BarcodeScanner.scan();
-    } catch (e) {
-      setState(() => currentIndex = 0);
+    if (lockedPrinter == null) {
+      try {
+        //target = "44332";
+        target = await BarcodeScanner.scan();
+      } catch (e) {
+        setState(() => currentIndex = 0);
+      }
+    } else {
+      target = lockedPrinter;
     }
 
     if (target != null) {
@@ -563,12 +582,6 @@ Oben rechts kannst du neue Dokumente hochladen.
       setState(() => lockedPrinter = target);
 
       remainingLockTime = 60;
-
-      if (printerLockTimer != null) printerLockTimer.cancel();
-      printerLockTimer = Timer.periodic(
-        const Duration(seconds: 1),
-        (Timer t) => setState(() => remainingLockTime -= 1),
-      );
 
       if (printerLockRefresher != null) printerLockRefresher.cancel();
       printerLockRefresher = Timer.periodic(
