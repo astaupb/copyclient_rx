@@ -1,16 +1,18 @@
-# copyclient_rx
+# AStA Copyclient App (copyclient_rx)
 
-Yet another reactive copyclient rewrite.
+This app is the main client used for printing with [AStAPrint/PAStA](https://git.uni-paderborn.de/asta/astaprint).
 
-## Getting Started
+Through it users can register themselves, load credit on their account and upload docuemnts they want to print.
+It also offers modes to get documents you scan from a printer and optionally direct-print them for a 'copy' mode.
 
-This project is a starting point for a Flutter application.
+## Building and Getting Started
+
+To get the last running dependency configuration run `flutter packages get`, if you want the latest versions run `flutter upgrade`.
+
+To start the app on your smartphone via USB or inside an emulator just `flutter run` and have fun.
+
+To build an Android or iOS App use `flutter build apk` or open the XCode workspace inside the ios folder to 'Archive' the app through XCode.
 
 A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+ - [Flutter install guide](https://flutter.dev/docs/get-started/–install)
+ - [Flutter API Docs](https://api.flutter.dev/)
