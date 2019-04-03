@@ -453,6 +453,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     currentIndex = 0;
+    selectableTiles = false;
     super.deactivate();
   }
 
@@ -464,6 +465,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     currentIndex = 0;
+    selectableTiles = false;
     super.dispose();
   }
 
