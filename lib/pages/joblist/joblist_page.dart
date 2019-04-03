@@ -41,6 +41,7 @@ class _JoblistPageState extends State<JoblistPage> {
   StreamSubscription printQueueListener;
 
   List<Job> pastJobs = [];
+  List<int> copiedJobIds = [];
 
   int lastCredit;
 
@@ -563,11 +564,12 @@ Oben rechts kannst du neue Dokumente hochladen.
         copyListener = joblistBloc.state.listen(
           (JoblistState state) {
             if (state.isResult) {
-              for (Job job in state.value.where(
-                  (Job job) => (job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch)) {
+              for (Job job in state.value.where((Job job) =>
+                  ((job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch) &&
+                  !copiedJobIds.contains(job.id))) {
                 joblistBloc.onPrintById(lockedPrinter, job.id);
-                //joblistBloc.onDeleteById(job.id);
                 copyStartTime = DateTime.now();
+                copiedJobIds.add(job.id);
                 Scaffold.of(context).showSnackBar(
                   SnackBar(
                     duration: Duration(seconds: 2),
