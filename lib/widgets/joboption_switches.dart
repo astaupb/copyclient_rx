@@ -269,6 +269,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
               children: <Widget>[
                 TextField(
                   controller: TextEditingController(text: _job.jobOptions.range),
+                  decoration: InputDecoration(labelText: 'z.B. "1,4-7,10"'),
                   autofocus: true,
                   autocorrect: false,
                   onChanged: (String text) => newRange = text,
