@@ -24,6 +24,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
   StreamSubscription jobListener;
 
   String newRange = '';
+  int newCopies = 1;
 
   _JoboptionSwitchesState(this._job);
 
@@ -111,7 +112,9 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
         ),
         Divider(indent: 10.0),
         ListTile(
-          onTap: null,
+          onTap: () => showDialog(
+              context: context,
+              builder: (BuildContext context) => _copiesDialog(context, joblistBloc)),
           leading: Icon(Icons.clear_all),
           title: Text('Anzahl Kopien'),
           trailing: Container(
@@ -259,29 +262,91 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
     super.dispose();
   }
 
+  Dialog _copiesDialog(BuildContext context, JoblistBloc joblistBloc) => Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'Kopien einstellen',
+                  textScaleFactor: 1.2,
+                  textAlign: TextAlign.start,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    TextField(
+                      controller: TextEditingController(text: _job.jobOptions.copies.toString()),
+                      decoration: InputDecoration(labelText: 'z.B. "4"'),
+                      autofocus: true,
+                      autocorrect: false,
+                      onChanged: (String text) {
+                        try {
+                          newCopies = int.parse(text);
+                        } catch (e) {
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                'Fehler beim Lesen der angebenen Kopien. Die Anzahl der Kopien sollte eine Zahl sein.'),
+                            duration: const Duration(seconds: 3),
+                          ));
+                        }
+                      },
+                    ),
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Okay'),
+                      onPressed: () {
+                        _job.jobOptions.copies = newCopies;
+                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
   Dialog _rangeDialog(BuildContext context, JoblistBloc joblistBloc) => Dialog(
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Form(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
-                TextField(
-                  controller: TextEditingController(text: _job.jobOptions.range),
-                  decoration: InputDecoration(labelText: 'z.B. "1,4-7,10"'),
-                  autofocus: true,
-                  autocorrect: false,
-                  onChanged: (String text) => newRange = text,
+                Text(
+                  'Seitenbereich einstellen',
+                  textScaleFactor: 1.2,
+                  textAlign: TextAlign.start,
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
-                MaterialButton(
-                  textColor: Colors.black87,
-                  child: Text('Okay'),
-                  onPressed: () {
-                    _job.jobOptions.range = newRange;
-                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                    Navigator.of(context).pop();
-                  },
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    TextField(
+                      controller: TextEditingController(text: _job.jobOptions.range),
+                      decoration: InputDecoration(labelText: 'z.B. "1,4-7,10"'),
+                      autofocus: true,
+                      autocorrect: false,
+                      onChanged: (String text) => newRange = text,
+                    ),
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Okay'),
+                      onPressed: () {
+                        _job.jobOptions.range = newRange;
+                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
