@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info/package_info.dart';
 
-import '../../token_store.dart';
+import '../../db_store.dart';
 import 'drawer_header.dart' as my;
 
 class MainDrawer extends StatelessWidget {
@@ -113,7 +113,7 @@ class MainDrawer extends StatelessWidget {
             trailing: Icon(Icons.exit_to_app),
             onTap: () async {
               authBloc.logout();
-              await TokenStore().clearTokens();
+              await DBStore().clearTokens();
               Navigator.of(context).popUntil(ModalRoute.withName('/'));
             },
           ),
