@@ -35,8 +35,7 @@ class _HeaderTileState extends State<HeaderTile> {
       builder: (BuildContext context, JoblistState state) {
         if (state.isResult) {
           _job = state.value.singleWhere((Job job) => job.id == _job.id);
-          return ListView(
-            shrinkWrap: true,
+          return Column(
             children: <Widget>[
               ListTile(
                 title: Text(
