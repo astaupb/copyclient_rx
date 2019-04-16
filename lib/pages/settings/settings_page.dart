@@ -24,6 +24,10 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () =>
                 Navigator.of(context).pushNamed('/settings/appearance'),
           ),
+          ListTile(
+            title: Text('Erweitert'),
+            onTap: () => Navigator.of(context).pushNamed('/settings/advanced'),
+          ),
           /*ListTile(
             title: Text('Angemeldete Geräte'),
             onTap: () => Navigator.of(context).pushNamed('/settings/security'),

@@ -14,9 +14,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
+import '../blocs/camera_bloc.dart';
 import '../models/backend_shiva.dart';
 import '../routes.dart';
-import '../token_store.dart';
+import '../db_store.dart';
 import 'login/login.dart';
 
 class RootPage extends StatefulWidget {
@@ -32,7 +33,7 @@ class _RootPageState extends State<RootPage> {
   static final http.Client client = http.Client();
   static final Backend backend = BackendShiva(client);
 
-  TokenStore store = TokenStore();
+  DBStore store = DBStore();
 
   AuthBloc authBloc = AuthBloc(backend: backend);
   JoblistBloc joblistBloc;
@@ -43,21 +44,11 @@ class _RootPageState extends State<RootPage> {
   PdfBloc pdfBloc;
   PrintQueueBloc printQueueBloc;
 
+  CameraBloc cameraBloc = CameraBloc();
+
   String _token;
 
   _RootPageState();
-
-  @override
-  void initState() {
-    _checkExistingToken();
-    super.initState();
-  }
-
-  void _checkExistingToken() async {
-    await store.openDb();
-    _token = store.currentToken;
-    if (_token != null) authBloc.tokenLogin(_token);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +81,8 @@ class _RootPageState extends State<RootPage> {
             printQueueBloc = PrintQueueBloc(backend);
             printQueueBloc.onStart(state.token);
 
+            cameraBloc.onStart();
+
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
               child: BlocProvider<UserBloc>(
@@ -104,18 +97,22 @@ class _RootPageState extends State<RootPage> {
                         bloc: pdfBloc,
                         child: BlocProvider<PrintQueueBloc>(
                           bloc: printQueueBloc,
-                          child: WillPopScope(
-                            onWillPop: () async => !await _onWillPop(),
-                            child: Navigator(
-                              key: widget.navigatorKey,
-                              initialRoute: '/',
-                              onGenerateRoute: (RouteSettings settings) {
-                                return MaterialPageRoute(
-                                  settings: settings,
-                                  maintainState: true,
-                                  builder: (context) => routes[settings.name](context),
-                                );
-                              },
+                          child: BlocProvider<CameraBloc>(
+                            bloc: cameraBloc,
+                            child: WillPopScope(
+                              onWillPop: () async => !await _onWillPop(),
+                              child: Navigator(
+                                key: widget.navigatorKey,
+                                initialRoute: '/',
+                                onGenerateRoute: (RouteSettings settings) {
+                                  return MaterialPageRoute(
+                                    settings: settings,
+                                    maintainState: true,
+                                    builder: (context) =>
+                                        routes[settings.name](context),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -129,14 +126,17 @@ class _RootPageState extends State<RootPage> {
             String snackText = 'Fehler: ${state.error}';
             int code = (state.error as ApiException).statusCode;
             if (code == 401) {
-              snackText = 'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
+              snackText =
+                  'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
             } else if (code == 400 || (code > 401 && code < 500)) {
               snackText =
                   'Fehler: Anfrage war fehlerhaft. Falls mehr Fehler auftreten bitte App neu starten';
             } else if (code >= 500 && code < 600) {
-              snackText = 'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
+              snackText =
+                  'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
             } else if (code == 0) {
-              snackText = 'Der Login dauert zu lange, bitte überprüfe deine Internetverbindung';
+              snackText =
+                  'Der Login dauert zu lange, bitte überprüfe deine Internetverbindung';
             }
             return LoginPage(
               authBloc: authBloc,
@@ -153,7 +153,9 @@ class _RootPageState extends State<RootPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     CircularProgressIndicator(),
-                    (state.isBusy) ? Text('Einloggen...') : Text('Lade Datenbanken...'),
+                    (state.isBusy)
+                        ? Text('Einloggen...')
+                        : Text('Lade Datenbanken...'),
                   ],
                 ),
               ),
@@ -162,7 +164,8 @@ class _RootPageState extends State<RootPage> {
             return LoginPage(
               authBloc: authBloc,
               startSnack: SnackBar(
-                content: Text('Registrierung erfolgreich, bitte logge dich nun ein'),
+                content:
+                    Text('Registrierung erfolgreich, bitte logge dich nun ein'),
                 duration: Duration(seconds: 3),
               ),
             );
@@ -171,6 +174,18 @@ class _RootPageState extends State<RootPage> {
         },
       ),
     );
+  }
+
+  @override
+  void initState() {
+    _checkExistingToken();
+    super.initState();
+  }
+
+  void _checkExistingToken() async {
+    await store.openDb();
+    _token = store.currentToken;
+    if (_token != null) authBloc.tokenLogin(_token);
   }
 
   Future<bool> _onWillPop() async {

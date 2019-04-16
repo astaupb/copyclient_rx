@@ -14,5 +14,7 @@ To start the app on your smartphone via USB or inside an emulator just `flutter 
 To build an Android or iOS App use `flutter build apk` or open the XCode workspace inside the ios folder to 'Archive' the app through XCode.
 
 A few resources to get you started if this is your first Flutter project:
- - [Flutter install guide](https://flutter.dev/docs/get-started/–install)
- - [Flutter API Docs](https://api.flutter.dev/)
+
+- [Flutter install guide](https://flutter.dev/docs/get-started/–install)
+
+- [Flutter API Docs](https://api.flutter.dev/)

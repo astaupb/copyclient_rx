@@ -33,96 +33,111 @@ class _HeaderTileState extends State<HeaderTile> {
     return BlocBuilder<JoblistEvent, JoblistState>(
       bloc: BlocProvider.of<JoblistBloc>(context),
       builder: (BuildContext context, JoblistState state) {
-        if (state.isResult) _job = state.value.singleWhere((Job job) => job.id == _job.id);
-        return Column(
-          children: <Widget>[
-            ListTile(
-              title: Text(
-                _job.jobInfo.filename,
-                textScaleFactor: 1.3,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+        if (state.isResult) {
+          _job = state.value.singleWhere((Job job) => job.id == _job.id);
+          return Column(
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  _job.jobInfo.filename,
+                  textScaleFactor: 1.3,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(DateTime.fromMillisecondsSinceEpoch(
+                            _job.timestamp * 1000)
+                        .toString()
+                        .split('.')[0]),
+                    (!Platform.isIOS)
+                        ? BlocBuilder<PdfEvent, PdfState>(
+                            bloc: BlocProvider.of<PdfBloc>(context),
+                            builder: (BuildContext context, PdfState state) {
+                              if (state.isResult || state.isInit) {
+                                Iterable idResults = state.value.where(
+                                    (PdfFile file) => file.id == _job.id);
+                                return Text(
+                                  (idResults.length == 1)
+                                      ? 'Heruntergeladen'
+                                      : 'Nicht heruntergeladen',
+                                );
+                              } else if (state.isBusy) {
+                                return Text('Am Herunterladen...');
+                              } else if (state.isException) {
+                                return Text(
+                                    'Fehler beim Download der PDF: ${state.error.toString()}');
+                              }
+                            },
+                          )
+                        : Container(width: 0.0, height: 0.0),
+                  ],
+                ),
+                trailing: HeartPin(_job.id),
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text(DateTime.fromMillisecondsSinceEpoch(_job.timestamp * 1000)
-                      .toString()
-                      .split('.')[0]),
-                  (!Platform.isIOS)
-                      ? BlocBuilder<PdfEvent, PdfState>(
-                          bloc: BlocProvider.of<PdfBloc>(context),
-                          builder: (BuildContext context, PdfState state) {
-                            if (state.isResult || state.isInit) {
-                              Iterable idResults = state.value.where((PdfFile file) => file.id == _job.id);
-                              return Text(
-                                (idResults.length == 1)
-                                    ? 'Heruntergeladen'
-                                    : 'Nicht heruntergeladen',
-                              );
-                            } else if (state.isBusy) {
-                              return Text('Am Herunterladen...');
-                            } else if (state.isException) {
-                              return Text(
-                                  'Fehler  beim Download der PDF: ${state.error.toString()}');
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      RaisedButton.icon(
+                        textColor: Colors.grey[100],
+                        label: Padding(
+                          padding: EdgeInsets.only(right: 16.0),
+                          child: Text(
+                              '${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
+                        ),
+                        icon: Padding(
+                          padding: EdgeInsets.only(left: 16.0),
+                          child: Icon(Icons.print),
+                        ),
+                        onPressed: () async {
+                          String target;
+                          try {
+                            target = await BarcodeScanner.scan();
+                            if (target != null) {
+                              BlocProvider.of<JoblistBloc>(context)
+                                  .onPrintById(target, _job.id);
+                              Navigator.of(context).pop();
                             }
-                          },
-                        )
-                      : Container(width: 0.0, height: 0.0),
-                ],
-              ),
-              trailing: HeartPin(_job.id),
-            ),
-            ListTile(
-              trailing: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  RaisedButton.icon(
-                    textColor: Colors.grey[100],
-                    label: Padding(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: Text('${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
-                    ),
-                    icon: Padding(
-                      padding: EdgeInsets.only(left: 16.0),
-                      child: Icon(Icons.print),
-                    ),
-                    onPressed: () async {
-                      String target;
-                      try {
-                        target = await BarcodeScanner.scan();
-                        if (target != null) {
-                          BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);
-                          Navigator.of(context).pop();
-                        }
-                      } catch (e) {
-                        print('MetaTile: $e');
-                        Scaffold.of(context).showSnackBar(
-                            SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
-                      }
-                    },
-                  ),
-                  BlocBuilder(
-                    bloc: userBloc,
-                    builder: (BuildContext context, UserState state) {
-                      if (state.isResult) {
-                        return Text(
-                          ((userBloc.user.credit - (_job.priceEstimation / 100.0)) > 0)
-                              ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
-                              : 'Fehlendes Guthaben: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(color: Colors.black54),
-                          textScaleFactor: 0.8,
-                        );
-                      }
-                      return Container(width: 0.0, height: 0.0);
-                    },
+                          } catch (e) {
+                            print('MetaTile: $e');
+                            Scaffold.of(context).showSnackBar(SnackBar(
+                                content:
+                                    Text('Es wurde kein Drucker ausgewählt')));
+                          }
+                        },
+                      ),
+                      BlocBuilder(
+                        bloc: userBloc,
+                        builder: (BuildContext context, UserState state) {
+                          if (state.isResult) {
+                            return Text(
+                              ((userBloc.user.credit -
+                                          (_job.priceEstimation / 100.0)) >
+                                      0)
+                                  ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
+                                  : 'Fehlendes Guthaben vmtl.: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(color: Colors.black54),
+                              textScaleFactor: 0.8,
+                            );
+                          }
+                          return Container(width: 0.0, height: 0.0);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ),
-          ],
-        );
+            ],
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
       },
     );
   }
