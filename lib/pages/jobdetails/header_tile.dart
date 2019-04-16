@@ -7,7 +7,9 @@ import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../blocs/camera_bloc.dart';
 import '../../widgets/heart_pin.dart';
+import '../../widgets/select_printer_dialog.dart';
 
 ///
 /// [ListTile] on [JobdetailsPage] that displays the price and title of a job
@@ -97,7 +99,17 @@ class _HeaderTileState extends State<HeaderTile> {
                         onPressed: () async {
                           String target;
                           try {
-                            target = await BarcodeScanner.scan();
+                            if (BlocProvider.of<CameraBloc>(context)
+                                .currentState
+                                .cameraDisabled) {
+                              target = await showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    selectPrinterDialog(context),
+                              );
+                            } else {
+                              target = await BarcodeScanner.scan();
+                            }
                             if (target != null) {
                               BlocProvider.of<JoblistBloc>(context)
                                   .onPrintById(target, _job.id);

@@ -14,11 +14,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../blocs/camera_bloc.dart';
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import '../jobdetails/jobdetails.dart';
 import 'joblist_deletion_modal.dart';
 import 'joblist_tile.dart';
+import '../../widgets/select_printer_dialog.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -64,7 +66,7 @@ class _JoblistPageState extends State<JoblistPage> {
           BlocProvider.of<AuthBloc>(context).logout();
           Navigator.pop(context);
         } else if (error.statusCode == 404) {
-          text = 'Der angeforderte Job existiert nicht mehr';
+          text = 'Der angeforderte Job oder Drucker existiert nicht';
         } else if (error.statusCode == 423) {
           text =
               'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
@@ -109,7 +111,17 @@ class _JoblistPageState extends State<JoblistPage> {
                             if (selectedIds.length > 0) {
                               String target;
                               try {
-                                target = await BarcodeScanner.scan();
+                                if (BlocProvider.of<CameraBloc>(context)
+                                    .currentState
+                                    .cameraDisabled) {
+                                  target = await showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        selectPrinterDialog(context),
+                                  );
+                                } else {
+                                  target = await BarcodeScanner.scan();
+                                }
                                 for (int id in selectedIds) {
                                   joblistBloc.onPrintById(target, id);
                                 }
@@ -173,6 +185,19 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                 ]
               : <Widget>[
+                  (BlocProvider.of<CameraBloc>(context)
+                          .currentState
+                          .cameraDisabled)
+                      ? IconButton(
+                          tooltip: 'Direktdrucker festlegen',
+                          icon: Icon(Icons.print),
+                          onPressed: () async => lockedPrinter =
+                              await showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      selectPrinterDialog(context)),
+                        )
+                      : Container(width: 0.0, height: 0.0),
                   MaterialButton(
                     child: BlocBuilder<UserEvent, UserState>(
                       bloc: BlocProvider.of<UserBloc>(context),
@@ -595,7 +620,14 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (lockedPrinter == null) {
       try {
         //target = "44332";
-        target = await BarcodeScanner.scan();
+        if (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled) {
+          target = await showDialog<String>(
+            context: context,
+            builder: (BuildContext context) => selectPrinterDialog(context),
+          );
+        } else {
+          target = await BarcodeScanner.scan();
+        }
       } catch (e) {
         setState(() => currentIndex = 0);
       }
@@ -611,7 +643,11 @@ Oben rechts kannst du neue Dokumente hochladen.
                 duration: Duration(seconds: 3),
                 content: Text(
                     'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.')));
-
+          else if ((state.error as ApiException).statusCode == 404) {
+            printQueueListener.cancel();
+            printerLockRefresher.cancel();
+            jobTimer.cancel();
+          }
           setState(() {
             currentIndex = 0;
             lockedPrinter = null;
@@ -710,7 +746,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   _onPressPrint(BuildContext context, List<Job> jobs, int index) async {
-    print(index);
     if (!selectableTiles) {
       String target;
       if (lockedPrinter != null) {
@@ -723,7 +758,16 @@ Oben rechts kannst du neue Dokumente hochladen.
         ));
       } else {
         try {
-          target = await BarcodeScanner.scan();
+          if (BlocProvider.of<CameraBloc>(context)
+              .currentState
+              .cameraDisabled) {
+            target = await showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => selectPrinterDialog(context),
+            );
+          } else {
+            target = await BarcodeScanner.scan();
+          }
           BlocProvider.of<JoblistBloc>(context).onPrintById(
               (lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
           Scaffold.of(context).showSnackBar(SnackBar(
