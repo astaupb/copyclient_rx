@@ -91,6 +91,9 @@ class DBStore {
               'CREATE TABLE Users(id INTEGER PRIMARY KEY, user_id INTEGER, token TEXT, credit INTEGER)');
           await db.execute(
               'CREATE TABLE Settings(id INTEGER PRIMARY KEY, mapKey TEXT, mapValue TEXT)');
+          await db.execute(
+              'INSERT INTO Settings(mapKey,mapValue) VALUES("camera_disabled","false")');
+
           _log.info(
               'created new Users and Settings table because it didnt exist yet');
         },
