@@ -71,15 +71,14 @@ class _JoblistPageState extends State<JoblistPage> {
           text =
               'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
         } else if (error.statusCode >= 500) {
-          text =
-              'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
+          text = 'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
         } else {
           text = error.toString();
         }
         currentIndex = 0;
         if (newException)
-          Scaffold.of(_scaffoldContext).showSnackBar(
-              SnackBar(duration: Duration(seconds: 3), content: Text(text)));
+          Scaffold.of(_scaffoldContext)
+              .showSnackBar(SnackBar(duration: Duration(seconds: 3), content: Text(text)));
         newException = false;
       } else if (state.isResult) {
         newException = true;
@@ -97,10 +96,10 @@ class _JoblistPageState extends State<JoblistPage> {
                           tooltip: 'Ausgewählte löschen',
                           icon: Icon(Icons.delete),
                           onPressed: () => showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  JoblistDeletionModal(selectedIds)).then(
-                              (val) => setState(() => selectableTiles = false)),
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      JoblistDeletionModal(selectedIds))
+                              .then((val) => setState(() => selectableTiles = false)),
                         ),
                   ),
                   Builder(
@@ -116,8 +115,7 @@ class _JoblistPageState extends State<JoblistPage> {
                                     .cameraDisabled) {
                                   target = await showDialog<String>(
                                     context: context,
-                                    builder: (BuildContext context) =>
-                                        selectPrinterDialog(context),
+                                    builder: (BuildContext context) => selectPrinterDialog(context),
                                   );
                                 } else {
                                   target = await BarcodeScanner.scan();
@@ -126,8 +124,7 @@ class _JoblistPageState extends State<JoblistPage> {
                                   joblistBloc.onPrintById(target, id);
                                 }
                                 Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Ausgewählte Jobs wurden abgeschickt'),
+                                  content: Text('Ausgewählte Jobs wurden abgeschickt'),
                                   duration: Duration(seconds: 1),
                                 ));
                                 selectedIds.clear();
@@ -149,29 +146,26 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                   BlocBuilder<JoblistEvent, JoblistState>(
                     bloc: joblistBloc,
-                    builder: (BuildContext context, JoblistState state) =>
-                        (state.isResult)
-                            ? IconButton(
-                                tooltip: 'Alle auswählen',
-                                icon: Icon(Icons.select_all),
-                                onPressed: () {
-                                  if (state.value.length ==
-                                      selectedIds.length) {
-                                    setState(() => selectedIds.clear());
-                                  } else {
-                                    List<int> allIds = [];
-                                    for (Job job in state.value)
-                                      allIds.add(job.id);
-                                    selectedIds.clear();
-                                    setState(() => selectedIds.addAll(allIds));
-                                  }
-                                },
-                              )
-                            : IconButton(
-                                tooltip: 'Alle auswählen',
-                                icon: Icon(Icons.select_all),
-                                onPressed: () => null,
-                              ),
+                    builder: (BuildContext context, JoblistState state) => (state.isResult)
+                        ? IconButton(
+                            tooltip: 'Alle auswählen',
+                            icon: Icon(Icons.select_all),
+                            onPressed: () {
+                              if (state.value.length == selectedIds.length) {
+                                setState(() => selectedIds.clear());
+                              } else {
+                                List<int> allIds = [];
+                                for (Job job in state.value) allIds.add(job.id);
+                                selectedIds.clear();
+                                setState(() => selectedIds.addAll(allIds));
+                              }
+                            },
+                          )
+                        : IconButton(
+                            tooltip: 'Alle auswählen',
+                            icon: Icon(Icons.select_all),
+                            onPressed: () => null,
+                          ),
                   ),
                   IconButton(
                     tooltip: 'Mehrfachauswahl beenden',
@@ -185,17 +179,13 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                 ]
               : <Widget>[
-                  (BlocProvider.of<CameraBloc>(context)
-                          .currentState
-                          .cameraDisabled)
+                  (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled)
                       ? IconButton(
                           tooltip: 'Direktdrucker festlegen',
                           icon: Icon(Icons.print),
-                          onPressed: () async => lockedPrinter =
-                              await showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      selectPrinterDialog(context)),
+                          onPressed: () async => lockedPrinter = await showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => selectPrinterDialog(context)),
                         )
                       : Container(width: 0.0, height: 0.0),
                   MaterialButton(
@@ -210,15 +200,13 @@ class _JoblistPageState extends State<JoblistPage> {
                           children: <Widget>[
                             Text('Guthaben:', textScaleFactor: 0.8),
                             (state.isResult)
-                                ? Text(
-                                    '${((lastCredit) / 100.0).toStringAsFixed(2)} €')
+                                ? Text('${((lastCredit) / 100.0).toStringAsFixed(2)} €')
                                 : Text('Laden...'),
                           ],
                         );
                       },
                     ),
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed('/transactions'),
+                    onPressed: () => Navigator.of(context).pushNamed('/transactions'),
                   ),
                   IconButton(
                     tooltip: 'Mehrfachauswahl aktivieren',
@@ -255,7 +243,6 @@ Oben rechts kannst du neue Dokumente hochladen.
                 } else {
                   final reverseList = state.value.reversed.toList();
                   return ListView.builder(
-                    shrinkWrap: true,
                     itemExtent: 72.0,
                     itemCount: reverseList.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -265,15 +252,13 @@ Oben rechts kannst du neue Dokumente hochladen.
                             Dismissible(
                               key: Key(reverseList[index].id.toString()),
                               onDismissed: (DismissDirection direction) =>
-                                  _onTileDismissed(
-                                      context, reverseList[index].id),
+                                  _onTileDismissed(context, reverseList[index].id),
                               background: _dismissableBackground(),
                               confirmDismiss: (DismissDirection direction) =>
                                   _onConfirmDismiss(context, direction),
                               child: Container(
                                 color: (selectableTiles)
-                                    ? (selectedIds
-                                            .contains(reverseList[index].id))
+                                    ? (selectedIds.contains(reverseList[index].id))
                                         ? Colors.black12
                                         : null
                                     : null,
@@ -283,17 +268,12 @@ Oben rechts kannst du neue Dokumente hochladen.
                                     context,
                                     index,
                                     reverseList[index],
-                                    onPress: (int index) =>
-                                        _onPressed(context, reverseList[index]),
-                                    onLongTap: (int index) => _onLongTapped(
-                                        context,
-                                        reverseList[index].id,
-                                        reverseList[index].jobOptions),
+                                    onPress: (int index) => _onPressed(context, reverseList[index]),
+                                    onLongTap: (int index) => _onLongTapped(context,
+                                        reverseList[index].id, reverseList[index].jobOptions),
                                     directPrinter: lockedPrinter,
-                                    chosen: selectedIds
-                                        .contains(reverseList[index].id),
-                                    onPressPrint: () => _onPressPrint(
-                                        context, reverseList, index),
+                                    chosen: selectedIds.contains(reverseList[index].id),
+                                    onPressPrint: () => _onPressPrint(context, reverseList, index),
                                   ),
                                 ),
                               ),
@@ -318,21 +298,22 @@ Oben rechts kannst du neue Dokumente hochladen.
         ),
         bottomNavigationBar: Builder(
           builder: (BuildContext context) => BubbleBottomBar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 opacity: .2,
                 currentIndex: currentIndex,
                 onTap: (int index) => _changePage(context, index),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                elevation: 8,
+                elevation: 16,
                 items: <BubbleBottomBarItem>[
                   BubbleBottomBarItem(
                     backgroundColor: Colors.red,
                     icon: Icon(
                       Icons.cancel,
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.title.color,
                     ),
                     activeIcon: Icon(
                       Icons.list,
-                      color: Colors.red,
+                      color: Colors.redAccent,
                     ),
                     title: Text("Liste"),
                   ),
@@ -343,17 +324,17 @@ Oben rechts kannst du neue Dokumente hochladen.
                         Icon(
                           Icons.scanner,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                         Icon(
                           Icons.arrow_drop_down,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                         Icon(
                           Icons.picture_as_pdf,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                       ],
                     ),
@@ -361,16 +342,16 @@ Oben rechts kannst du neue Dokumente hochladen.
                       children: <Widget>[
                         Icon(
                           Icons.scanner,
-                          color: Colors.black,
+                          color: Colors.deepPurpleAccent,
                         ),
                         Icon(
                           Icons.arrow_forward,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Colors.deepPurpleAccent,
                         ),
                         Icon(
                           Icons.picture_as_pdf,
-                          color: Colors.black,
+                          color: Colors.deepPurpleAccent,
                         ),
                       ],
                     ),
@@ -378,8 +359,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Text("Scanner"),
-                        Text(
-                            'Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
                             textScaleFactor: 0.7),
                       ],
                     ),
@@ -391,17 +371,17 @@ Oben rechts kannst du neue Dokumente hochladen.
                         Icon(
                           Icons.scanner,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                         Icon(
                           Icons.arrow_drop_down,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                         Icon(
                           Icons.print,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.title.color,
                         ),
                       ],
                     ),
@@ -409,16 +389,16 @@ Oben rechts kannst du neue Dokumente hochladen.
                       children: <Widget>[
                         Icon(
                           Icons.scanner,
-                          color: Colors.black,
+                          color: Colors.indigoAccent,
                         ),
                         Icon(
                           Icons.arrow_forward,
                           size: 16.0,
-                          color: Colors.black,
+                          color: Colors.indigoAccent,
                         ),
                         Icon(
                           Icons.print,
-                          color: Colors.black,
+                          color: Colors.indigoAccent,
                         ),
                       ],
                     ),
@@ -426,8 +406,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Text("Kopierer"),
-                        Text(
-                            'Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
                             textScaleFactor: 0.7),
                       ],
                     ),
@@ -561,8 +540,7 @@ Oben rechts kannst du neue Dokumente hochladen.
           (JoblistState state) {
             if (state.isResult) {
               for (Job job in state.value.where((Job job) =>
-                  ((job.timestamp * 1000) >
-                      copyStartTime.millisecondsSinceEpoch) &&
+                  ((job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch) &&
                   !copiedJobIds.contains(job.id))) {
                 joblistBloc.onPrintById(lockedPrinter, job.id);
                 copyStartTime = DateTime.now();
@@ -602,16 +580,16 @@ Oben rechts kannst du neue Dokumente hochladen.
         padding: EdgeInsets.all(20.0),
       );
 
-  Future<String> _getFilePath() async {
-    String filePath;
+  Future<Map<String, String>> _getFilePath() async {
+    Map<String, String> filePaths;
     try {
-      filePath = await FilePicker.getFilePath(
-          type: FileType.CUSTOM, fileExtension: 'pdf');
-      if (filePath != '') return filePath;
+      filePaths = await FilePicker.getMultiFilePath(type: FileType.CUSTOM, fileExtension: 'pdf');
+      print(filePaths.toString());
+      if (filePaths != null && filePaths.isNotEmpty) return filePaths;
     } catch (e) {
       print("Error while picking the file: " + e.toString());
     }
-    return '';
+    return {};
   }
 
   void _lockPrinter() async {
@@ -685,8 +663,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     }
   }
 
-  Future<bool> _onConfirmDismiss(
-      BuildContext context, DismissDirection diection) async {
+  Future<bool> _onConfirmDismiss(BuildContext context, DismissDirection diection) async {
     bool keepJob = false;
     SnackBar snack = SnackBar(
       duration: Duration(seconds: 1),
@@ -703,8 +680,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       ),
     );
 
-    ScaffoldFeatureController snackController =
-        Scaffold.of(context).showSnackBar(snack);
+    ScaffoldFeatureController snackController = Scaffold.of(context).showSnackBar(snack);
 
     if (keepJob) snackController.close();
 
@@ -721,9 +697,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     Scaffold.of(context).showSnackBar(
       SnackBar(
         duration: Duration(seconds: 1),
-        content: Text((newOptions.keep)
-            ? 'Job wird behalten'
-            : 'Job wird nicht mehr behalten'),
+        content: Text((newOptions.keep) ? 'Job wird behalten' : 'Job wird nicht mehr behalten'),
       ),
     );
   }
@@ -750,17 +724,15 @@ Oben rechts kannst du neue Dokumente hochladen.
       String target;
       if (lockedPrinter != null) {
         target = lockedPrinter;
-        BlocProvider.of<JoblistBloc>(context).onPrintById(
-            (lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+        BlocProvider.of<JoblistBloc>(context)
+            .onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
         Scaffold.of(context).showSnackBar(SnackBar(
           content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
           duration: Duration(seconds: 1),
         ));
       } else {
         try {
-          if (BlocProvider.of<CameraBloc>(context)
-              .currentState
-              .cameraDisabled) {
+          if (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled) {
             target = await showDialog<String>(
               context: context,
               builder: (BuildContext context) => selectPrinterDialog(context),
@@ -768,8 +740,8 @@ Oben rechts kannst du neue Dokumente hochladen.
           } else {
             target = await BarcodeScanner.scan();
           }
-          BlocProvider.of<JoblistBloc>(context).onPrintById(
-              (lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+          BlocProvider.of<JoblistBloc>(context)
+              .onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
           Scaffold.of(context).showSnackBar(SnackBar(
             content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
             duration: Duration(seconds: 1),
@@ -807,9 +779,12 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   void _onSelectedUpload() async {
     UploadBloc uploadBloc = BlocProvider.of<UploadBloc>(context);
-    String filePath = await _getFilePath();
-    uploadBloc.onUpload(File(filePath).readAsBytesSync(),
-        filename: filePath.split('/').last);
+    await _getFilePath().then(
+      (Map<String, String> paths) => paths.forEach(
+            (String filename, String path) =>
+                uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename),
+          ),
+    );
   }
 
   void _onTileDismissed(BuildContext context, int id) async {
