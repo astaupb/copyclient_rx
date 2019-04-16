@@ -12,10 +12,14 @@
 	<false/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Used for scheduling or importing events</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Used to play music from Apple Music</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Used for getting user motion</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>de</string>
 	<key>CFBundleVersion</key>
-	<string>40</string>
+	<string>42</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Used if user wants to upload a photo directly from camera</string>
 	<key>CFBundlePackageType</key>
@@ -23,7 +27,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleExecutable</key>
@@ -51,16 +55,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Used to choose file to upload from the media library</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Used to play music from Apple Music</string>
-	<key>NSMotionUsageDescription</key>
-	<string>Used for getting user motion</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Used for speech to text</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Used if app needs  the location all the time</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to choose file to upload from the media library</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Used for speech to text</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Used when location is temporarily needed</string>
 </dict>
