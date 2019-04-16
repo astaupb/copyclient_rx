@@ -9,16 +9,13 @@ class AppearanceSettingsPage extends StatefulWidget {
 }
 
 class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
-  bool _darkThemeEnabled = false;
   ThemeBloc themeBloc;
 
-  void _toggleDarkTheme() {
-    if (_darkThemeEnabled) {
+  void _changeTheme(bool dark) {
+    if (!dark) {
       themeBloc.dispatch(ActivateDefaultTheme());
-      setState(() => _darkThemeEnabled = false);
     } else {
       themeBloc.dispatch(ActivateDarkTheme());
-      setState(() => _darkThemeEnabled = true);
     }
   }
 
@@ -31,15 +28,26 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
       ),
       body: ListView(
         children: <Widget>[
-          ListTile(
-            title: Text('Dunkles Theme'),
-            trailing: Switch(
-              onChanged: (bool value) => _toggleDarkTheme(),
-              value: _darkThemeEnabled,
-            ),
-            onTap: () => _toggleDarkTheme(),
+          BlocBuilder<ThemeEvent, ThemeState>(
+            bloc: themeBloc,
+            builder: (BuildContext context, ThemeState state) {
+              return ListTile(
+                title: Text('Dunkles Theme'),
+                onTap: () => _changeTheme(
+                      (state.theme.brightness == Brightness.dark)
+                          ? false
+                          : true,
+                    ),
+                trailing: Switch(
+                  onChanged: (bool value) => _changeTheme(value),
+                  value: (state.theme.brightness == Brightness.dark)
+                      ? true
+                      : false,
+                ),
+              );
+            },
           ),
-        ].expand((Widget tile) => [tile, Divider(height: 0.0)]).toList(),
+        ],
       ),
     );
   }

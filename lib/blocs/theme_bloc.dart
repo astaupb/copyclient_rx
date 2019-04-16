@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
+import '../db_store.dart';
+
 final ThemeData copyshopTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.pink,
@@ -28,6 +30,17 @@ final ThemeData copyshopTheme = ThemeData(
   ),
 );
 
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.teal[800],
+    disabledColor: Colors.teal[200],
+    colorScheme: ColorScheme.dark(),
+    shape: StadiumBorder(),
+    minWidth: 16.0,
+  ),
+);
+
 class ActivateDarkTheme extends ThemeEvent {}
 
 class ActivateDefaultTheme extends ThemeEvent {}
@@ -41,6 +54,8 @@ class ChangeTheme extends ThemeEvent {
 }
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
+  DBStore dbStore = DBStore();
+
   @override
   get initialState => ThemeState.copyshopTheme();
 
@@ -50,13 +65,33 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       yield ThemeState.custom(event.newTheme);
     }
     if (event is ActivateDarkTheme) {
+      dbStore.insertSetting(MapEntry('theme', 'dark'));
       yield ThemeState.darkTheme();
     }
     if (event is ActivateLightTheme) {
+      dbStore.insertSetting(MapEntry('theme', 'light'));
       yield ThemeState.lightTheme();
     }
     if (event is ActivateDefaultTheme) {
+      dbStore.insertSetting(MapEntry('theme', 'copyshop'));
       yield ThemeState.copyshopTheme();
+    }
+  }
+
+  void onSetCopyshopTheme() => dispatch(ActivateDefaultTheme());
+
+  void onSetDarkTheme() => dispatch(ActivateDarkTheme());
+
+  void onSetLightTheme() => dispatch(ActivateLightTheme());
+
+  void onStart() {
+    String theme = dbStore.settings['theme'];
+    if (theme == 'copyshop') {
+      onSetCopyshopTheme();
+    } else if (theme == 'dark') {
+      onSetDarkTheme();
+    } else if (theme == 'light') {
+      onSetLightTheme();
     }
   }
 }
@@ -72,7 +107,7 @@ class ThemeState {
 
   factory ThemeState.custom(ThemeData theme) => ThemeState(theme);
 
-  factory ThemeState.darkTheme() => ThemeState(ThemeData.dark());
+  factory ThemeState.darkTheme() => ThemeState(darkTheme);
 
   factory ThemeState.lightTheme() => ThemeState(ThemeData.light());
 

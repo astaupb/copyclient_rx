@@ -37,7 +37,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   void onDisable() => dispatch(DisableCamera());
 
   void onStart() async {
-    if (await _dbStore.getSetting('camera_disabled') == 'true')
+    if (_dbStore.settings['camera_disabled'] == 'true')
       onDisable();
     else
       onEnable();

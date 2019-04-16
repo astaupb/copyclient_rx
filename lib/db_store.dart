@@ -12,7 +12,7 @@ class DBStore {
   Database _db;
   String _currentToken;
 
-  Map<String, String> _settings;
+  Map<String, String> _settings = {};
 
   factory DBStore() => _instance;
   DBStore.internal();
@@ -39,9 +39,9 @@ class DBStore {
     }
   }
 
-  Future<String> getSetting(String key) async {
+  Future<String> getSetting(Database db, String key) async {
     _log.info('getting setting $key from database');
-    return await _db.transaction((txn) async {
+    return await db.transaction((txn) async {
       var batch = txn.batch();
       batch.rawQuery('SELECT mapValue FROM Settings WHERE mapKey = "$key"');
       List<dynamic> results = await batch.commit();
@@ -91,14 +91,24 @@ class DBStore {
               'CREATE TABLE Users(id INTEGER PRIMARY KEY, user_id INTEGER, token TEXT, credit INTEGER)');
           await db.execute(
               'CREATE TABLE Settings(id INTEGER PRIMARY KEY, mapKey TEXT, mapValue TEXT)');
+
           await db.execute(
               'INSERT INTO Settings(mapKey,mapValue) VALUES("camera_disabled","false")');
+          await db.execute(
+              'INSERT INTO Settings(mapKey,mapValue) VALUES("theme","copyshop")');
 
           _log.info(
               'created new Users and Settings table because it didnt exist yet');
         },
         onOpen: (Database db) async {
+          _db = db;
           _currentToken = await getCurrentToken(db);
+          _settings.addAll(
+            {
+              'theme': await getSetting(db, 'theme'),
+              'camera_disabled': await getSetting(db, 'camera_disabled'),
+            },
+          );
           _log.fine('currentToken: $currentToken');
         },
       );

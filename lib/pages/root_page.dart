@@ -15,9 +15,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 import '../blocs/camera_bloc.dart';
+import '../blocs/theme_bloc.dart';
+import '../db_store.dart';
 import '../models/backend_shiva.dart';
 import '../routes.dart';
-import '../db_store.dart';
 import 'login/login.dart';
 
 class RootPage extends StatefulWidget {
@@ -60,28 +61,13 @@ class _RootPageState extends State<RootPage> {
           if (state.isAuthorized) {
             if (state.persistent) store.insertToken(state.token);
             // AUTHORIZED AND READY TO HUSTLE
-            joblistBloc = JoblistBloc(backend);
             joblistBloc.onStart(state.token);
-
-            userBloc = UserBloc(backend);
             userBloc.onStart(state.token);
-
-            uploadBloc = UploadBloc(backend);
             uploadBloc.onStart(state.token);
-
-            journalBloc = JournalBloc(backend);
             journalBloc.onStart(state.token);
-
-            previewBloc = PreviewBloc(backend);
             previewBloc.onStart(state.token);
-
-            pdfBloc = PdfBloc(backend);
             pdfBloc.onStart(state.token);
-
-            printQueueBloc = PrintQueueBloc(backend);
             printQueueBloc.onStart(state.token);
-
-            cameraBloc.onStart();
 
             return BlocProvider<JoblistBloc>(
               bloc: joblistBloc,
@@ -178,6 +164,13 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
+    joblistBloc = JoblistBloc(backend);
+    userBloc = UserBloc(backend);
+    uploadBloc = UploadBloc(backend);
+    journalBloc = JournalBloc(backend);
+    previewBloc = PreviewBloc(backend);
+    pdfBloc = PdfBloc(backend);
+    printQueueBloc = PrintQueueBloc(backend);
     _checkExistingToken();
     super.initState();
   }
@@ -186,6 +179,8 @@ class _RootPageState extends State<RootPage> {
     await store.openDb();
     _token = store.currentToken;
     if (_token != null) authBloc.tokenLogin(_token);
+    cameraBloc.onStart();
+    BlocProvider.of<ThemeBloc>(context).onStart();
   }
 
   Future<bool> _onWillPop() async {
