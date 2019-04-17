@@ -29,6 +29,10 @@ class JoblistPage extends StatefulWidget {
 
 class _JoblistPageState extends State<JoblistPage> {
   PrintQueueBloc printQueueBloc;
+  JoblistBloc joblistBloc;
+  UploadBloc uploadBloc;
+  CameraBloc cameraBloc;
+  UserBloc userBloc;
 
   Timer printerLockRefresher;
   Timer jobTimer;
@@ -56,7 +60,6 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   Widget build(BuildContext context) {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     jobListener = joblistBloc.state.listen((JoblistState state) {
       if (state.isException) {
         joblistBloc.onRefresh();
@@ -110,9 +113,7 @@ class _JoblistPageState extends State<JoblistPage> {
                             if (selectedIds.length > 0) {
                               String target;
                               try {
-                                if (BlocProvider.of<CameraBloc>(context)
-                                    .currentState
-                                    .cameraDisabled) {
+                                if (cameraBloc.currentState.cameraDisabled) {
                                   target = await showDialog<String>(
                                     context: context,
                                     builder: (BuildContext context) => selectPrinterDialog(context),
@@ -179,7 +180,7 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                 ]
               : <Widget>[
-                  (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled)
+                  (cameraBloc.currentState.cameraDisabled)
                       ? IconButton(
                           tooltip: 'Direktdrucker festlegen',
                           icon: Icon(Icons.print),
@@ -190,7 +191,7 @@ class _JoblistPageState extends State<JoblistPage> {
                       : Container(width: 0.0, height: 0.0),
                   MaterialButton(
                     child: BlocBuilder<UserEvent, UserState>(
-                      bloc: BlocProvider.of<UserBloc>(context),
+                      bloc: userBloc,
                       builder: (BuildContext context, UserState state) {
                         if (state.isResult) {
                           lastCredit = state.value.credit;
@@ -444,6 +445,11 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   @override
   void initState() {
+    joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
+    uploadBloc = BlocProvider.of<UploadBloc>(context);
+    cameraBloc = BlocProvider.of<CameraBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
     currentIndex = 0;
     _cancelTimers();
     super.initState();
@@ -533,7 +539,6 @@ Oben rechts kannst du neue Dokumente hochladen.
             ),
       );
       if (dialogResult == 0) {
-        JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
         _lockPrinter();
         copyStartTime = DateTime.now();
         copyListener = joblistBloc.state.listen(
@@ -593,12 +598,11 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _lockPrinter() async {
-    printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
     String target;
     if (lockedPrinter == null) {
       try {
         //target = "44332";
-        if (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled) {
+        if (cameraBloc.currentState.cameraDisabled) {
           target = await showDialog<String>(
             context: context,
             builder: (BuildContext context) => selectPrinterDialog(context),
@@ -656,8 +660,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       );
 
       if (jobTimer != null) jobTimer.cancel();
-      jobTimer = Timer.periodic(const Duration(seconds: 3),
-          (Timer t) => BlocProvider.of<JoblistBloc>(context).onRefresh());
+      jobTimer = Timer.periodic(const Duration(seconds: 3), (Timer t) => joblistBloc.onRefresh());
     } else {
       setState(() => currentIndex = 0);
     }
@@ -688,7 +691,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _onLongTapped(BuildContext context, int id, JobOptions options) {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     JobOptions newOptions = options;
 
     newOptions.keep = !newOptions.keep;
@@ -724,15 +726,14 @@ Oben rechts kannst du neue Dokumente hochladen.
       String target;
       if (lockedPrinter != null) {
         target = lockedPrinter;
-        BlocProvider.of<JoblistBloc>(context)
-            .onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+        joblistBloc.onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
         Scaffold.of(context).showSnackBar(SnackBar(
           content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
           duration: Duration(seconds: 1),
         ));
       } else {
         try {
-          if (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled) {
+          if (cameraBloc.currentState.cameraDisabled) {
             target = await showDialog<String>(
               context: context,
               builder: (BuildContext context) => selectPrinterDialog(context),
@@ -740,8 +741,7 @@ Oben rechts kannst du neue Dokumente hochladen.
           } else {
             target = await BarcodeScanner.scan();
           }
-          BlocProvider.of<JoblistBloc>(context)
-              .onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+          joblistBloc.onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
           Scaffold.of(context).showSnackBar(SnackBar(
             content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
             duration: Duration(seconds: 1),
@@ -764,8 +764,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   Future<void> _onRefresh() async {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
-    UserBloc userBloc = BlocProvider.of<UserBloc>(context);
     var listener;
     listener = joblistBloc.state.listen((JoblistState state) {
       if (state.isResult) {
@@ -778,7 +776,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _onSelectedUpload() async {
-    UploadBloc uploadBloc = BlocProvider.of<UploadBloc>(context);
     await _getFilePath().then(
       (Map<String, String> paths) => paths.forEach(
             (String filename, String path) =>
@@ -788,7 +785,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _onTileDismissed(BuildContext context, int id) async {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     joblistBloc.onDeleteById(id);
   }
 
