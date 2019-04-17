@@ -496,6 +496,8 @@ Oben rechts kannst du neue Dokumente hochladen.
       },
     );
 
+    uploadBloc.onRefresh();
+
     currentIndex = 0;
     _cancelTimers();
     super.initState();
@@ -819,6 +821,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       }
     });
     userBloc.onRefresh();
+    uploadBloc.onRefresh();
     joblistBloc.onRefresh();
   }
 
