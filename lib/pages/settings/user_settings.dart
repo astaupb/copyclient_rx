@@ -28,37 +28,82 @@ class UserSettingsPage extends StatelessWidget {
               Card(
                 margin: EdgeInsets.all(24.0),
                 color: Colors.grey[700],
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(40.0, 24.0, 40.0, 24.0),
-                  child: BlocBuilder<UserEvent, UserState>(
-                    bloc: userBloc,
-                    builder: (BuildContext context, UserState state) {
-                      if (state.isResult) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            Text(
-                              state.value?.name,
-                              textScaleFactor: 1.5,
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(40.0, 24.0, 40.0, 24.0),
+                      child: BlocBuilder<UserEvent, UserState>(
+                        bloc: userBloc,
+                        builder: (BuildContext context, UserState state) {
+                          if (state.isResult) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: <Widget>[
+                                Text(
+                                  state.value?.name,
+                                  textScaleFactor: 1.5,
+                                  style:
+                                      TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                ),
+                                Divider(),
+                                Text(
+                                  '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
+                                  textScaleFactor: 1.3,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                      ),
+                    ),
+                    BlocBuilder<UserEvent, UserState>(
+                      bloc: userBloc,
+                      builder: (BuildContext context, UserState state) {
+                        if (state.isResult)
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 8.0, right: 8.0),
+                            child: Text(
+                              state.value.userId.toString(),
+                              textAlign: TextAlign.right,
+                              style: TextStyle(color: Color(0xE6FFFFFF)),
                             ),
-                            Divider(),
-                            Text(
-                              '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
-                              textScaleFactor: 1.3,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
+                          );
+                        else
+                          Container(width: 0.0, height: 0.0);
+                      },
+                    ),
+                  ],
                 ),
               ),
               Spacer(),
-              Divider(),
+              BlocBuilder<UserEvent, UserState>(
+                bloc: userBloc,
+                builder: (BuildContext context, UserState state) {
+                  if (state.isResult) {
+                    if (state.value.card != null)
+                      return Padding(
+                        padding: EdgeInsets.only(right: 24.0),
+                        child: Column(
+                          children: <Widget>[
+                            Icon(
+                              Icons.credit_card,
+                              size: 48.0,
+                            ),
+                            Text('${state.value.card}', textScaleFactor: 1.2),
+                            Text('${state.value.pin}', textScaleFactor: 1.2),
+                          ],
+                        ),
+                      );
+                    else
+                      return Container(width: 0.0, height: 0.0);
+                  }
+                },
+              ),
+              //(state.value.card != null) ? Spacer() : Container(width: 0.0, height: 0.0),
             ],
           ),
           ListTile(
