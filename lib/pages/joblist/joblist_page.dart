@@ -35,6 +35,8 @@ class _JoblistPageState extends State<JoblistPage> {
   UserBloc userBloc;
 
   StreamSubscription uploadListener;
+  Timer uploadTimer;
+  int uploadCount = 0;
 
   Timer printerLockRefresher;
   Timer jobTimer;
@@ -483,10 +485,12 @@ Oben rechts kannst du neue Dokumente hochladen.
     uploadListener = uploadBloc.state.skip(2).listen(
       (UploadState state) {
         if (state.isResult) {
-          if (state.value.length > 0) {
-            Future.delayed(const Duration(seconds: 3)).then((_) => uploadBloc.onRefresh());
-          } else {
-            Future.delayed(const Duration(seconds: 1)).then((_) => joblistBloc.onRefresh());
+          if (state.value.length < uploadCount) {
+            joblistBloc.onRefresh();
+          }
+          uploadCount = state.value.length;
+          if (state.value.length == 0) {
+            if (uploadTimer != null) uploadTimer.cancel();
           }
         }
       },
@@ -500,6 +504,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _cancelTimers() {
     if (printerLockRefresher != null) printerLockRefresher.cancel();
     if (jobTimer != null) jobTimer.cancel();
+    if (uploadTimer != null) uploadTimer.cancel();
   }
 
   void _changePage(BuildContext context, int index) async {
@@ -824,6 +829,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                 uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename),
           ),
     );
+    uploadTimer = Timer.periodic(const Duration(seconds: 3), (_) => uploadBloc.onRefresh());
   }
 
   void _onTileDismissed(BuildContext context, int id) async {
