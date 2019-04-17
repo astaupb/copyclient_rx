@@ -34,6 +34,8 @@ class _JoblistPageState extends State<JoblistPage> {
   CameraBloc cameraBloc;
   UserBloc userBloc;
 
+  StreamSubscription uploadListener;
+
   Timer printerLockRefresher;
   Timer jobTimer;
   StreamSubscription jobListener;
@@ -243,45 +245,70 @@ Oben rechts kannst du neue Dokumente hochladen.
                   );
                 } else {
                   final reverseList = state.value.reversed.toList();
-                  return ListView.builder(
-                    itemExtent: 72.0,
-                    itemCount: reverseList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (reverseList[index] != null)
-                        return Column(
-                          children: <Widget>[
-                            Dismissible(
-                              key: Key(reverseList[index].id.toString()),
-                              onDismissed: (DismissDirection direction) =>
-                                  _onTileDismissed(context, reverseList[index].id),
-                              background: _dismissableBackground(),
-                              confirmDismiss: (DismissDirection direction) =>
-                                  _onConfirmDismiss(context, direction),
-                              child: Container(
-                                color: (selectableTiles)
-                                    ? (selectedIds.contains(reverseList[index].id))
-                                        ? Colors.black12
-                                        : null
-                                    : null,
-                                child: ListTileTheme(
-                                  selectedColor: Colors.black,
-                                  child: JoblistTile(
-                                    context,
-                                    index,
-                                    reverseList[index],
-                                    onPress: (int index) => _onPressed(context, reverseList[index]),
-                                    onLongTap: (int index) => _onLongTapped(context,
-                                        reverseList[index].id, reverseList[index].jobOptions),
-                                    directPrinter: lockedPrinter,
-                                    chosen: selectedIds.contains(reverseList[index].id),
-                                    onPressPrint: () => _onPressPrint(context, reverseList, index),
-                                  ),
+                  return BlocBuilder(
+                    bloc: uploadBloc,
+                    builder: (BuildContext context, UploadState state) {
+                      List<DispatcherTask> uploadList;
+                      if (state.isResult) uploadList = state.value;
+                      return ListView.builder(
+                        itemExtent: 72.0,
+                        itemCount: reverseList.length + uploadList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index < uploadList.length) {
+                            return Column(
+                              children: <Widget>[
+                                ListTile(
+                                  title: Text('${uploadList[index].filename}'),
+                                  subtitle: Text((uploadList[index].isUploading)
+                                      ? 'Am Hochladen...'
+                                      : 'Dokument am Verarbeiten...'),
+                                  trailing: CircularProgressIndicator(),
                                 ),
-                              ),
-                            ),
-                            Divider(height: 0.0),
-                          ],
-                        );
+                                Divider(height: 0.0),
+                              ],
+                            );
+                          } else {
+                            index -= uploadList.length;
+                            if (reverseList[index] != null)
+                              return Column(
+                                children: <Widget>[
+                                  Dismissible(
+                                    key: Key(reverseList[index].id.toString()),
+                                    onDismissed: (DismissDirection direction) =>
+                                        _onTileDismissed(context, reverseList[index].id),
+                                    background: _dismissableBackground(),
+                                    confirmDismiss: (DismissDirection direction) =>
+                                        _onConfirmDismiss(context, direction),
+                                    child: Container(
+                                      color: (selectableTiles)
+                                          ? (selectedIds.contains(reverseList[index].id))
+                                              ? Colors.black12
+                                              : null
+                                          : null,
+                                      child: ListTileTheme(
+                                        selectedColor: Colors.black,
+                                        child: JoblistTile(
+                                          context,
+                                          index,
+                                          reverseList[index],
+                                          onPress: (int index) =>
+                                              _onPressed(context, reverseList[index]),
+                                          onLongTap: (int index) => _onLongTapped(context,
+                                              reverseList[index].id, reverseList[index].jobOptions),
+                                          directPrinter: lockedPrinter,
+                                          chosen: selectedIds.contains(reverseList[index].id),
+                                          onPressPrint: () =>
+                                              _onPressPrint(context, reverseList, index),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Divider(height: 0.0),
+                                ],
+                              );
+                          }
+                        },
+                      );
                     },
                   );
                 }
@@ -426,6 +453,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (copyListener != null) copyListener.cancel();
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
+    //if (uploadListener != null) uploadListener.cancel();
     currentIndex = 0;
     selectableTiles = false;
     super.deactivate();
@@ -438,6 +466,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (copyListener != null) copyListener.cancel();
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
+    if (uploadListener != null) uploadListener.cancel();
     currentIndex = 0;
     selectableTiles = false;
     super.dispose();
@@ -450,6 +479,19 @@ Oben rechts kannst du neue Dokumente hochladen.
     uploadBloc = BlocProvider.of<UploadBloc>(context);
     cameraBloc = BlocProvider.of<CameraBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
+
+    uploadListener = uploadBloc.state.skip(2).listen(
+      (UploadState state) {
+        if (state.isResult) {
+          if (state.value.length > 0) {
+            Future.delayed(const Duration(seconds: 3)).then((_) => uploadBloc.onRefresh());
+          } else {
+            Future.delayed(const Duration(seconds: 1)).then((_) => joblistBloc.onRefresh());
+          }
+        }
+      },
+    );
+
     currentIndex = 0;
     _cancelTimers();
     super.initState();
