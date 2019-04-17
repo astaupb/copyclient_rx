@@ -29,7 +29,7 @@ class UserSettingsPage extends StatelessWidget {
                 margin: EdgeInsets.all(24.0),
                 color: Colors.grey[700],
                 child: Padding(
-                  padding: EdgeInsets.all(24.0),
+                  padding: EdgeInsets.fromLTRB(40.0, 24.0, 40.0, 24.0),
                   child: BlocBuilder<UserEvent, UserState>(
                     bloc: userBloc,
                     builder: (BuildContext context, UserState state) {
@@ -40,11 +40,12 @@ class UserSettingsPage extends StatelessWidget {
                             Text(
                               state.value?.name,
                               textScaleFactor: 1.5,
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
                             ),
+                            Divider(),
                             Text(
                               '${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
-                              textScaleFactor: 1.2,
+                              textScaleFactor: 1.3,
                               style: TextStyle(color: Colors.white),
                             ),
                           ],
