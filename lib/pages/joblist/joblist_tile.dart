@@ -70,13 +70,15 @@ class JoblistTile extends ListTile {
                     Column(
                       children: [
                         Icon(Icons.color_lens,
-                            color: (job.jobInfo.colored > 0) ? Colors.teal[800] : Colors.grey),
+                            color: (job.jobInfo.colored > 0 && job.jobOptions.color)
+                                ? Colors.teal[800]
+                                : Colors.grey),
                       ],
                     ),
                     Column(
                       children: [
                         Icon(Icons.photo_size_select_large,
-                            color: (job.jobInfo.a3 || job.jobOptions.a3)
+                            color: (job.jobOptions.a3)
                                 ? Colors.teal[800]
                                 : Colors.grey),
                       ],
@@ -89,7 +91,7 @@ class JoblistTile extends ListTile {
                   children: [
                     Icon(Icons.filter_none, color: Colors.black38, size: 19.0),
                     Text(
-                      ' ${job.jobInfo.pagecount.toString()}',
+                      ' ${(job.jobInfo.pagecount * job.jobOptions.copies).toString()}',
                       textAlign: TextAlign.right,
                     ),
                   ],
