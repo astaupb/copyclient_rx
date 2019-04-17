@@ -49,7 +49,7 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get trailing => Container(
-        width: 128.0,
+        width: 136.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -78,9 +78,7 @@ class JoblistTile extends ListTile {
                     Column(
                       children: [
                         Icon(Icons.photo_size_select_large,
-                            color: (job.jobOptions.a3)
-                                ? Colors.teal[800]
-                                : Colors.grey),
+                            color: (job.jobOptions.a3) ? Colors.teal[800] : Colors.grey),
                       ],
                     ),
                   ],
@@ -98,13 +96,16 @@ class JoblistTile extends ListTile {
                 ),
               ],
             ),
-            MaterialButton(
-              color: Colors.teal[800],
-              child: Icon(
-                Icons.print,
-                color: Colors.white,
+            Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: MaterialButton(
+                color: Colors.teal[800],
+                child: Icon(
+                  Icons.print,
+                  color: Colors.white,
+                ),
+                onPressed: onPressPrint,
               ),
-              onPressed: onPressPrint,
             ),
           ],
         ),
