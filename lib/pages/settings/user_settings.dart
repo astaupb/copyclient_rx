@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../db_store.dart';
 import 'user_dialogs/change_name_dialog.dart';
 import 'user_dialogs/change_password_dialog.dart';
 import 'user_dialogs/default_options_dialog.dart';
@@ -147,11 +149,14 @@ class UserSettingsPage extends StatelessWidget {
         builder: (BuildContext context) => DefaultOptionsDialog(userBloc: userBloc));
   }
 
-  void _showPasswordDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => ChangePasswordDialog(userBloc: userBloc),
-    );
+  Future<void> _showPasswordDialog(BuildContext context) async {
+    if ((await showDialog<bool>(
+            context: context,
+            builder: (BuildContext context) => ChangePasswordDialog(userBloc: userBloc))) ??
+        false) {
+      BlocProvider.of<AuthBloc>(context).logout();
+      DBStore().clearTokens();
+    }
   }
 
   void _showUsernameDialog(BuildContext context) {

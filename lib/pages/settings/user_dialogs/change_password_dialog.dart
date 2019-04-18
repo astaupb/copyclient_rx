@@ -1,5 +1,7 @@
+import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blocs_copyclient/user.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   final UserBloc userBloc;
@@ -34,27 +36,23 @@ class ChangePasswordDialogState extends State<ChangePasswordDialog> {
                   obscureText: true,
                   autocorrect: false,
                   decoration: InputDecoration(labelText: 'Altes Passwort'),
-                  validator: (val) =>
-                      val.length < 1 ? 'Altes Passwort benötigt' : null,
+                  validator: (val) => val.length < 1 ? 'Altes Passwort benötigt' : null,
                   onSaved: (val) => _oldPassword = val,
                 ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
                   decoration: InputDecoration(labelText: 'Neues Passwort'),
-                  validator: (val) => val.length < 6
-                      ? 'Das neue Passwort sollte länger als 5 Zeichen sein'
-                      : null,
+                  validator: (val) =>
+                      val.length < 6 ? 'Das neue Passwort sollte länger als 5 Zeichen sein' : null,
                   onSaved: (val) => _newPassword = val,
                 ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
-                  decoration:
-                      InputDecoration(labelText: 'Neues Passwort (bestätigen)'),
-                  validator: (val) => val.length < 6
-                      ? 'Das neue Passwort sollte länger als 5 Zeichen sein'
-                      : null,
+                  decoration: InputDecoration(labelText: 'Neues Passwort (bestätigen)'),
+                  validator: (val) =>
+                      val.length < 6 ? 'Das neue Passwort sollte länger als 5 Zeichen sein' : null,
                   onSaved: (val) => _newPasswordRetype = val,
                 ),
               ],
@@ -77,7 +75,7 @@ class ChangePasswordDialogState extends State<ChangePasswordDialog> {
                     if (_newPassword == _newPasswordRetype) {
                       widget.userBloc.onChangePassword(_oldPassword, _newPassword);
                       _formKey.currentState.reset();
-                      Navigator.pop(context);
+                      Navigator.pop<bool>(context, true);
                     }
                   }
                 },

@@ -15,12 +15,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/camera_bloc.dart';
+import '../../db_store.dart';
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
+import '../../widgets/select_printer_dialog.dart';
 import '../jobdetails/jobdetails.dart';
 import 'joblist_deletion_modal.dart';
 import 'joblist_tile.dart';
-import '../../widgets/select_printer_dialog.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -71,6 +72,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
         if (error.statusCode == 401) {
           BlocProvider.of<AuthBloc>(context).logout();
+          DBStore().clearTokens();
           Navigator.pop(context);
         } else if (error.statusCode == 404) {
           text = 'Der angeforderte Job oder Drucker existiert nicht';
