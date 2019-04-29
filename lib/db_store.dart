@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:sqflite/sqflite.dart';
@@ -30,8 +31,7 @@ class DBStore {
   }
 
   Future<String> getCurrentToken(Database db) async {
-    List<Map> results = await db.query('Users',
-        columns: ['token'], orderBy: 'id DESC', limit: 1);
+    List<Map> results = await db.query('Users', columns: ['token'], orderBy: 'id DESC', limit: 1);
     if (results.length > 0) {
       return results[0]['token'];
     } else {
@@ -69,15 +69,25 @@ class DBStore {
       var batch = txn.batch();
       batch.delete('Users', where: 'id > 0');
       // Insert username and token and commit to DB
-      batch.insert(
-          'Users', {'user_id': userId, 'token': token, 'credit': credit});
+      batch.insert('Users', {'user_id': userId, 'token': token, 'credit': credit});
       await batch.commit();
     });
   }
 
   Future<void> openDb() async {
     // Get db location
-    var basePath = await getDatabasesPath();
+    String basePath = await getDatabasesPath();
+
+    Directory baseDir = Directory(basePath);
+
+    if (baseDir.listSync().any((FileSystemEntity file) => file.path.contains('users'))) {
+      _log.fine('found old database structure in $basePath, deleting all files');
+      baseDir.listSync().map((FileSystemEntity entity) {
+        _log.fine('deleting ${entity.path.split('/').last}');
+        entity.delete();
+      });
+    }
+
     String dbPath = basePath + '/copyclient.db';
 
     _log.fine('opening database file in $dbPath');
@@ -89,16 +99,14 @@ class DBStore {
         onCreate: (Database db, int version) async {
           await db.execute(
               'CREATE TABLE Users(id INTEGER PRIMARY KEY, user_id INTEGER, token TEXT, credit INTEGER)');
-          await db.execute(
-              'CREATE TABLE Settings(id INTEGER PRIMARY KEY, mapKey TEXT, mapValue TEXT)');
+          await db
+              .execute('CREATE TABLE Settings(id INTEGER PRIMARY KEY, mapKey TEXT, mapValue TEXT)');
 
-          await db.execute(
-              'INSERT INTO Settings(mapKey,mapValue) VALUES("camera_disabled","false")');
-          await db.execute(
-              'INSERT INTO Settings(mapKey,mapValue) VALUES("theme","copyshop")');
+          await db
+              .execute('INSERT INTO Settings(mapKey,mapValue) VALUES("camera_disabled","false")');
+          await db.execute('INSERT INTO Settings(mapKey,mapValue) VALUES("theme","copyshop")');
 
-          _log.info(
-              'created new Users and Settings table because it didnt exist yet');
+          _log.info('created new Users and Settings table because it didnt exist yet');
         },
         onOpen: (Database db) async {
           _db = db;
