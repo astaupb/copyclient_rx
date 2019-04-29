@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>AStA Copyclient</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -40,6 +42,24 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Used if app needs  the location all the time</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to choose file to upload from the media library</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Used for speech to text</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used when location is temporarily needed</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Used if user wants to upload a photo directly from camera</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Used for scheduling or importing events</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Used to play music from Apple Music</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Used for getting user motion</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
 </plist>
