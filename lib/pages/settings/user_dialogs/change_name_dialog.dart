@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:blocs_copyclient/user.dart';
 
+import '../../../string_sanitization.dart';
+
 class ChangeNameDialog extends StatefulWidget {
   final UserBloc userBloc;
 
@@ -31,10 +33,9 @@ class ChangeNameDialogState extends State<ChangeNameDialog> {
                 TextFormField(
                   autocorrect: false,
                   decoration: InputDecoration(labelText: 'Neuer Nutzername'),
-                  validator: (val) => val.length < 2
-                      ? 'Der neue Nutzername sollte länger als 2 Zeichen sein'
-                      : null,
+                  validator: onValidateUsername,
                   onSaved: (val) => _newName = val,
+                  onEditingComplete: () => _formKey.currentState.validate(),
                 ),
               ],
             ),

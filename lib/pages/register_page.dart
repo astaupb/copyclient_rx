@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../string_sanitization.dart';
+
 class RegisterPage extends StatefulWidget {
   final AuthBloc authBloc;
 
@@ -123,17 +125,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   autocorrect: false,
                   initialValue: _username,
                   decoration: InputDecoration(labelText: 'Benutzername', hintText: 'maxmuster'),
-                  validator: (value) {
-                    if (value.length < 1)
-                      return 'Ein Benutzername muss mindestens 2 Zeichen enthalten';
-                    if (value.contains('/') || value.contains('.') || value.contains(':'))
-                      return 'Ein Benutzername darf kein / . oder : enthalten';
-                    return null;
-                  },
+                  validator: onValidateUsername,
                   onSaved: (value) => _username = value,
                 ),
                 TextFormField(
                   initialValue: _password,
+                  autocorrect: false,
                   decoration: InputDecoration(
                     isDense: true,
                     labelText: 'Passwort',
@@ -155,6 +152,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 TextFormField(
                   initialValue: _retypedPassword,
+                  autocorrect: false,
                   decoration: InputDecoration(
                     isDense: true,
                     labelText: 'Passwort bestätigen',
