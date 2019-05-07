@@ -120,6 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               children: <Widget>[
                 TextFormField(
+                  autocorrect: false,
                   initialValue: _username,
                   decoration: InputDecoration(labelText: 'Benutzername', hintText: 'maxmuster'),
                   validator: (value) {
