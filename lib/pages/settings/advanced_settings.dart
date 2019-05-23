@@ -23,8 +23,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
         children: <Widget>[
           ListTile(
             title: Text('Eingabefelder statt Kamera nutzen'),
-            subtitle: Text(
-                'Zur Zuweisung eines Druckers ohne Kamera/mit defekter Kamera'),
+            subtitle: Text('Zur Zuweisung eines Druckers ohne Kamera/mit defekter Kamera'),
             trailing: BlocBuilder<CameraEvent, CameraState>(
               bloc: cameraBloc,
               builder: (BuildContext context, CameraState state) {
@@ -36,9 +35,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                 );
               },
             ),
-            onTap: () => (!_cameraDisabled)
-                ? cameraBloc.onDisable()
-                : cameraBloc.onEnable(),
+            onTap: () => (!_cameraDisabled) ? cameraBloc.onDisable() : cameraBloc.onEnable(),
           ),
         ],
       ),

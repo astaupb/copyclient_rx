@@ -26,8 +26,7 @@ Dialog selectPrinterDialog(BuildContext context) {
           TextField(
             onChanged: (String val) => input = val,
             onEditingComplete: () => Navigator.pop<String>(context, input),
-            decoration: InputDecoration(
-                border: InputBorder.none, hintText: 'z.B. 44332'),
+            decoration: InputDecoration(border: InputBorder.none, hintText: 'z.B. 44332'),
             autofocus: true,
             autocorrect: false,
             keyboardType: TextInputType.numberWithOptions(),

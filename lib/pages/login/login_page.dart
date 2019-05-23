@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
 
   @override
   LoginPageState createState() {
-    return new LoginPageState();
+    return LoginPageState();
   }
 }
 

@@ -34,7 +34,7 @@ class JoblistTile extends ListTile {
   bool get selected => chosen;
 
   @override
-  Widget get subtitle => new Text(
+  Widget get subtitle => Text(
         '${DateTime.fromMillisecondsSinceEpoch(job.timestamp * 1000)}'.split('.')[0],
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

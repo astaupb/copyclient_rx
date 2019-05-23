@@ -37,8 +37,7 @@ class DetailsDialog extends SimpleDialog {
                 title: Text('Zeitstempel:'),
                 subtitle: Text(_job.timestamp.toString()),
                 onLongPress: () {
-                  Clipboard.setData(
-                      ClipboardData(text: _job.timestamp.toString()));
+                  Clipboard.setData(ClipboardData(text: _job.timestamp.toString()));
                 },
               ),
               Divider(),

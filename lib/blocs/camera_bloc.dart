@@ -27,8 +27,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
   @override
   void onTransition(Transition transition) {
-    _log.fine(
-        'Transition from ${transition.currentState} to ${transition.nextState}');
+    _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
     super.onTransition(transition);
   }
 

@@ -10,14 +10,13 @@ class TransactionsTile extends ListTile {
   bool get dense => true;
 
   @override
-  Widget get leading =>
-      (transaction.value < 0) ? Icon(Icons.remove) : Icon(Icons.add);
+  Widget get leading => (transaction.value < 0) ? Icon(Icons.remove) : Icon(Icons.add);
 
   @override
   get onTap => () => null;
 
   @override
-  Widget get subtitle => new Text(transaction.timestamp);
+  Widget get subtitle => Text(transaction.timestamp);
 
   @override
   Widget get title => Text(transaction.description);

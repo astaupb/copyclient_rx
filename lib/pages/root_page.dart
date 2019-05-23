@@ -94,8 +94,7 @@ class _RootPageState extends State<RootPage> {
                                   return MaterialPageRoute(
                                     settings: settings,
                                     maintainState: true,
-                                    builder: (context) =>
-                                        routes[settings.name](context),
+                                    builder: (context) => routes[settings.name](context),
                                   );
                                 },
                               ),
@@ -112,17 +111,14 @@ class _RootPageState extends State<RootPage> {
             String snackText = 'Fehler: ${state.error}';
             int code = (state.error as ApiException).statusCode;
             if (code == 401) {
-              snackText =
-                  'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
+              snackText = 'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
             } else if (code == 400 || (code > 401 && code < 500)) {
               snackText =
                   'Fehler: Anfrage war fehlerhaft. Falls mehr Fehler auftreten bitte App neu starten';
             } else if (code >= 500 && code < 600) {
-              snackText =
-                  'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
+              snackText = 'Fehler: Fehler auf dem Server - Bitte unter app@asta.upb.de melden';
             } else if (code == 0) {
-              snackText =
-                  'Der Login dauert zu lange, bitte überprüfe deine Internetverbindung';
+              snackText = 'Der Login dauert zu lange, bitte überprüfe deine Internetverbindung';
             }
             return LoginPage(
               authBloc: authBloc,
@@ -139,9 +135,7 @@ class _RootPageState extends State<RootPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     CircularProgressIndicator(),
-                    (state.isBusy)
-                        ? Text('Einloggen...')
-                        : Text('Lade Datenbanken...'),
+                    (state.isBusy) ? Text('Einloggen...') : Text('Lade Datenbanken...'),
                   ],
                 ),
               ),
@@ -150,8 +144,7 @@ class _RootPageState extends State<RootPage> {
             return LoginPage(
               authBloc: authBloc,
               startSnack: SnackBar(
-                content:
-                    Text('Registrierung erfolgreich, bitte logge dich nun ein'),
+                content: Text('Registrierung erfolgreich, bitte logge dich nun ein'),
                 duration: Duration(seconds: 3),
               ),
             );

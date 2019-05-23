@@ -125,8 +125,11 @@ class _PreviewGridState extends State<PreviewGrid> {
                                     width: (job.jobOptions.nup > 2) ? 150.0 : 300,
                                   ),
                                   Image.memory(
-                                    previewSet
-                                        .previews[(_portrait && job.jobOptions.nup == 4 && job.jobInfo.pagecount > 2) ? 2 : 1],
+                                    previewSet.previews[(_portrait &&
+                                            job.jobOptions.nup == 4 &&
+                                            job.jobInfo.pagecount > 2)
+                                        ? 2
+                                        : 1],
                                     width: (job.jobOptions.nup > 2) ? 150.0 : 300,
                                   ),
                                 ],

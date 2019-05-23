@@ -73,15 +73,15 @@ class JobdetailsPage extends StatelessWidget {
 
   void _onPdfDownload(BuildContext context) async {
     const SnackBar doneSnack = SnackBar(
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       content: Text('PDF unter Downloads gespeichert'),
     );
     const SnackBar errorSnack = SnackBar(
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       content: Text('Fehler beim Download der PDF'),
     );
     const SnackBar downloadSnack = SnackBar(
-      duration: const Duration(seconds: 30),
+      duration: Duration(seconds: 30),
       content: Text('Lade PDF...'),
     );
     PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
@@ -93,10 +93,10 @@ class JobdetailsPage extends StatelessWidget {
     Scaffold.of(context).showSnackBar(downloadSnack);
     pdfBloc.state.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == _job.id) {
-        final String _basePath = (await (Directory(
-                    (await getExternalStorageDirectory()).path + '/Download')
-                .create(recursive: true)))
-            .path;
+        final String _basePath =
+            (await (Directory((await getExternalStorageDirectory()).path + '/Download')
+                    .create(recursive: true)))
+                .path;
         String _path;
         (_job.jobInfo.filename.isEmpty)
             ? _path = _basePath + '/${_job.id}.pdf'

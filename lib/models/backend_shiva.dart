@@ -11,11 +11,10 @@ class BackendShiva implements Backend {
   final String basePath = '/api/v1';
   final Client _innerClient;
 
-  Logger _log = new Logger('BackendShiva');
+  Logger _log = Logger('BackendShiva');
 
   BackendShiva(this._innerClient) {
-    _log.fine(
-        'Creating Backend with ${_innerClient.toString()} as innerClient');
+    _log.fine('Creating Backend with ${_innerClient.toString()} as innerClient');
   }
 
   @override
@@ -47,7 +46,7 @@ class BackendShiva implements Backend {
   }
 
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = new Map();
+    Map<String, dynamic> map = Map();
     map['host'] = host;
     map['basePath'] = basePath;
     return map;

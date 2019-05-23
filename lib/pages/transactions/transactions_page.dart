@@ -58,8 +58,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   }
                   return Container(
                     color: (index % 2 == 1) ? Colors.black12 : null,
-                    child:
-                        TransactionsTile(state.value.transactions[index - 1]),
+                    child: TransactionsTile(state.value.transactions[index - 1]),
                   );
                 },
               );
@@ -100,8 +99,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       var listener;
       listener = journalBloc.state.listen((JournalState state) async {
         if (state.isResult) {
-          Future.delayed(Duration(seconds: 2))
-              .then((_) => journalBloc.onRefresh());
+          Future.delayed(Duration(seconds: 2)).then((_) => journalBloc.onRefresh());
           listener.cancel();
         } else if (state.isException) {
           ApiException error = state.error;
@@ -109,11 +107,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           if (error.statusCode == 472) {
             snackText = 'Fehler: Dieser Token wurde bereits verbraucht';
           } else if (error.statusCode == 401) {
-            snackText =
-                'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
+            snackText = 'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
           } else if (error.statusCode == 400) {
-            snackText =
-                'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
+            snackText = 'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
           }
           SnackBar snackBar = SnackBar(
             content: Text(snackText),

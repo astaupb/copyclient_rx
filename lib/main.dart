@@ -22,7 +22,7 @@ class Copyclient extends StatefulWidget {
 
   @override
   CopyclientState createState() {
-    return new CopyclientState();
+    return CopyclientState();
   }
 }
 

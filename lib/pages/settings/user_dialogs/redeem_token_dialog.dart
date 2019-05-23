@@ -31,8 +31,7 @@ class RedeemTokenDialogState extends State<RedeemTokenDialog> {
                 TextFormField(
                   autocorrect: false,
                   decoration: InputDecoration(labelText: 'Aufladecode'),
-                  validator: (val) =>
-                      val.length < 16 ? 'Code ist mindestens 16-stellig' : null,
+                  validator: (val) => val.length < 16 ? 'Code ist mindestens 16-stellig' : null,
                   onSaved: (val) => _token = val,
                 ),
               ],

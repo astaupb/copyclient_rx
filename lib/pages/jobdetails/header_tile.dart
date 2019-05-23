@@ -49,8 +49,7 @@ class _HeaderTileState extends State<HeaderTile> {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(DateTime.fromMillisecondsSinceEpoch(
-                            _job.timestamp * 1000)
+                    Text(DateTime.fromMillisecondsSinceEpoch(_job.timestamp * 1000)
                         .toString()
                         .split('.')[0]),
                     (!Platform.isIOS)
@@ -58,8 +57,8 @@ class _HeaderTileState extends State<HeaderTile> {
                             bloc: BlocProvider.of<PdfBloc>(context),
                             builder: (BuildContext context, PdfState state) {
                               if (state.isResult || state.isInit) {
-                                Iterable idResults = state.value.where(
-                                    (PdfFile file) => file.id == _job.id);
+                                Iterable idResults =
+                                    state.value.where((PdfFile file) => file.id == _job.id);
                                 return Text(
                                   (idResults.length == 1)
                                       ? 'Heruntergeladen'
@@ -89,8 +88,8 @@ class _HeaderTileState extends State<HeaderTile> {
                         textColor: Colors.grey[100],
                         label: Padding(
                           padding: EdgeInsets.only(right: 16.0),
-                          child: Text(
-                              '${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
+                          child:
+                              Text('${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
                         ),
                         icon: Padding(
                           padding: EdgeInsets.only(left: 16.0),
@@ -99,27 +98,22 @@ class _HeaderTileState extends State<HeaderTile> {
                         onPressed: () async {
                           String target;
                           try {
-                            if (BlocProvider.of<CameraBloc>(context)
-                                .currentState
-                                .cameraDisabled) {
+                            if (BlocProvider.of<CameraBloc>(context).currentState.cameraDisabled) {
                               target = await showDialog<String>(
                                 context: context,
-                                builder: (BuildContext context) =>
-                                    selectPrinterDialog(context),
+                                builder: (BuildContext context) => selectPrinterDialog(context),
                               );
                             } else {
                               target = await BarcodeScanner.scan();
                             }
                             if (target != null) {
-                              BlocProvider.of<JoblistBloc>(context)
-                                  .onPrintById(target, _job.id);
+                              BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);
                               Navigator.of(context).pop();
                             }
                           } catch (e) {
                             print('MetaTile: $e');
-                            Scaffold.of(context).showSnackBar(SnackBar(
-                                content:
-                                    Text('Es wurde kein Drucker ausgewählt')));
+                            Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
                           }
                         },
                       ),
@@ -128,9 +122,7 @@ class _HeaderTileState extends State<HeaderTile> {
                         builder: (BuildContext context, UserState state) {
                           if (state.isResult) {
                             return Text(
-                              ((userBloc.user.credit -
-                                          (_job.priceEstimation / 100.0)) >
-                                      0)
+                              ((userBloc.user.credit - (_job.priceEstimation / 100.0)) > 0)
                                   ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
                                   : 'Fehlendes Guthaben vmtl.: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
                               textAlign: TextAlign.left,

@@ -21,8 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           ListTile(
             title: Text('Aussehen'),
-            onTap: () =>
-                Navigator.of(context).pushNamed('/settings/appearance'),
+            onTap: () => Navigator.of(context).pushNamed('/settings/appearance'),
           ),
           ListTile(
             title: Text('Erweitert'),
