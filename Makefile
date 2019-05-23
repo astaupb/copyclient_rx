@@ -1,6 +1,9 @@
 include make.mk
 
-.PHONY: build deploy clean
+.PHONY: format build deploy clean
+
+format:
+	dartfmt -w -l 100 --fix .
 
 build:
 	flutter packages get && flutter build apk && flutter build ios
