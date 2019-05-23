@@ -1,8 +1,13 @@
 import 'dart:convert';
 
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:blocs_copyclient/exceptions.dart';
+import 'package:blocs_copyclient/journal.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 class CreditPage extends StatefulWidget {
   @override
@@ -10,47 +15,66 @@ class CreditPage extends StatefulWidget {
 }
 
 class _CreditPageState extends State<CreditPage> {
+  JournalBloc journalBloc;
+  UserBloc userBloc;
+
   static final List<int> dropdownValues = [5, 10, 15, 20];
   int selectedValue = dropdownValues.first;
 
-  String actionBarTitle = 'Guthaben';
-
-  bool showWebView = false;
   String _link;
+
+  @override
+  void initState() {
+    journalBloc = BlocProvider.of<JournalBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(actionBarTitle)),
-      body: (!showWebView)
-          ? ListView(
-              children: <Widget>[
-                ListTile(
-                  title: Text('Betrag zum Aufladen auswählen'),
-                  trailing: DropdownButton(
-                    value: selectedValue,
-                    items: dropdownValues
-                        .map(
-                          (int value) => DropdownMenuItem<int>(
-                                value: value,
-                                child: Text('$value.00€'),
-                              ),
-                        )
-                        .toList(),
-                    onChanged: _onDropdownChanged,
-                  ),
-                ),
-                RaisedButton(
-                  onPressed: _onSubmit,
-                  child: Text('Kaufdialog öffnen'),
-                ),
-              ],
-            )
-          : WebView(
-              initialUrl: _link,
-              javascriptMode: JavascriptMode.unrestricted,
-              onPageFinished: _onPageFinished,
+      appBar: AppBar(title: Text('Guthaben')),
+      body: ListView(
+        children: <Widget>[
+          ListTile(
+            title: Text('Aktuelles Guthaben:'),
+            trailing: BlocBuilder(
+              bloc: journalBloc,
+              builder: (BuildContext context, JournalState state) {
+                if (state.isResult) {
+                  return Text('${(state.value.credit / 100.0).toStringAsFixed(2)} €');
+                } else {
+                  return Container(height: 0.0, width: 0.0);
+                }
+              },
             ),
+          ),
+          ListTile(
+            title: Text('Betrag zum Aufladen per PayPal auswählen'),
+            trailing: DropdownButton(
+              value: selectedValue,
+              items: dropdownValues
+                  .map(
+                    (int value) => DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value.00€'),
+                        ),
+                  )
+                  .toList(),
+              onChanged: _onDropdownChanged,
+            ),
+          ),
+          RaisedButton(
+            onPressed: _onSubmit,
+            child: Text('PayPal Bezahlvorgang öffnen'),
+          ),
+          Divider(),
+          RaisedButton(
+            onPressed: _onScanCredit,
+            child: Text('Guthabencode einscannen'),
+          )
+        ],
+      ),
     );
   }
 
@@ -76,14 +100,51 @@ class _CreditPageState extends State<CreditPage> {
   void _onSubmit() async {
     print('requesting payment link for $selectedValue euros');
     _link = await _getPaymentLink(selectedValue);
-    setState(() {
-      showWebView = true;
-      actionBarTitle = 'PayPal Bezahldialog';
-    });
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => WebviewScaffold(
+              url: _link,
+              appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
+              withJavascript: true,
+              clearCache: true,
+              clearCookies: true,
+              withLocalStorage: false,
+              withZoom: true,
+              allowFileURLs: false,
+              supportMultipleWindows: false,
+            ),
+      ),
+    );
   }
 
-  void _onPageFinished(String url) {
-    print('webview finished loading $url');
-    _link = null;
+  void _onScanCredit() async {
+    try {
+      String token = await BarcodeScanner.scan();
+      journalBloc.onAddTransaction(token);
+      var listener;
+      listener = journalBloc.state.listen((JournalState state) async {
+        if (state.isResult) {
+          Future.delayed(Duration(seconds: 2)).then((val) => userBloc.onRefresh());
+          listener.cancel();
+        } else if (state.isException) {
+          ApiException error = state.error;
+          String snackText = 'Fehler: $error';
+          if (error.statusCode == 472) {
+            snackText = 'Fehler: Dieser Token wurde bereits verbraucht';
+          } else if (error.statusCode == 401) {
+            snackText = 'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
+          } else if (error.statusCode == 400) {
+            snackText = 'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
+          }
+          SnackBar snackBar = SnackBar(
+            content: Text(snackText),
+            duration: Duration(seconds: 3),
+          );
+          Scaffold.of(context).showSnackBar(snackBar);
+        }
+      });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }
