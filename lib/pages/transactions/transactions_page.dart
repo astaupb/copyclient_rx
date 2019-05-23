@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocs_copyclient/journal.dart';
 
-import 'transactions_tile.dart';
+import '../../widgets/transactions_tile.dart';
 import '../../widgets/centered_text.dart';
 
 class TransactionsPage extends StatefulWidget {

@@ -213,7 +213,7 @@ class _JoblistPageState extends State<JoblistPage> {
                         );
                       },
                     ),
-                    onPressed: () => Navigator.of(context).pushNamed('/transactions'),
+                    onPressed: () => Navigator.of(context).pushNamed('/credit'),
                   ),
                   IconButton(
                     tooltip: 'Mehrfachauswahl aktivieren',

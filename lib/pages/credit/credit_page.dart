@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:barcode_scan/barcode_scan.dart';
@@ -9,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:http/http.dart' as http;
+
+import '../../widgets/transactions_tile.dart';
 
 class CreditPage extends StatefulWidget {
   @override
@@ -24,6 +27,9 @@ class _CreditPageState extends State<CreditPage> {
   int customValue;
 
   String _link;
+
+  StreamSubscription journalListener;
+  List<Transaction> transactionsExcerpt = [];
 
   @override
   Widget build(BuildContext context) {
@@ -73,16 +79,31 @@ class _CreditPageState extends State<CreditPage> {
                     Text('€', textScaleFactor: 1.3),
                   ],
                 )),
-          RaisedButton(
-            onPressed: _onSubmit,
-            child: Text('PayPal Bezahlvorgang öffnen'),
+          Padding(
+            padding: EdgeInsets.only(left: 24.0, right: 24.0),
+            child: RaisedButton(
+              onPressed: _onSubmit,
+              child: Text('PayPal Bezahlvorgang öffnen'),
+            ),
           ),
           Divider(height: 24.0),
           Builder(
-            builder: (BuildContext context) => RaisedButton(
-                  onPressed: () => _onScanCredit(context),
-                  child: Text('Guthabencode einscannen'),
+            builder: (BuildContext context) => Padding(
+                  padding: EdgeInsets.only(left: 24.0, right: 24.0),
+                  child: RaisedButton(
+                    onPressed: () => _onScanCredit(context),
+                    child: Text('Guthabencode einscannen'),
+                  ),
                 ),
+          ),
+          Divider(height: 24.0),
+          ListTile(title: Text('Letzte Transaktionen')),
+          ...List.from(transactionsExcerpt.map((Transaction t) => TransactionsTile(t))),
+          MaterialButton(
+            child: Text('Alle ansehen...'),
+            textColor: Colors.black87,
+            minWidth: 180.0,
+            onPressed: () => Navigator.of(context).pushNamed('/credit/transactions'),
           ),
         ],
       ),
@@ -93,7 +114,22 @@ class _CreditPageState extends State<CreditPage> {
   void initState() {
     journalBloc = BlocProvider.of<JournalBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
+
+    journalBloc.onRefresh();
+
+    journalListener = journalBloc.state.listen((JournalState state) {
+      if (state.isResult) {
+        setState(() => transactionsExcerpt = state.value.transactions.take(5).toList());
+      }
+    });
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (journalListener != null) journalListener.cancel();
+    super.dispose();
   }
 
   Widget _counterBuilder(
@@ -107,7 +143,10 @@ class _CreditPageState extends State<CreditPage> {
 
   Widget _creditBuilder(BuildContext context, JournalState state) {
     if (state.isResult) {
-      return Text('${(state.value.credit / 100.0).toStringAsFixed(2)} €');
+      return Text(
+        '${(state.value.credit / 100.0).toStringAsFixed(2)} €',
+        textScaleFactor: 1.4,
+      );
     } else {
       return Center(child: CircularProgressIndicator());
     }

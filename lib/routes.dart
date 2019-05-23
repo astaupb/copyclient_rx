@@ -18,6 +18,6 @@ final routes = {
   '/settings/appearance': (BuildContext context) => AppearanceSettingsPage(),
   '/settings/security': (BuildContext context) => SecuritySettingsPage(),
   '/register': (BuildContext context) => RegisterPage(),
-  '/transactions': (BuildContext context) => TransactionsPage(),
+  '/credit/transactions': (BuildContext context) => TransactionsPage(),
   '/credit': (BuildContext context) => CreditPage(),
 };
