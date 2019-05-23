@@ -26,6 +26,7 @@ class _CreditPageState extends State<CreditPage> {
   int selectedValue = dropdownValues.first;
   int customValue;
 
+  StreamSubscription webviewListener;
   String _link;
 
   StreamSubscription journalListener;
@@ -129,6 +130,7 @@ class _CreditPageState extends State<CreditPage> {
   @override
   void dispose() {
     if (journalListener != null) journalListener.cancel();
+    if (webviewListener != null) webviewListener.cancel();
     super.dispose();
   }
 
@@ -235,11 +237,30 @@ class _CreditPageState extends State<CreditPage> {
               clearCache: true,
               clearCookies: true,
               withLocalStorage: false,
-              withZoom: true,
+              withZoom: false,
               allowFileURLs: false,
               supportMultipleWindows: false,
             ),
       ),
     );
+
+    final flutterWebviewPlugin = FlutterWebviewPlugin();
+
+    void waitAndClose() async {
+      await Future.delayed(const Duration(seconds: 3));
+      Navigator.of(context).pop();
+      journalBloc.onRefresh();
+      flutterWebviewPlugin.close();
+    }
+
+    webviewListener = flutterWebviewPlugin.onUrlChanged.listen((String url) async {
+      if (url.contains('/aufwerter/cancel')) {
+        print('payment got cancelled');
+        waitAndClose();
+      } else if (url.contains('/aufwerter/success')) {
+        print('payment was success');
+        waitAndClose();
+      }
+    });
   }
 }
