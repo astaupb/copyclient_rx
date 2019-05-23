@@ -21,9 +21,29 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>50</string>
+	<string>51</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Used to play music from Apple Music</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Used for scheduling or importing events</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Used if user wants to upload a photo directly from camera</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Used for getting contacts</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Used if app needs  the location all the time</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used when location is temporarily needed</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Used for getting user motion</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to choose file to upload from the media library</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Used for speech to text</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -42,26 +62,6 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Used if app needs  the location all the time</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Used to choose file to upload from the media library</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Used for speech to text</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Used when location is temporarily needed</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Used if user wants to upload a photo directly from camera</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Used for scheduling or importing events</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Used to play music from Apple Music</string>
-	<key>NSMotionUsageDescription</key>
-	<string>Used for getting user motion</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Used for getting contacts</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<string>YES</string>
