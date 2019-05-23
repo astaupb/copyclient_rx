@@ -1,7 +1,5 @@
-import 'package:blocs_copyclient/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blocs_copyclient/user.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   final UserBloc userBloc;

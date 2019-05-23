@@ -4,10 +4,11 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/user.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:http/http.dart' as http;
 
 class CreditPage extends StatefulWidget {
   @override
@@ -15,20 +16,14 @@ class CreditPage extends StatefulWidget {
 }
 
 class _CreditPageState extends State<CreditPage> {
-  JournalBloc journalBloc;
-  UserBloc userBloc;
-
   static final List<int> dropdownValues = [5, 10, 15, 20];
+  JournalBloc journalBloc;
+
+  UserBloc userBloc;
   int selectedValue = dropdownValues.first;
+  int customValue;
 
   String _link;
-
-  @override
-  void initState() {
-    journalBloc = BlocProvider.of<JournalBloc>(context);
-    userBloc = BlocProvider.of<UserBloc>(context);
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,39 +31,53 @@ class _CreditPageState extends State<CreditPage> {
       appBar: AppBar(title: Text('Guthaben')),
       body: ListView(
         children: <Widget>[
+          Divider(height: 24.0),
           ListTile(
             title: Text('Aktuelles Guthaben:'),
             trailing: BlocBuilder(
               bloc: journalBloc,
-              builder: (BuildContext context, JournalState state) {
-                if (state.isResult) {
-                  return Text('${(state.value.credit / 100.0).toStringAsFixed(2)} €');
-                } else {
-                  return Container(height: 0.0, width: 0.0);
-                }
-              },
+              builder: _creditBuilder,
             ),
           ),
+          Divider(height: 24.0),
           ListTile(
             title: Text('Betrag zum Aufladen per PayPal auswählen'),
             trailing: DropdownButton(
               value: selectedValue,
-              items: dropdownValues
-                  .map(
-                    (int value) => DropdownMenuItem<int>(
-                          value: value,
-                          child: Text('$value.00€'),
-                        ),
-                  )
-                  .toList(),
+              items: _getDropdownItems(),
               onChanged: _onDropdownChanged,
             ),
           ),
+          if (selectedValue == -1)
+            ListTile(
+                title: Text('Benutzerdefinierter Betrag:'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 100.0,
+                      child: TextField(
+                        controller: TextEditingController(
+                            text: (customValue != null) ? customValue.toString() : '5'),
+                        keyboardType: TextInputType.numberWithOptions(),
+                        autocorrect: false,
+                        textInputAction: TextInputAction.done,
+                        autofocus: true,
+                        textAlign: TextAlign.end,
+                        maxLength: 3,
+                        maxLengthEnforced: true,
+                        buildCounter: _counterBuilder,
+                        onChanged: (String value) => customValue = int.tryParse(value),
+                      ),
+                    ),
+                    Text('€', textScaleFactor: 1.3),
+                  ],
+                )),
           RaisedButton(
             onPressed: _onSubmit,
             child: Text('PayPal Bezahlvorgang öffnen'),
           ),
-          Divider(),
+          Divider(height: 24.0),
           RaisedButton(
             onPressed: _onScanCredit,
             child: Text('Guthabencode einscannen'),
@@ -78,9 +87,42 @@ class _CreditPageState extends State<CreditPage> {
     );
   }
 
-  void _onDropdownChanged(value) {
-    setState(() => selectedValue = value);
+  @override
+  void initState() {
+    journalBloc = BlocProvider.of<JournalBloc>(context);
+    userBloc = BlocProvider.of<UserBloc>(context);
+    super.initState();
   }
+
+  Widget _counterBuilder(
+    BuildContext context, {
+    int currentLength,
+    int maxLength,
+    bool isFocused,
+  }) {
+    return Container(width: 0.0, height: 0.0);
+  }
+
+  Widget _creditBuilder(BuildContext context, JournalState state) {
+    if (state.isResult) {
+      return Text('${(state.value.credit / 100.0).toStringAsFixed(2)} €');
+    } else {
+      return Center(child: CircularProgressIndicator());
+    }
+  }
+
+  List<DropdownMenuItem<int>> _getDropdownItems() => dropdownValues
+      .map(
+        (int value) => DropdownMenuItem<int>(
+              value: value,
+              child: Text('$value.00€'),
+            ),
+      )
+      .toList()
+        ..add(DropdownMenuItem(
+          value: -1,
+          child: Text('Benutzerdefiniert'),
+        ));
 
   Future<String> _getPaymentLink(int value) async {
     if (value >= 1) {
@@ -97,24 +139,8 @@ class _CreditPageState extends State<CreditPage> {
     return '';
   }
 
-  void _onSubmit() async {
-    print('requesting payment link for $selectedValue euros');
-    _link = await _getPaymentLink(selectedValue);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => WebviewScaffold(
-              url: _link,
-              appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
-              withJavascript: true,
-              clearCache: true,
-              clearCookies: true,
-              withLocalStorage: false,
-              withZoom: true,
-              allowFileURLs: false,
-              supportMultipleWindows: false,
-            ),
-      ),
-    );
+  void _onDropdownChanged(value) {
+    setState(() => selectedValue = value);
   }
 
   void _onScanCredit() async {
@@ -146,5 +172,27 @@ class _CreditPageState extends State<CreditPage> {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void _onSubmit() async {
+    final int valueToUse = (customValue != null) ? customValue : selectedValue;
+    print('requesting payment link for $valueToUse euros');
+    _link = await _getPaymentLink(valueToUse);
+    customValue = null;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => WebviewScaffold(
+              url: _link,
+              appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
+              withJavascript: true,
+              clearCache: true,
+              clearCookies: true,
+              withLocalStorage: false,
+              withZoom: true,
+              allowFileURLs: false,
+              supportMultipleWindows: false,
+            ),
+      ),
+    );
   }
 }
