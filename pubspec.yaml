@@ -26,6 +26,7 @@ dependencies:
   path_provider: 0.5.0+1
   permission_handler: '^3.0.0'
   bubble_bottom_bar: ^1.0.2
+  webview_flutter: ^0.3.7+1
 
 flutter:
   uses-material-design: true
