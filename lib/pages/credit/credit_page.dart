@@ -19,10 +19,11 @@ class CreditPage extends StatefulWidget {
 }
 
 class _CreditPageState extends State<CreditPage> {
-  static final List<int> dropdownValues = [5, 10, 15, 20];
   JournalBloc journalBloc;
-
   UserBloc userBloc;
+
+  static final List<int> dropdownValues = [5, 10, 15, 20];
+
   int selectedValue = dropdownValues.first;
   int customValue;
 
@@ -168,14 +169,20 @@ class _CreditPageState extends State<CreditPage> {
         ));
 
   Future<String> _getPaymentLink(int value) async {
+    int userId;
+    await userBloc.state
+        .takeWhile((UserState state) => state.isResult)
+        .first
+        .then((UserState state) => userId = state.value.userId);
     if (value >= 1) {
       return await http
-          .get('https://astaprint.uni-paderborn.de/aufwerter/create/$value')
+          .post('https://astaprint.uni-paderborn.de/aufwerter/create/$value?user_id=${userId}')
           .then((http.Response response) {
         if (response.statusCode == 200) {
           print(response.body);
           return json.decode(utf8.decode(response.bodyBytes))['link'];
         } else if (response.statusCode == 400) {
+          print('error getting payment link: ${response.body}');
           return '';
         }
       });
@@ -249,8 +256,9 @@ class _CreditPageState extends State<CreditPage> {
     void waitAndClose() async {
       await Future.delayed(const Duration(seconds: 3));
       Navigator.of(context).pop();
-      journalBloc.onRefresh();
       flutterWebviewPlugin.close();
+      await Future.delayed(const Duration(seconds: 2));
+      journalBloc.onRefresh();
     }
 
     webviewListener = flutterWebviewPlugin.onUrlChanged.listen((String url) async {
