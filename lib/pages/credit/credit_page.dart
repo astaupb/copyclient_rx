@@ -126,8 +126,9 @@ class _CreditPageState extends State<CreditPage> {
 
   Future<String> _getPaymentLink(int value) async {
     if (value >= 1) {
-      Uri uri = Uri(scheme: 'http', host: '10.0.2.2', port: 5000, path: '/create/$value');
-      return await http.get(uri).then((http.Response response) {
+      return await http
+          .get('https://astaprint.uni-paderborn.de/aufwerter/create/$value')
+          .then((http.Response response) {
         if (response.statusCode == 200) {
           print(response.body);
           return json.decode(utf8.decode(response.bodyBytes))['link'];
