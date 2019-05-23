@@ -78,10 +78,12 @@ class _CreditPageState extends State<CreditPage> {
             child: Text('PayPal Bezahlvorgang öffnen'),
           ),
           Divider(height: 24.0),
-          RaisedButton(
-            onPressed: _onScanCredit,
-            child: Text('Guthabencode einscannen'),
-          )
+          Builder(
+            builder: (BuildContext context) => RaisedButton(
+                  onPressed: () => _onScanCredit(context),
+                  child: Text('Guthabencode einscannen'),
+                ),
+          ),
         ],
       ),
     );
@@ -144,7 +146,7 @@ class _CreditPageState extends State<CreditPage> {
     setState(() => selectedValue = value);
   }
 
-  void _onScanCredit() async {
+  void _onScanCredit(BuildContext context) async {
     try {
       String token = await BarcodeScanner.scan();
       journalBloc.onAddTransaction(token);
@@ -165,12 +167,17 @@ class _CreditPageState extends State<CreditPage> {
           }
           SnackBar snackBar = SnackBar(
             content: Text(snackText),
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           );
           Scaffold.of(context).showSnackBar(snackBar);
         }
       });
     } catch (e) {
+      const SnackBar snackBar = SnackBar(
+        content: Text('Es wurde kein Code gescannt'),
+        duration: Duration(seconds: 3),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
       print(e.toString());
     }
   }

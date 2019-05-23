@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:barcode_scan/barcode_scan.dart';
-import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocs_copyclient/journal.dart';
@@ -20,17 +18,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Transaktionen'),
-        actions: <Widget>[
-          Builder(
-            builder: (BuildContext context) => IconButton(
-                  icon: Icon(Icons.credit_card),
-                  onPressed: () => _onPressedTopUp(context),
-                ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text('Transaktionen')),
       body: RefreshIndicator(
         onRefresh: () => _onRefresh(),
         child: BlocBuilder<JournalEvent, JournalState>(
@@ -90,39 +78,5 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
     });
     journalBloc.dispatch(RefreshJournal());
-  }
-
-  void _onPressedTopUp(BuildContext context) async {
-    try {
-      String token = await BarcodeScanner.scan();
-      journalBloc.onAddTransaction(token);
-      var listener;
-      listener = journalBloc.state.listen((JournalState state) async {
-        if (state.isResult) {
-          Future.delayed(Duration(seconds: 2)).then((_) => journalBloc.onRefresh());
-          listener.cancel();
-        } else if (state.isException) {
-          ApiException error = state.error;
-          String snackText = 'Fehler: $error';
-          if (error.statusCode == 472) {
-            snackText = 'Fehler: Dieser Token wurde bereits verbraucht';
-          } else if (error.statusCode == 401) {
-            snackText = 'Du hast keine Berechtigung dies zu tun oder falsche Anmeldedaten';
-          } else if (error.statusCode == 400) {
-            snackText = 'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
-          }
-          SnackBar snackBar = SnackBar(
-            content: Text(snackText),
-            duration: const Duration(seconds: 3),
-          );
-          Scaffold.of(context).showSnackBar(snackBar);
-        }
-      });
-    } catch (e) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: const Text('Es wurde kein Code eingescannt'),
-        duration: const Duration(seconds: 2),
-      ));
-    }
   }
 }
