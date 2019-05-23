@@ -34,14 +34,6 @@ class MainDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Transaktionsjournal'),
-            trailing: Icon(Icons.local_atm),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/transactions');
-            },
-          ),
-          ListTile(
             title: Text('Über'),
             trailing: Icon(Icons.help),
             onTap: () async {

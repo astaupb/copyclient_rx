@@ -245,40 +245,42 @@ class _CreditPageState extends State<CreditPage> {
     print('requesting payment link for $valueToUse euros');
     _link = await _getPaymentLink(valueToUse);
     customValue = null;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => WebviewScaffold(
-              url: _link,
-              appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
-              withJavascript: true,
-              clearCache: true,
-              clearCookies: true,
-              withLocalStorage: false,
-              withZoom: false,
-              allowFileURLs: false,
-              supportMultipleWindows: false,
-            ),
-      ),
-    );
+    if (_link != '') {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) => WebviewScaffold(
+                url: _link,
+                appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
+                withJavascript: true,
+                clearCache: true,
+                clearCookies: true,
+                withLocalStorage: false,
+                withZoom: false,
+                allowFileURLs: false,
+                supportMultipleWindows: false,
+              ),
+        ),
+      );
 
-    final flutterWebviewPlugin = FlutterWebviewPlugin();
+      final flutterWebviewPlugin = FlutterWebviewPlugin();
 
-    void waitAndClose() async {
-      await Future.delayed(const Duration(seconds: 3));
-      Navigator.of(context).pop();
-      flutterWebviewPlugin.close();
-      await Future.delayed(const Duration(seconds: 2));
-      journalBloc.onRefresh();
-    }
-
-    webviewListener = flutterWebviewPlugin.onUrlChanged.listen((String url) async {
-      if (url.contains('/aufwerter/cancel')) {
-        print('payment got cancelled');
-        waitAndClose();
-      } else if (url.contains('/aufwerter/success')) {
-        print('payment was success');
-        waitAndClose();
+      void waitAndClose() async {
+        await Future.delayed(const Duration(seconds: 3));
+        Navigator.of(context).pop();
+        flutterWebviewPlugin.close();
+        await Future.delayed(const Duration(seconds: 2));
+        journalBloc.onRefresh();
       }
-    });
+
+      webviewListener = flutterWebviewPlugin.onUrlChanged.listen((String url) async {
+        if (url.contains('/aufwerter/cancel')) {
+          print('payment got cancelled');
+          waitAndClose();
+        } else if (url.contains('/aufwerter/success')) {
+          print('payment was success');
+          waitAndClose();
+        }
+      });
+    }
   }
 }
