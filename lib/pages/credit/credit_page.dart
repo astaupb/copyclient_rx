@@ -19,10 +19,10 @@ class CreditPage extends StatefulWidget {
 }
 
 class _CreditPageState extends State<CreditPage> {
-  JournalBloc journalBloc;
-  UserBloc userBloc;
-
   static final List<int> dropdownValues = [5, 10, 15, 20];
+  JournalBloc journalBloc;
+
+  UserBloc userBloc;
 
   int selectedValue = dropdownValues.first;
   int customValue;
@@ -37,79 +37,89 @@ class _CreditPageState extends State<CreditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Guthaben')),
-      body: ListView(
-        children: <Widget>[
-          Divider(height: 24.0),
-          ListTile(
-            title: Text('Aktuelles Guthaben:'),
-            trailing: BlocBuilder(
-              bloc: journalBloc,
-              builder: _creditBuilder,
-            ),
-          ),
-          Divider(height: 24.0),
-          ListTile(
-            title: Text('Betrag zum Aufladen per PayPal auswählen'),
-            trailing: DropdownButton(
-              value: selectedValue,
-              items: _getDropdownItems(),
-              onChanged: _onDropdownChanged,
-            ),
-          ),
-          if (selectedValue == -1)
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: ListView(
+          children: <Widget>[
+            Divider(height: 24.0),
             ListTile(
-                title: Text('Benutzerdefinierter Betrag:'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Container(
-                      width: 100.0,
-                      child: TextField(
-                        controller: TextEditingController(
-                            text: (customValue != null) ? customValue.toString() : '5'),
-                        keyboardType: TextInputType.numberWithOptions(),
-                        autocorrect: false,
-                        textInputAction: TextInputAction.done,
-                        autofocus: true,
-                        textAlign: TextAlign.end,
-                        maxLength: 3,
-                        maxLengthEnforced: true,
-                        buildCounter: _counterBuilder,
-                        onChanged: (String value) => customValue = int.tryParse(value),
-                      ),
-                    ),
-                    Text('€', textScaleFactor: 1.3),
-                  ],
-                )),
-          Padding(
-            padding: EdgeInsets.only(left: 24.0, right: 24.0),
-            child: RaisedButton(
-              onPressed: _onSubmit,
-              child: Text('PayPal Bezahlvorgang öffnen'),
+              title: Text('Aktuelles Guthaben:'),
+              trailing: BlocBuilder(
+                bloc: journalBloc,
+                builder: _creditBuilder,
+              ),
             ),
-          ),
-          Divider(height: 24.0),
-          Builder(
-            builder: (BuildContext context) => Padding(
-                  padding: EdgeInsets.only(left: 24.0, right: 24.0),
-                  child: RaisedButton(
-                    onPressed: () => _onScanCredit(context),
-                    child: Text('Guthabencode einscannen'),
+            Divider(height: 24.0),
+            ListTile(
+              title: Text('Betrag zum Aufladen per PayPal auswählen'),
+              trailing: DropdownButton(
+                value: selectedValue,
+                items: _getDropdownItems(),
+                onChanged: _onDropdownChanged,
+              ),
+            ),
+            if (selectedValue == -1)
+              ListTile(
+                  title: Text('Benutzerdefinierter Betrag:'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        width: 100.0,
+                        child: TextField(
+                          controller: TextEditingController(
+                              text: (customValue != null) ? customValue.toString() : '5'),
+                          keyboardType: TextInputType.numberWithOptions(),
+                          autocorrect: false,
+                          textInputAction: TextInputAction.done,
+                          autofocus: true,
+                          textAlign: TextAlign.end,
+                          maxLength: 3,
+                          maxLengthEnforced: true,
+                          buildCounter: _counterBuilder,
+                          onChanged: (String value) => customValue = int.tryParse(value),
+                        ),
+                      ),
+                      Text('€', textScaleFactor: 1.3),
+                    ],
+                  )),
+            Padding(
+              padding: EdgeInsets.only(left: 24.0, right: 24.0),
+              child: RaisedButton(
+                onPressed: _onSubmit,
+                child: Text('PayPal Bezahlvorgang öffnen'),
+              ),
+            ),
+            Divider(height: 24.0),
+            Builder(
+              builder: (BuildContext context) => Padding(
+                    padding: EdgeInsets.only(left: 24.0, right: 24.0),
+                    child: RaisedButton(
+                      onPressed: () => _onScanCredit(context),
+                      child: Text('Guthabencode einscannen'),
+                    ),
                   ),
-                ),
-          ),
-          Divider(height: 24.0),
-          ListTile(title: Text('Letzte Transaktionen')),
-          ...List.from(transactionsExcerpt.map((Transaction t) => TransactionsTile(t))),
-          MaterialButton(
-            child: Text('Alle ansehen...'),
-            textColor: Colors.black87,
-            minWidth: 180.0,
-            onPressed: () => Navigator.of(context).pushNamed('/credit/transactions'),
-          ),
-        ],
+            ),
+            Divider(height: 24.0),
+            ListTile(title: Text('Letzte Transaktionen')),
+            ...List.from(transactionsExcerpt.map((Transaction t) => TransactionsTile(t))),
+            MaterialButton(
+              child: Text('Alle ansehen...'),
+              textColor: Colors.black87,
+              minWidth: 180.0,
+              onPressed: () => Navigator.of(context).pushNamed('/credit/transactions'),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    if (journalListener != null) journalListener.cancel();
+    if (webviewListener != null) webviewListener.cancel();
+    super.dispose();
   }
 
   @override
@@ -126,13 +136,6 @@ class _CreditPageState extends State<CreditPage> {
     });
 
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    if (journalListener != null) journalListener.cancel();
-    if (webviewListener != null) webviewListener.cancel();
-    super.dispose();
   }
 
   Widget _counterBuilder(
@@ -192,6 +195,13 @@ class _CreditPageState extends State<CreditPage> {
 
   void _onDropdownChanged(value) {
     setState(() => selectedValue = value);
+  }
+
+  Future<void> _onRefresh() async {
+    journalBloc.onRefresh();
+    journalBloc.state.take(1).first.then((JournalState state) {
+      return;
+    });
   }
 
   void _onScanCredit(BuildContext context) async {
