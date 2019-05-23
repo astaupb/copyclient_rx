@@ -69,41 +69,29 @@ class _RootPageState extends State<RootPage> {
             pdfBloc.onStart(state.token);
             printQueueBloc.onStart(state.token);
 
-            return BlocProvider<JoblistBloc>(
-              bloc: joblistBloc,
-              child: BlocProvider<UserBloc>(
-                bloc: userBloc,
-                child: BlocProvider<UploadBloc>(
-                  bloc: uploadBloc,
-                  child: BlocProvider<JournalBloc>(
-                    bloc: journalBloc,
-                    child: BlocProvider<PreviewBloc>(
-                      bloc: previewBloc,
-                      child: BlocProvider<PdfBloc>(
-                        bloc: pdfBloc,
-                        child: BlocProvider<PrintQueueBloc>(
-                          bloc: printQueueBloc,
-                          child: BlocProvider<CameraBloc>(
-                            bloc: cameraBloc,
-                            child: WillPopScope(
-                              onWillPop: () async => !await _onWillPop(),
-                              child: Navigator(
-                                key: widget.navigatorKey,
-                                initialRoute: '/',
-                                onGenerateRoute: (RouteSettings settings) {
-                                  return MaterialPageRoute(
-                                    settings: settings,
-                                    maintainState: true,
-                                    builder: (context) => routes[settings.name](context),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+            return BlocProviderTree(
+              blocProviders: [
+                BlocProvider<JoblistBloc>(bloc: joblistBloc),
+                BlocProvider<UserBloc>(bloc: userBloc),
+                BlocProvider<UploadBloc>(bloc: uploadBloc),
+                BlocProvider<JournalBloc>(bloc: journalBloc),
+                BlocProvider<PreviewBloc>(bloc: previewBloc),
+                BlocProvider<PdfBloc>(bloc: pdfBloc),
+                BlocProvider<PrintQueueBloc>(bloc: printQueueBloc),
+                BlocProvider<CameraBloc>(bloc: cameraBloc),
+              ],
+              child: WillPopScope(
+                onWillPop: () async => !await _onWillPop(),
+                child: Navigator(
+                  key: widget.navigatorKey,
+                  initialRoute: '/',
+                  onGenerateRoute: (RouteSettings settings) {
+                    return MaterialPageRoute(
+                      settings: settings,
+                      maintainState: true,
+                      builder: (context) => routes[settings.name](context),
+                    );
+                  },
                 ),
               ),
             );
