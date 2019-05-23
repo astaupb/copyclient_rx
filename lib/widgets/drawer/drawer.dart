@@ -24,7 +24,7 @@ class MainDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           my.DrawerHeader(),
-          ListTile(
+          /*ListTile(
             title: Text('Aufladen'),
             trailing: Icon(Icons.credit_card),
             onTap: () async {
@@ -61,6 +61,14 @@ class MainDrawer extends StatelessWidget {
                 print(e.toString());
               }
             },
+          ),*/
+          ListTile(
+            title: Text('Guthaben'),
+            trailing: Icon(Icons.credit_card),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/credit');
+            },
           ),
           ListTile(
             title: Text('Einstellungen'),
@@ -93,8 +101,7 @@ class MainDrawer extends StatelessWidget {
                     children: <Widget>[
                       Divider(),
                       Text('Paketname: \n${packageInfo.packageName}'),
-                      Text(
-                          '\nVersion: \n${packageInfo.version}+${packageInfo.buildNumber}'),
+                      Text('\nVersion: \n${packageInfo.version}+${packageInfo.buildNumber}'),
                       Divider(),
                       Text('Copyright © AStA Paderborn 2019'),
                       RaisedButton(
