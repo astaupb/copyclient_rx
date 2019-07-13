@@ -65,14 +65,14 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   Widget build(BuildContext context) {
-    jobListener = joblistBloc.state.listen((JoblistState state) {
+    jobListener = joblistBloc.state.listen((JoblistState state) async {
       if (state.isException) {
         joblistBloc.onRefresh();
         ApiException error = (state.error as ApiException);
 
         if (error.statusCode == 401) {
           BlocProvider.of<AuthBloc>(context).logout();
-          DBStore().clearTokens();
+          await DBStore().clearTokens();
           Navigator.pop(context);
         } else if (error.statusCode == 404) {
           text = 'Der angeforderte Job oder Drucker existiert nicht';
@@ -512,7 +512,6 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _changePage(BuildContext context, int index) async {
-    // TODO: load dispatcher queue
     if (copyListener != null) copyListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     setState(() {

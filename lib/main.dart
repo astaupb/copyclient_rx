@@ -32,7 +32,7 @@ class CopyclientState extends State<Copyclient> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      bloc: themeBloc,
+      builder: (BuildContext context) => themeBloc,
       child: BlocBuilder(
         bloc: themeBloc,
         builder: (BuildContext context, ThemeState state) => MaterialApp(

@@ -179,7 +179,7 @@ class _CreditPageState extends State<CreditPage> {
         .then((UserState state) => userId = state.value.userId);
     if (value >= 1) {
       return await http
-          .post('https://astaprint.uni-paderborn.de/aufwerter/create/$value?user_id=${userId}')
+          .post('https://astaprint.uni-paderborn.de/aufwerter/create/$value?user_id=$userId')
           .then((http.Response response) {
         if (response.statusCode == 200) {
           print(response.body);

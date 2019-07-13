@@ -54,7 +54,7 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AuthBloc>(
-      bloc: authBloc,
+      builder: (BuildContext context) => authBloc,
       child: BlocBuilder<AuthEvent, AuthState>(
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
@@ -69,16 +69,16 @@ class _RootPageState extends State<RootPage> {
             pdfBloc.onStart(state.token);
             printQueueBloc.onStart(state.token);
 
-            return BlocProviderTree(
-              blocProviders: [
-                BlocProvider<JoblistBloc>(bloc: joblistBloc),
-                BlocProvider<UserBloc>(bloc: userBloc),
-                BlocProvider<UploadBloc>(bloc: uploadBloc),
-                BlocProvider<JournalBloc>(bloc: journalBloc),
-                BlocProvider<PreviewBloc>(bloc: previewBloc),
-                BlocProvider<PdfBloc>(bloc: pdfBloc),
-                BlocProvider<PrintQueueBloc>(bloc: printQueueBloc),
-                BlocProvider<CameraBloc>(bloc: cameraBloc),
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider<JoblistBloc>(builder: (BuildContext context) => joblistBloc),
+                BlocProvider<UserBloc>(builder: (BuildContext context) => userBloc),
+                BlocProvider<UploadBloc>(builder: (BuildContext context) => uploadBloc),
+                BlocProvider<JournalBloc>(builder: (BuildContext context) => journalBloc),
+                BlocProvider<PreviewBloc>(builder: (BuildContext context) => previewBloc),
+                BlocProvider<PdfBloc>(builder: (BuildContext context) => pdfBloc),
+                BlocProvider<PrintQueueBloc>(builder: (BuildContext context) => printQueueBloc),
+                BlocProvider<CameraBloc>(builder: (BuildContext context) => cameraBloc),
               ],
               child: WillPopScope(
                 onWillPop: () async => !await _onWillPop(),
