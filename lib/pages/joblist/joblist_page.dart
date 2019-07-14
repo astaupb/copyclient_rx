@@ -97,59 +97,60 @@ class _JoblistPageState extends State<JoblistPage> {
       onWillPop: () => _onWillPop(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Jobliste'),
+          automaticallyImplyLeading:
+              !selectableTiles, // make drawer and title disappear on  multiselect
+          title: (!selectableTiles) ? Text('Jobliste') : Container(width: 0.0, height: 0.0),
           actions: (selectableTiles)
               ? <Widget>[
                   Builder(
                     builder: (BuildContext context) => IconButton(
-                          tooltip: 'Ausgewählte löschen',
-                          icon: Icon(Icons.delete),
-                          onPressed: () => showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      JoblistDeletionModal(selectedIds))
-                              .then((val) => setState(() => selectableTiles = false)),
-                        ),
+                      tooltip: 'Ausgewählte drucken',
+                      icon: Icon(Icons.print),
+                      onPressed: () async {
+                        if (selectedIds.length > 0) {
+                          String target;
+                          try {
+                            if (cameraBloc.currentState.cameraDisabled) {
+                              target = await showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) => selectPrinterDialog(context),
+                              );
+                            } else {
+                              target = await BarcodeScanner.scan();
+                            }
+                            for (int id in selectedIds) {
+                              joblistBloc.onPrintById(target, id);
+                            }
+                            Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text('Ausgewählte Jobs wurden abgeschickt'),
+                              duration: Duration(seconds: 1),
+                            ));
+                            selectedIds.clear();
+                            setState(() => selectableTiles = false);
+                          } catch (e) {
+                            Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text('Kein Drucker ausgewählt'),
+                              duration: Duration(seconds: 1),
+                            ));
+                          }
+                        } else {
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text('Keine Jobs ausgewählt'),
+                            duration: Duration(seconds: 1),
+                          ));
+                        }
+                      },
+                    ),
                   ),
                   Builder(
                     builder: (BuildContext context) => IconButton(
-                          tooltip: 'Ausgewählte drucken',
-                          icon: Icon(Icons.print),
-                          onPressed: () async {
-                            if (selectedIds.length > 0) {
-                              String target;
-                              try {
-                                if (cameraBloc.currentState.cameraDisabled) {
-                                  target = await showDialog<String>(
-                                    context: context,
-                                    builder: (BuildContext context) => selectPrinterDialog(context),
-                                  );
-                                } else {
-                                  target = await BarcodeScanner.scan();
-                                }
-                                for (int id in selectedIds) {
-                                  joblistBloc.onPrintById(target, id);
-                                }
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text('Ausgewählte Jobs wurden abgeschickt'),
-                                  duration: Duration(seconds: 1),
-                                ));
-                                selectedIds.clear();
-                                setState(() => selectableTiles = false);
-                              } catch (e) {
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text('Kein Drucker ausgewählt'),
-                                  duration: Duration(seconds: 1),
-                                ));
-                              }
-                            } else {
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                content: Text('Keine Jobs ausgewählt'),
-                                duration: Duration(seconds: 1),
-                              ));
-                            }
-                          },
-                        ),
+                      tooltip: 'Ausgewählte löschen',
+                      icon: Icon(Icons.delete),
+                      onPressed: () => showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) => JoblistDeletionModal(selectedIds))
+                          .then((val) => setState(() => selectableTiles = false)),
+                    ),
                   ),
                   BlocBuilder<JoblistEvent, JoblistState>(
                     bloc: joblistBloc,
@@ -174,15 +175,16 @@ class _JoblistPageState extends State<JoblistPage> {
                             onPressed: () => null,
                           ),
                   ),
+                  Spacer(),
                   IconButton(
                     tooltip: 'Mehrfachauswahl beenden',
                     icon: Icon(Icons.clear),
                     onPressed: () => setState(
-                          () {
-                            selectedIds = [];
-                            selectableTiles = false;
-                          },
-                        ),
+                      () {
+                        selectedIds = [];
+                        selectableTiles = false;
+                      },
+                    ),
                   ),
                 ]
               : <Widget>[
@@ -330,121 +332,121 @@ Oben rechts kannst du neue Dokumente hochladen.
         ),
         bottomNavigationBar: Builder(
           builder: (BuildContext context) => BubbleBottomBar(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                opacity: .2,
-                currentIndex: currentIndex,
-                onTap: (int index) => _changePage(context, index),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                elevation: 16,
-                items: <BubbleBottomBarItem>[
-                  BubbleBottomBarItem(
-                    backgroundColor: Colors.red,
-                    icon: Icon(
-                      Icons.cancel,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            opacity: .2,
+            currentIndex: currentIndex,
+            onTap: (int index) => _changePage(context, index),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            elevation: 16,
+            items: <BubbleBottomBarItem>[
+              BubbleBottomBarItem(
+                backgroundColor: Colors.red,
+                icon: Icon(
+                  Icons.cancel,
+                  color: Theme.of(context).textTheme.title.color,
+                ),
+                activeIcon: Icon(
+                  Icons.list,
+                  color: Colors.redAccent,
+                ),
+                title: Text("Liste"),
+              ),
+              BubbleBottomBarItem(
+                backgroundColor: Colors.deepPurple,
+                icon: Column(
+                  children: <Widget>[
+                    Icon(
+                      Icons.scanner,
+                      size: 16.0,
                       color: Theme.of(context).textTheme.title.color,
                     ),
-                    activeIcon: Icon(
-                      Icons.list,
-                      color: Colors.redAccent,
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 16.0,
+                      color: Theme.of(context).textTheme.title.color,
                     ),
-                    title: Text("Liste"),
-                  ),
-                  BubbleBottomBarItem(
-                    backgroundColor: Colors.deepPurple,
-                    icon: Column(
-                      children: <Widget>[
-                        Icon(
-                          Icons.scanner,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        Icon(
-                          Icons.picture_as_pdf,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                      ],
+                    Icon(
+                      Icons.picture_as_pdf,
+                      size: 16.0,
+                      color: Theme.of(context).textTheme.title.color,
                     ),
-                    activeIcon: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.scanner,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 16.0,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                        Icon(
-                          Icons.picture_as_pdf,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                      ],
+                  ],
+                ),
+                activeIcon: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.scanner,
+                      color: Colors.deepPurpleAccent,
                     ),
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text("Scanner"),
-                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
-                            textScaleFactor: 0.7),
-                      ],
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 16.0,
+                      color: Colors.deepPurpleAccent,
                     ),
-                  ),
-                  BubbleBottomBarItem(
-                    backgroundColor: Colors.indigo,
-                    icon: Column(
-                      children: <Widget>[
-                        Icon(
-                          Icons.scanner,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        Icon(
-                          Icons.print,
-                          size: 16.0,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                      ],
+                    Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.deepPurpleAccent,
                     ),
-                    activeIcon: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.scanner,
-                          color: Colors.indigoAccent,
-                        ),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 16.0,
-                          color: Colors.indigoAccent,
-                        ),
-                        Icon(
-                          Icons.print,
-                          color: Colors.indigoAccent,
-                        ),
-                      ],
-                    ),
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text("Kopierer"),
-                        Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
-                            textScaleFactor: 0.7),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+                title: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text("Scanner"),
+                    Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                        textScaleFactor: 0.7),
+                  ],
+                ),
               ),
+              BubbleBottomBarItem(
+                backgroundColor: Colors.indigo,
+                icon: Column(
+                  children: <Widget>[
+                    Icon(
+                      Icons.scanner,
+                      size: 16.0,
+                      color: Theme.of(context).textTheme.title.color,
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 16.0,
+                      color: Theme.of(context).textTheme.title.color,
+                    ),
+                    Icon(
+                      Icons.print,
+                      size: 16.0,
+                      color: Theme.of(context).textTheme.title.color,
+                    ),
+                  ],
+                ),
+                activeIcon: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.scanner,
+                      color: Colors.indigoAccent,
+                    ),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 16.0,
+                      color: Colors.indigoAccent,
+                    ),
+                    Icon(
+                      Icons.print,
+                      color: Colors.indigoAccent,
+                    ),
+                  ],
+                ),
+                title: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text("Kopierer"),
+                    Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
+                        textScaleFactor: 0.7),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -521,34 +523,34 @@ Oben rechts kannst du neue Dokumente hochladen.
       int dialogResult = await showDialog<int>(
         context: context,
         builder: (BuildContext context) => Dialog(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                    'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du scannen willst.'),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(
-                        'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du scannen willst.'),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        MaterialButton(
-                          textColor: Colors.black87,
-                          child: Text('Abbrechen'),
-                          onPressed: () => Navigator.pop<int>(context, 1),
-                        ),
-                        MaterialButton(
-                          textColor: Colors.black87,
-                          child: Text('Okay'),
-                          onPressed: () => Navigator.pop<int>(context, 0),
-                        ),
-                      ],
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Abbrechen'),
+                      onPressed: () => Navigator.pop<int>(context, 1),
+                    ),
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Okay'),
+                      onPressed: () => Navigator.pop<int>(context, 0),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
+          ),
+        ),
       );
       if (dialogResult == 0) {
         _lockPrinter();
@@ -559,34 +561,34 @@ Oben rechts kannst du neue Dokumente hochladen.
       int dialogResult = await showDialog<int>(
         context: context,
         builder: (BuildContext context) => Dialog(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                    'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du kopieren willst.\n\nAchtung: Gescannte Dokumente werden sofort in Schwarz Weiß ausgedruckt'),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Text(
-                        'Wähle als nächstes per QR Code am Druckerbildschirm das Gerät aus mit dem du kopieren willst.\n\nAchtung: Gescannte Dokumente werden sofort in Schwarz Weiß ausgedruckt'),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        MaterialButton(
-                          textColor: Colors.black87,
-                          child: Text('Abbrechen'),
-                          onPressed: () => Navigator.pop<int>(context, 1),
-                        ),
-                        MaterialButton(
-                          textColor: Colors.black87,
-                          child: Text('Okay'),
-                          onPressed: () => Navigator.pop<int>(context, 0),
-                        ),
-                      ],
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Abbrechen'),
+                      onPressed: () => Navigator.pop<int>(context, 1),
+                    ),
+                    MaterialButton(
+                      textColor: Colors.black87,
+                      child: Text('Okay'),
+                      onPressed: () => Navigator.pop<int>(context, 0),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
+          ),
+        ),
       );
       if (dialogResult == 0) {
         _lockPrinter();
@@ -829,9 +831,9 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _onSelectedUpload() async {
     await _getFilePath().then(
       (Map<String, String> paths) => paths.forEach(
-            (String filename, String path) =>
-                uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename),
-          ),
+        (String filename, String path) =>
+            uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename),
+      ),
     );
     uploadTimer = Timer.periodic(const Duration(seconds: 3), (_) => uploadBloc.onRefresh());
   }
