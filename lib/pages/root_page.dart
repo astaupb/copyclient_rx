@@ -1,14 +1,7 @@
 import 'dart:async';
 
-import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/blocs.dart';
 import 'package:blocs_copyclient/exceptions.dart';
-import 'package:blocs_copyclient/joblist.dart';
-import 'package:blocs_copyclient/journal.dart';
-import 'package:blocs_copyclient/pdf_download.dart';
-import 'package:blocs_copyclient/preview.dart';
-import 'package:blocs_copyclient/print_queue.dart';
-import 'package:blocs_copyclient/upload.dart';
-import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,6 +37,7 @@ class _RootPageState extends State<RootPage> {
   PreviewBloc previewBloc;
   PdfBloc pdfBloc;
   PrintQueueBloc printQueueBloc;
+  TokensBloc tokensBloc;
 
   CameraBloc cameraBloc = CameraBloc();
 
@@ -68,6 +62,7 @@ class _RootPageState extends State<RootPage> {
             previewBloc.onStart(state.token);
             pdfBloc.onStart(state.token);
             printQueueBloc.onStart(state.token);
+            tokensBloc.onStart(state.token);
 
             return MultiBlocProvider(
               providers: [
@@ -79,6 +74,7 @@ class _RootPageState extends State<RootPage> {
                 BlocProvider<PdfBloc>(builder: (BuildContext context) => pdfBloc),
                 BlocProvider<PrintQueueBloc>(builder: (BuildContext context) => printQueueBloc),
                 BlocProvider<CameraBloc>(builder: (BuildContext context) => cameraBloc),
+                BlocProvider<TokensBloc>(builder: (BuildContext context) => tokensBloc),
               ],
               child: WillPopScope(
                 onWillPop: () async => !await _onWillPop(),
@@ -152,6 +148,7 @@ class _RootPageState extends State<RootPage> {
     previewBloc = PreviewBloc(backend);
     pdfBloc = PdfBloc(backend);
     printQueueBloc = PrintQueueBloc(backend);
+    tokensBloc = TokensBloc(backend);
     _checkExistingToken();
     super.initState();
   }
