@@ -10,6 +10,8 @@ class SecuritySettingsPage extends StatefulWidget {
 }
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
+  List<Token> lastTokens = [];
+
   @override
   void initState() {
     BlocProvider.of<TokensBloc>(context).onGetTokens();
@@ -21,21 +23,32 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Angemeldete Geräte'),
+        actions: <Widget>[
+          PopupMenuButton<int>(
+            onSelected: _onSelectActionMenu,
+            itemBuilder: (BuildContext context) =>
+                [PopupMenuItem<int>(value: 0, child: Text('Alle anderen Geräte ausloggen'))],
+          ),
+        ],
       ),
       body: BlocBuilder<TokensEvent, TokensState>(
         bloc: BlocProvider.of<TokensBloc>(context),
         builder: (BuildContext context, state) {
           if (state.isResult) {
             final List<Token> tokens = state.value.reversed.toList();
+            lastTokens = tokens;
             return RefreshIndicator(
                 child: ListView.builder(
                   itemCount: tokens.length,
                   itemBuilder: (BuildContext context, int i) {
                     return ListTile(
                       leading: Text(tokens[i].clientType.toString().split('.').last),
-                      title: Text(tokens[i].ip),
-                      subtitle: Text(tokens[i].created.toString().split('.').first),
-                      trailing: Text(tokens[i].location),
+                      title: Text('Ort: ${tokens[i].location}, IP: ${tokens[i].ip}'),
+                      subtitle: Text('Erstellt: ${tokens[i].created.toString().split('.').first}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.cancel),
+                        onPressed: () => _onPressedDelete(tokens[i].id),
+                      ),
                     );
                   },
                 ),
@@ -58,5 +71,18 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       }
     });
     bloc.onGetTokens();
+  }
+
+  void _onPressedDelete(int id) {
+    BlocProvider.of<TokensBloc>(context).onDeleteToken(id);
+  }
+
+  void _onSelectActionMenu(int value) {
+    if (value == 0) {
+      lastTokens.removeAt(0);
+      for (Token token in lastTokens) {
+        BlocProvider.of<TokensBloc>(context).onDeleteToken(token.id);
+      }
+    }
   }
 }
