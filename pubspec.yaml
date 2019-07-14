@@ -34,3 +34,8 @@ flutter:
   assets:
     - images/icon_hires.png
     - images/drawer/screen.jpeg
+
+  fonts:
+    - family:  UserAgentIcons
+      fonts:
+        - asset: fonts/UserAgentIcons.ttf

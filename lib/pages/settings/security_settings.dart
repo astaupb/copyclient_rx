@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:blocs_copyclient/tokens.dart';
+import 'package:copyclient_rx/user_agent_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,12 +12,6 @@ class SecuritySettingsPage extends StatefulWidget {
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   List<Token> lastTokens = [];
-
-  @override
-  void initState() {
-    BlocProvider.of<TokensBloc>(context).onGetTokens();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,30 +30,55 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         bloc: BlocProvider.of<TokensBloc>(context),
         builder: (BuildContext context, state) {
           if (state.isResult) {
-            final List<Token> tokens = state.value.reversed.toList();
-            lastTokens = tokens;
-            return RefreshIndicator(
-                child: ListView.builder(
-                  itemCount: tokens.length,
-                  itemBuilder: (BuildContext context, int i) {
-                    return ListTile(
-                      leading: Text(tokens[i].clientType.toString().split('.').last),
-                      title: Text('Ort: ${tokens[i].location}, IP: ${tokens[i].ip}'),
-                      subtitle: Text('Erstellt: ${tokens[i].created.toString().split('.').first}'),
-                      trailing: IconButton(
-                        icon: Icon(Icons.cancel),
-                        onPressed: () => _onPressedDelete(tokens[i].id),
-                      ),
-                    );
-                  },
-                ),
-                onRefresh: () => onRefresh());
-          } else {
-            return Center(child: CircularProgressIndicator());
+            lastTokens = state.value.reversed.toList();
           }
+          return RefreshIndicator(
+              child: ListView.builder(
+                itemCount: lastTokens.length,
+                itemBuilder: (BuildContext context, int i) {
+                  return ListTile(
+                    leading: clientTypeIcon(lastTokens[i].clientType),
+                    title: Text('Ort: ${lastTokens[i].location}, IP: ${lastTokens[i].ip}'),
+                    subtitle: Text(
+                        'Erstellt: ${lastTokens[i].created.toLocal().toString().split('.').first}'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.cancel),
+                      onPressed: () => _onPressedDelete(lastTokens[i].id),
+                    ),
+                  );
+                },
+              ),
+              onRefresh: () => onRefresh());
         },
       ),
     );
+  }
+
+  Widget clientTypeIcon(ClientType type) {
+    switch (type) {
+      case ClientType.chrome:
+        return Icon(UserAgentIcons.chrome);
+      case ClientType.firefox:
+        return Icon(UserAgentIcons.firefox);
+      case ClientType.safari:
+        return Icon(UserAgentIcons.safari);
+      case ClientType.curl:
+        return Icon(UserAgentIcons.curl_symbol);
+      case ClientType.dartio:
+        return Image.asset('images/icon_hires.png', height: 32);
+      case ClientType.electron:
+        return Image.asset('images/icon_hires.png', height: 32);
+      case ClientType.unknown:
+        return Icon(Icons.device_unknown);
+      default:
+        return Text(type.toString().split('.').last);
+    }
+  }
+
+  @override
+  void initState() {
+    BlocProvider.of<TokensBloc>(context).onGetTokens();
+    super.initState();
   }
 
   Future<void> onRefresh() async {
