@@ -27,6 +27,7 @@ dependencies:
   permission_handler: ^3.1.0
   bubble_bottom_bar: ^1.2.0
   flutter_webview_plugin: ^0.3.5
+  esys_flutter_share: ^1.0.2
 
 flutter:
   uses-material-design: true
