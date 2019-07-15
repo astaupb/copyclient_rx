@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:blocs_copyclient/blocs.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,8 @@ class _RootPageState extends State<RootPage> {
   CameraBloc cameraBloc = CameraBloc();
 
   String _token;
+
+  MultiBlocListener authorizedListener;
 
   _RootPageState();
 
@@ -140,6 +143,26 @@ class _RootPageState extends State<RootPage> {
   }
 
   @override
+  void dispose() {
+    final List blocs = [
+      joblistBloc,
+      userBloc,
+      uploadBloc,
+      journalBloc,
+      previewBloc,
+      pdfBloc,
+      printQueueBloc,
+      tokensBloc
+    ];
+
+    for (var bloc in blocs) {
+      bloc.cancel();
+    }
+
+    super.dispose();
+  }
+
+  @override
   void initState() {
     joblistBloc = JoblistBloc(backend);
     userBloc = UserBloc(backend);
@@ -150,7 +173,31 @@ class _RootPageState extends State<RootPage> {
     printQueueBloc = PrintQueueBloc(backend);
     tokensBloc = TokensBloc(backend);
     _checkExistingToken();
+
+    final List blocs = [
+      joblistBloc,
+      userBloc,
+      uploadBloc,
+      journalBloc,
+      previewBloc,
+      pdfBloc,
+      printQueueBloc,
+      tokensBloc
+    ];
+
+    for (var bloc in blocs) {
+      bloc.state.listen(_for401);
+    }
+
     super.initState();
+  }
+
+  void _for401(state) async {
+    if (state.isException && state.error.statusCode == 401) {
+      authBloc.logout();
+      await DBStore().clearTokens();
+      //Navigator.pop(context);
+    }
   }
 
   void _checkExistingToken() async {

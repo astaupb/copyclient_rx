@@ -70,11 +70,7 @@ class _JoblistPageState extends State<JoblistPage> {
         joblistBloc.onRefresh();
         ApiException error = (state.error as ApiException);
 
-        if (error.statusCode == 401) {
-          BlocProvider.of<AuthBloc>(context).logout();
-          await DBStore().clearTokens();
-          Navigator.pop(context);
-        } else if (error.statusCode == 404) {
+        if (error.statusCode == 404) {
           text = 'Der angeforderte Job oder Drucker existiert nicht';
         } else if (error.statusCode == 423) {
           text =
