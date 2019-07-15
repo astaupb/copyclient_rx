@@ -136,6 +136,21 @@ class _RootPageState extends State<RootPage> {
               ),
             );
           }
+          _initBlocs();
+          final List blocs = [
+            joblistBloc,
+            userBloc,
+            uploadBloc,
+            journalBloc,
+            previewBloc,
+            pdfBloc,
+            printQueueBloc,
+            tokensBloc
+          ];
+
+          for (var bloc in blocs) {
+            bloc.state.listen(_for401);
+          }
           return LoginPage(authBloc: authBloc);
         },
       ),
@@ -156,14 +171,13 @@ class _RootPageState extends State<RootPage> {
     ];
 
     for (var bloc in blocs) {
-      bloc.cancel();
+      if (bloc != null) bloc.cancel();
     }
 
     super.dispose();
   }
 
-  @override
-  void initState() {
+  void _initBlocs() {
     joblistBloc = JoblistBloc(backend);
     userBloc = UserBloc(backend);
     uploadBloc = UploadBloc(backend);
@@ -172,22 +186,11 @@ class _RootPageState extends State<RootPage> {
     pdfBloc = PdfBloc(backend);
     printQueueBloc = PrintQueueBloc(backend);
     tokensBloc = TokensBloc(backend);
+  }
+
+  @override
+  void initState() {
     _checkExistingToken();
-
-    final List blocs = [
-      joblistBloc,
-      userBloc,
-      uploadBloc,
-      journalBloc,
-      previewBloc,
-      pdfBloc,
-      printQueueBloc,
-      tokensBloc
-    ];
-
-    for (var bloc in blocs) {
-      bloc.state.listen(_for401);
-    }
 
     super.initState();
   }

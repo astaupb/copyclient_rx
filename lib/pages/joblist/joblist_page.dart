@@ -250,11 +250,11 @@ Oben rechts kannst du neue Dokumente hochladen.
                   return BlocBuilder(
                     bloc: uploadBloc,
                     builder: (BuildContext context, UploadState state) {
-                      List<DispatcherTask> uploadList;
+                      List<DispatcherTask> uploadList = [];
                       if (state.isResult) uploadList = state.value;
                       return ListView.builder(
                         itemExtent: 72.0,
-                        itemCount: reverseList.length + uploadList.length,
+                        itemCount: reverseList.length ?? 0 + uploadList.length,
                         itemBuilder: (BuildContext context, int index) {
                           if (index < uploadList.length) {
                             return Column(
