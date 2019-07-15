@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/tokens.dart';
 import 'package:copyclient_rx/user_agent_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+enum ActionButton { deleteAll }
 
 class SecuritySettingsPage extends StatefulWidget {
   @override
@@ -19,10 +22,12 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       appBar: AppBar(
         title: Text('Angemeldete Geräte'),
         actions: <Widget>[
-          PopupMenuButton<int>(
+          PopupMenuButton<ActionButton>(
             onSelected: _onSelectActionMenu,
-            itemBuilder: (BuildContext context) =>
-                [PopupMenuItem<int>(value: 0, child: Text('Alle anderen Geräte ausloggen'))],
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<ActionButton>(
+                  value: ActionButton.deleteAll, child: Text('Alle Geräte ausloggen'))
+            ],
           ),
         ],
       ),
@@ -97,12 +102,19 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     BlocProvider.of<TokensBloc>(context).onDeleteToken(id);
   }
 
-  void _onSelectActionMenu(int value) {
-    if (value == 0) {
-      lastTokens.removeAt(0);
-      for (Token token in lastTokens) {
-        BlocProvider.of<TokensBloc>(context).onDeleteToken(token.id);
-      }
+  void _onSelectActionMenu(ActionButton action) {
+    switch (action) {
+      case ActionButton.deleteAll:
+        TokensBloc bloc = BlocProvider.of<TokensBloc>(context);
+        bloc.state.skip(lastTokens.length * 2).listen(
+              (_) => BlocProvider.of<AuthBloc>(context).logout(),
+            );
+        for (Token token in lastTokens) {
+          bloc.onDeleteToken(token.id);
+        }
+        break;
+      default:
+        return;
     }
   }
 }
