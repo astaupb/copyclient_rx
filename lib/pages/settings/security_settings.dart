@@ -8,6 +8,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum ActionButton { deleteAll }
 
+class AppIcon extends Column {
+  final String iconText;
+
+  AppIcon({this.iconText = ''});
+
+  @override
+  List<Widget> get children => [
+        Image.asset('images/icon_hires.png', height: 30),
+        Text(iconText),
+      ];
+
+  @override
+  MainAxisAlignment get mainAxisAlignment => MainAxisAlignment.center;
+
+  @override
+  MainAxisSize get mainAxisSize => MainAxisSize.min;
+}
+
 class SecuritySettingsPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _SecuritySettingsPageState();
@@ -70,9 +88,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       case ClientType.curl:
         return Icon(UserAgentIcons.curl_symbol);
       case ClientType.dartio:
-        return Image.asset('images/icon_hires.png', height: 32);
+        return AppIcon(iconText: 'App');
       case ClientType.electron:
-        return Image.asset('images/icon_hires.png', height: 32);
+        return AppIcon(iconText: 'PC');
       case ClientType.unknown:
         return Icon(Icons.device_unknown);
       default:
