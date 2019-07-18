@@ -1,7 +1,7 @@
 name: copyclient_rx
 description: Yet another reactive copyclient rewrite
 
-version: 1.0.6+61
+version: 1.0.6+62
 
 environment:
   sdk: ">=2.3.2 <3.0.0"
@@ -28,6 +28,8 @@ dependencies:
   bubble_bottom_bar: ^1.2.0
   flutter_webview_plugin: ^0.3.5
   esys_flutter_share: ^1.0.2
+  receive_sharing_intent:
+    git: https://github.com/leontappe/receive_sharing_intent.git
 
 flutter:
   uses-material-design: true

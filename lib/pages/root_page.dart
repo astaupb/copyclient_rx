@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:blocs_copyclient/blocs.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../blocs/camera_bloc.dart';
 import '../blocs/theme_bloc.dart';
@@ -44,7 +47,7 @@ class _RootPageState extends State<RootPage> {
 
   String _token;
 
-  MultiBlocListener authorizedListener;
+  StreamSubscription<List<String>> _intentDataStreamSubscription;
 
   _RootPageState();
 
@@ -66,6 +69,23 @@ class _RootPageState extends State<RootPage> {
             pdfBloc.onStart(state.token);
             printQueueBloc.onStart(state.token);
             tokensBloc.onStart(state.token);
+
+            // For sharing images coming from outside the app while the app is in the memory
+            _intentDataStreamSubscription =
+                ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
+              // Call reset method if you don't want to see this callback again.
+              ReceiveSharingIntent.reset();
+              _handleIntentValue(value);
+            }, onError: (err) {
+              print("getIntentDataStream error: $err");
+            });
+
+            // For sharing images coming from outside the app while the app is closed
+            ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
+              // Call reset method if you don't want to see this callback again.
+              ReceiveSharingIntent.reset();
+              _handleIntentValue(value);
+            });
 
             return MultiBlocProvider(
               providers: [
@@ -174,7 +194,21 @@ class _RootPageState extends State<RootPage> {
       if (bloc != null) bloc.cancel();
     }
 
+    _intentDataStreamSubscription.cancel();
+
     super.dispose();
+  }
+
+  void _handleIntentValue(var value) async {
+    if (value != null) {
+      print(value);
+      for (String url in value) {
+        await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
+        await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+        final File file = File(url);
+        uploadBloc.onUpload(file.readAsBytesSync(), filename: file.path.split('/').last);
+      }
+    }
   }
 
   void _initBlocs() {
