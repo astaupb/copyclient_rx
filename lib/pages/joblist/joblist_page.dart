@@ -505,7 +505,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     _cancelTimers();
 
     // For sharing images coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
+    if (Platform.isAndroid) _intentDataStreamSubscription =
         ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
       // Call reset method if you don't want to see this callback again.
       ReceiveSharingIntent.reset();
@@ -515,7 +515,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     });
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
+    if (Platform.isAndroid) ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
       // Call reset method if you don't want to see this callback again.
       ReceiveSharingIntent.reset();
       _handleIntentValue(value);
