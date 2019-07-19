@@ -47,7 +47,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
           Builder(
             builder: (BuildContext context) => IconButton(
               icon: Icon(Icons.share),
-              onPressed: () => _onShowShare(context),
+              onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
             ),
           ),
           IconButton(
@@ -116,50 +116,53 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     });
   }
 
+  void _onShare(BuildContext context) {
+    PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
+    StreamSubscription listen;
+    listen = pdfBloc.state.listen((PdfState state) async {
+      if (state.isResult && state.value.last.id == widget._job.id) {
+        //Navigator.of(context).pop();
+        final PdfFile pdf = state.value.last;
+        await Share.file(
+            'Copyclient Download', widget._job.jobInfo.filename, pdf.file, 'application/pdf');
+        listen.cancel();
+      }
+    });
+    pdfBloc.onGetPdf(widget._job.id);
+  }
+
   void _onShowShare(BuildContext scaffoldContext) async {
     await showModalBottomSheet(
-        context: scaffoldContext,
-        builder: (BuildContext context) {
-          return Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                if (!Platform.isIOS)
-                  RaisedButton(
-                    child: Row(children: <Widget>[
-                      Icon(Icons.file_download),
-                      Text('Download'),
-                    ]),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await _onPdfDownload(scaffoldContext);
-                    },
-                  ),
+      context: scaffoldContext,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              if (!Platform.isIOS)
                 RaisedButton(
                   child: Row(children: <Widget>[
-                    Icon(Icons.share),
-                    Text('Teilen'),
+                    Icon(Icons.file_download),
+                    Text('Download'),
                   ]),
-                  onPressed: () {
-                    PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
-                    StreamSubscription listen;
-                    listen = pdfBloc.state.listen((PdfState state) async {
-                      if (state.isResult && state.value.last.id == widget._job.id) {
-                        //Navigator.of(context).pop();
-                        final PdfFile pdf = state.value.last;
-                        await Share.file('Copyclient Download', widget._job.jobInfo.filename,
-                            pdf.file, 'application/pdf');
-                        listen.cancel();
-                      }
-                    });
-                    pdfBloc.onGetPdf(widget._job.id);
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await _onPdfDownload(scaffoldContext);
                   },
                 ),
-              ],
-            ),
-          );
-        });
+              RaisedButton(
+                child: Row(children: <Widget>[
+                  Icon(Icons.share),
+                  Text('Teilen'),
+                ]),
+                onPressed: () => _onShare(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
