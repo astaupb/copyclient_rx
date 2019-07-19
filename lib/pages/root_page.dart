@@ -207,7 +207,8 @@ class _RootPageState extends State<RootPage> {
         await PermissionHandler().requestPermissions([PermissionGroup.storage]);
         final File file = File(url);
         final String filename = file.path.split('/').last;
-        uploadBloc.onUpload(file.readAsBytesSync(), filename: filename);
+        final int numericFilename = int.tryParse(filename);
+        uploadBloc.onUpload(file.readAsBytesSync(), filename: (numericFilename == null) ? filename : null);
       }
     }
   }

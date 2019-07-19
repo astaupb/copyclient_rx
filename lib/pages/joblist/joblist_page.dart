@@ -260,7 +260,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                             return Column(
                               children: <Widget>[
                                 ListTile(
-                                  title: Text('${uploadList[index].filename}'),
+                                  title: Text('${uploadList[index].filename ?? 'Neuer Druckjob'}'),
                                   subtitle: Text((uploadList[index].isUploading)
                                       ? 'Am Hochladen...'
                                       : 'Dokument am Verarbeiten...'),

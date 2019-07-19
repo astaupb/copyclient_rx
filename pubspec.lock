@@ -197,7 +197,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "4c0bc8afe6c32ff7888001f11bcc235f4a21137f"
+      resolved-ref: "294437a21f9d08cce9f981129fa2d5fda26d2bf9"
       url: "https://github.com/leontappe/receive_sharing_intent.git"
     source: git
     version: "1.2.0+1"
