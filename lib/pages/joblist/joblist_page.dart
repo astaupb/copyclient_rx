@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
-import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
@@ -13,9 +12,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../blocs/camera_bloc.dart';
-import '../../db_store.dart';
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import '../../widgets/select_printer_dialog.dart';
@@ -62,6 +62,8 @@ class _JoblistPageState extends State<JoblistPage> {
 
   bool selectableTiles = false;
   List<int> selectedIds = [];
+
+  StreamSubscription<List<String>> _intentDataStreamSubscription;
 
   @override
   Widget build(BuildContext context) {
@@ -469,6 +471,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     if (uploadListener != null) uploadListener.cancel();
+    _intentDataStreamSubscription.cancel();
     currentIndex = 0;
     selectableTiles = false;
     super.dispose();
@@ -482,7 +485,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     cameraBloc = BlocProvider.of<CameraBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
 
-    uploadListener = uploadBloc.state.skip(2).listen(
+    uploadListener = uploadBloc.state.listen(
       (UploadState state) {
         if (state.isResult) {
           if (state.value.length < uploadCount) {
@@ -500,6 +503,24 @@ Oben rechts kannst du neue Dokumente hochladen.
 
     currentIndex = 0;
     _cancelTimers();
+
+    // For sharing images coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
+      // Call reset method if you don't want to see this callback again.
+      ReceiveSharingIntent.reset();
+      _handleIntentValue(value);
+    }, onError: (err) {
+      print("getIntentDataStream error: $err");
+    });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
+      // Call reset method if you don't want to see this callback again.
+      ReceiveSharingIntent.reset();
+      _handleIntentValue(value);
+    });
+
     super.initState();
   }
 
@@ -637,12 +658,34 @@ Oben rechts kannst du neue Dokumente hochladen.
     Map<String, String> filePaths;
     try {
       filePaths = await FilePicker.getMultiFilePath(type: FileType.CUSTOM, fileExtension: 'pdf');
-      print(filePaths.toString());
       if (filePaths != null && filePaths.isNotEmpty) return filePaths;
     } catch (e) {
       print("Error while picking the file: " + e.toString());
     }
     return {};
+  }
+
+  void _handleIntentValue(List<String> value) async {
+    if (value != null) {
+      await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
+      await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+      for (String url in value) {
+        final File file = File(url);
+        final String filename = file.path.split('/').last;
+        final int numericFilename = int.tryParse(filename);
+        print('upload filename $filename');
+        uploadBloc.onUpload(await file.readAsBytes(),
+            filename: (numericFilename == null) ? filename : null);
+      }
+      StreamSubscription listener;
+      listener = uploadBloc.state.listen((UploadState state) {
+        if (state.isResult &&
+            state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
+          uploadTimer = Timer.periodic(const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
+          listener.cancel();
+        }
+      });
+    }
   }
 
   void _lockPrinter() async {
@@ -831,7 +874,7 @@ Oben rechts kannst du neue Dokumente hochladen.
             uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename),
       ),
     );
-    uploadTimer = Timer.periodic(const Duration(seconds: 3), (_) => uploadBloc.onRefresh());
+    uploadTimer = Timer.periodic(const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
   }
 
   void _onTileDismissed(BuildContext context, int id) async {
