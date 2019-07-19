@@ -135,34 +135,33 @@ class _PreviewGridState extends State<PreviewGrid> {
                                 ],
                               ),
                             ),
-                            (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
-                                ? Container(
-                                    margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                    padding: EdgeInsets.all(5.0),
-                                    alignment: Alignment.center,
-                                    color: Colors.white,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Image.memory(
-                                          previewSet.previews[
-                                              (_portrait && job.jobOptions.nup == 4) ? 1 : 2],
-                                          width: 150.0,
-                                        ),
-                                        (job.jobInfo.pagecount == 3)
-                                            ? Container(
-                                                width: 150,
-                                                height: 211.5,
-                                              )
-                                            : Image.memory(
-                                                previewSet.previews[3],
-                                                width: 150.0,
-                                              ),
-                                      ],
+                            if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
+                              Container(
+                                margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                padding: EdgeInsets.all(5.0),
+                                alignment: Alignment.center,
+                                color: Colors.white,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Image.memory(
+                                      previewSet
+                                          .previews[(_portrait && job.jobOptions.nup == 4) ? 1 : 2],
+                                      width: 150.0,
                                     ),
-                                  )
-                                : Container(),
+                                    (job.jobInfo.pagecount == 3)
+                                        ? Container(
+                                            width: 150,
+                                            height: 211.5,
+                                          )
+                                        : Image.memory(
+                                            previewSet.previews[3],
+                                            width: 150.0,
+                                          ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ],
@@ -215,29 +214,33 @@ class _PreviewGridState extends State<PreviewGrid> {
                                 ],
                               ),
                             ),
-                            (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
-                                ? Container(
-                                    margin: EdgeInsets.only(bottom: 5.0),
-                                    padding: EdgeInsets.all(5.0),
-                                    alignment: Alignment.center,
-                                    color: Colors.white,
-                                    width: 310.0,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Image.memory(
-                                          previewSet.previews[2],
-                                          width: 150.0,
-                                        ),
-                                        Image.memory(
-                                          previewSet.previews[3],
-                                          width: 150.0,
-                                        ),
-                                      ],
+                            if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
+                              Container(
+                                margin: EdgeInsets.only(bottom: 5.0),
+                                padding: EdgeInsets.all(5.0),
+                                alignment: Alignment.center,
+                                color: Colors.white,
+                                width: 310.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Image.memory(
+                                      previewSet.previews[2],
+                                      width: 150.0,
                                     ),
-                                  )
-                                : Container(),
+                                    if (job.jobInfo.pagecount > 3)
+                                      Image.memory(
+                                        previewSet.previews[3],
+                                        width: 150.0,
+                                      )
+                                    else
+                                      Container(
+                                        width: 150.0,
+                                      )
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ],

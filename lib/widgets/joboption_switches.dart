@@ -53,51 +53,49 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
           );
           return Column(
             children: <Widget>[
-              (_job.jobInfo.colored > 0)
-                  ? ListTile(
-                      onTap: () {
-                        _job.jobOptions.color = !_job.jobOptions.color;
-                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                      },
-                      leading: Icon(Icons.palette),
-                      title: Text('Farbe'),
-                      trailing: Switch(
+              if (_job.jobInfo.colored > 0)
+                ListTile(
+                  onTap: () {
+                    _job.jobOptions.color = !_job.jobOptions.color;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                  },
+                  leading: Icon(Icons.palette),
+                  title: Text('Farbe'),
+                  trailing: Switch(
+                    onChanged: (val) {
+                      _job.jobOptions.color = val;
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    },
+                    value: _job.jobOptions.color,
+                  ),
+                ),
+              if (_job.jobInfo.pagecount * _job.jobOptions.copies >= 2)
+                Column(
+                  children: <Widget>[
+                    ListTile(
+                      onTap: null,
+                      title: Text('Duplex'),
+                      trailing: DropdownButton(
+                        items: <Map<int, String>>[
+                          {0: 'Aus'},
+                          {1: 'Lange Kante'},
+                          {2: 'Kurze Kante'},
+                        ]
+                            .map((Map<int, String> duplex) => DropdownMenuItem<int>(
+                                  value: duplex.keys.single,
+                                  child: Text(duplex.values.single),
+                                ))
+                            .toList(),
+                        value: _job.jobOptions.duplex,
                         onChanged: (val) {
-                          _job.jobOptions.color = val;
+                          _job.jobOptions.duplex = val;
                           joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                         },
-                        value: _job.jobOptions.color,
                       ),
-                    )
-                  : null,
-              (_job.jobInfo.pagecount * _job.jobOptions.copies < 2)
-                  ? null
-                  : Column(
-                      children: <Widget>[
-                        ListTile(
-                          onTap: null,
-                          title: Text('Duplex'),
-                          trailing: DropdownButton(
-                            items: <Map<int, String>>[
-                              {0: 'Aus'},
-                              {1: 'Lange Kante'},
-                              {2: 'Kurze Kante'},
-                            ]
-                                .map((Map<int, String> duplex) => DropdownMenuItem<int>(
-                                      value: duplex.keys.single,
-                                      child: Text(duplex.values.single),
-                                    ))
-                                .toList(),
-                            value: _job.jobOptions.duplex,
-                            onChanged: (val) {
-                              _job.jobOptions.duplex = val;
-                              joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                            },
-                          ),
-                        ),
-                        Divider(indent: 10.0),
-                      ],
                     ),
+                    Divider(indent: 10.0),
+                  ],
+                ),
               ListTile(
                 onTap: () {
                   _job.jobOptions.a3 = !_job.jobOptions.a3;
@@ -174,23 +172,22 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                   ),
                 ),
               ),
-              (_job.jobOptions.copies > 1)
-                  ? ListTile(
-                      onTap: () {
-                        _job.jobOptions.collate = !_job.jobOptions.collate;
-                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                      },
-                      leading: null,
-                      title: Text('Gleiche Seiten zusammenstellen'),
-                      trailing: Switch(
-                        onChanged: (val) {
-                          _job.jobOptions.collate = val;
-                          joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                        },
-                        value: _job.jobOptions.collate,
-                      ),
-                    )
-                  : null,
+              if (_job.jobOptions.copies > 1)
+                ListTile(
+                  onTap: () {
+                    _job.jobOptions.collate = !_job.jobOptions.collate;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                  },
+                  leading: null,
+                  title: Text('Gleiche Seiten zusammenstellen'),
+                  trailing: Switch(
+                    onChanged: (val) {
+                      _job.jobOptions.collate = val;
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    },
+                    value: _job.jobOptions.collate,
+                  ),
+                ),
               Divider(indent: 10.0),
               ListTile(
                 onTap: () {
@@ -202,54 +199,52 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 trailing: Text(_job.jobOptions.range.isEmpty ? 'Alle' : _job.jobOptions.range),
               ),
               Divider(indent: 10.0),
-              ((_job.jobInfo.pagecount * _job.jobOptions.copies) > 1)
-                  ? ListTile(
-                      onTap: null,
-                      title: Text('Seiten pro Blatt'),
-                      trailing: DropdownButton(
-                        items: [1, 2, 4]
-                            .map(
-                              (int value) => DropdownMenuItem<int>(
-                                    value: value,
-                                    child: Text(value.toString()),
-                                  ),
-                            )
-                            .toList(),
-                        value: _job.jobOptions.nup,
-                        onChanged: (val) {
-                          _job.jobOptions.nup = val;
-                          joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                        },
-                      ),
-                    )
-                  : null,
-              (_job.jobOptions.nup > 2)
-                  ? ListTile(
-                      onTap: null,
-                      title: Text('Reihenfolge auf Blatt'),
-                      trailing: DropdownButton(
-                        items: <Map<int, String>>[
-                          translateNupOrder(NupPageOrder.RIGHTTHENDOWN),
-                          translateNupOrder(NupPageOrder.DOWNTHENRIGHT),
-                          translateNupOrder(NupPageOrder.LEFTTHENDOWN),
-                          translateNupOrder(NupPageOrder.DOWNTHENLEFT),
-                        ]
-                            .map(
-                              (Map<int, String> order) => DropdownMenuItem<int>(
-                                    value: order.keys.single,
-                                    child: Text(order.values.single),
-                                  ),
-                            )
-                            .toList(),
-                        value: _job.jobOptions.nupPageOrder,
-                        onChanged: (val) {
-                          _job.jobOptions.nupPageOrder = val;
-                          joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                        },
-                      ),
-                    )
-                  : null,
-            ].where((widget) => widget != null).toList(),
+              if ((_job.jobInfo.pagecount * _job.jobOptions.copies) > 1)
+                ListTile(
+                  onTap: null,
+                  title: Text('Seiten pro Blatt'),
+                  trailing: DropdownButton(
+                    items: [1, 2, 4]
+                        .map(
+                          (int value) => DropdownMenuItem<int>(
+                            value: value,
+                            child: Text(value.toString()),
+                          ),
+                        )
+                        .toList(),
+                    value: _job.jobOptions.nup,
+                    onChanged: (val) {
+                      _job.jobOptions.nup = val;
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    },
+                  ),
+                ),
+              if (_job.jobOptions.nup > 2)
+                ListTile(
+                  onTap: null,
+                  title: Text('Reihenfolge auf Blatt'),
+                  trailing: DropdownButton(
+                    items: <Map<int, String>>[
+                      translateNupOrder(NupPageOrder.RIGHTTHENDOWN),
+                      translateNupOrder(NupPageOrder.DOWNTHENRIGHT),
+                      translateNupOrder(NupPageOrder.LEFTTHENDOWN),
+                      translateNupOrder(NupPageOrder.DOWNTHENLEFT),
+                    ]
+                        .map(
+                          (Map<int, String> order) => DropdownMenuItem<int>(
+                            value: order.keys.single,
+                            child: Text(order.values.single),
+                          ),
+                        )
+                        .toList(),
+                    value: _job.jobOptions.nupPageOrder,
+                    onChanged: (val) {
+                      _job.jobOptions.nupPageOrder = val;
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    },
+                  ),
+                ),
+            ],
           );
         } else if (state.isException) {
           if ((state.error as ApiException).statusCode == 400) {

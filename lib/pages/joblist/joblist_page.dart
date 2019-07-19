@@ -471,7 +471,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     if (uploadListener != null) uploadListener.cancel();
-    _intentDataStreamSubscription.cancel();
+    if (_intentDataStreamSubscription != null) _intentDataStreamSubscription.cancel();
     currentIndex = 0;
     selectableTiles = false;
     super.dispose();
