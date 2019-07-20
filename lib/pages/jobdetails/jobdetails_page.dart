@@ -5,8 +5,8 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_download.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../widgets/details_dialog.dart';
@@ -29,6 +29,8 @@ class JobdetailsPage extends StatefulWidget {
 }
 
 class _JobdetailsPageState extends State<JobdetailsPage> {
+  static const MethodChannel _mChannel = const MethodChannel('de.upb.copyclient/download_path');
+
   @override
   Widget build(BuildContext context) {
     //final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
@@ -98,10 +100,14 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     Scaffold.of(context).showSnackBar(downloadSnack);
     pdfBloc.state.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
-        final String _basePath =
-            (await Directory((await getExternalStorageDirectory()).path + '/../../../../Download')
-                    .create())
-                .path;
+        String downloadPath;
+        try {
+          downloadPath = await _mChannel.invokeMethod('getDownloadsDirectory');
+          print(downloadPath);
+        } catch (e) {
+          print(e.toString());
+        }
+        final String _basePath = (await Directory(downloadPath).create()).path;
         String _path;
         (widget._job.jobInfo.filename.isEmpty)
             ? _path = _basePath + '/${widget._job.id}.pdf'
