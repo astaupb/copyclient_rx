@@ -12,6 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logging/logging.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -29,6 +30,8 @@ class JoblistPage extends StatefulWidget {
 }
 
 class _JoblistPageState extends State<JoblistPage> {
+  Logger _log = Logger('JoblistPage');
+
   PrintQueueBloc printQueueBloc;
   JoblistBloc joblistBloc;
   UploadBloc uploadBloc;
@@ -391,8 +394,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text("Scanner"),
-                    Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
-                        textScaleFactor: 0.7),
+                    Text(lockedPrinter ?? 'Keiner}', textScaleFactor: 0.7),
                   ],
                 ),
               ),
@@ -437,9 +439,8 @@ Oben rechts kannst du neue Dokumente hochladen.
                 title: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Text("Kopierer"),
-                    Text('Reservierter Drucker: ${lockedPrinter ?? 'Keiner'}',
-                        textScaleFactor: 0.7),
+                    Text("Kopierer:"),
+                    Text(lockedPrinter ?? 'Keiner', textScaleFactor: 0.7),
                   ],
                 ),
               ),
@@ -505,21 +506,23 @@ Oben rechts kannst du neue Dokumente hochladen.
     _cancelTimers();
 
     // For sharing images coming from outside the app while the app is in the memory
-    if (Platform.isAndroid) _intentDataStreamSubscription =
-        ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
-      // Call reset method if you don't want to see this callback again.
-      ReceiveSharingIntent.reset();
-      _handleIntentValue(value);
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-    });
+    if (Platform.isAndroid)
+      _intentDataStreamSubscription =
+          ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
+        // Call reset method if you don't want to see this callback again.
+        ReceiveSharingIntent.reset();
+        _handleIntentValue(value);
+      }, onError: (err) {
+        print("getIntentDataStream error: $err");
+      });
 
     // For sharing images coming from outside the app while the app is closed
-    if (Platform.isAndroid) ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
-      // Call reset method if you don't want to see this callback again.
-      ReceiveSharingIntent.reset();
-      _handleIntentValue(value);
-    });
+    if (Platform.isAndroid)
+      ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
+        // Call reset method if you don't want to see this callback again.
+        ReceiveSharingIntent.reset();
+        _handleIntentValue(value);
+      });
 
     super.initState();
   }
@@ -691,6 +694,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _lockPrinter() async {
     String target;
     if (lockedPrinter == null) {
+      _log.fine('_lockPrinter: lockedPrinter is null, trying dialog or camera');
       try {
         //target = "44332";
         if (cameraBloc.currentState.cameraDisabled) {
@@ -702,13 +706,16 @@ Oben rechts kannst du neue Dokumente hochladen.
           target = await BarcodeScanner.scan();
         }
       } catch (e) {
+        _log.severe(e.toString());
         setState(() => currentIndex = 0);
       }
     } else {
+      _log.fine('_lockPrinter: lockedPrinter != null, setting target to $lockedPrinter');
       target = lockedPrinter;
     }
 
     if (target != null) {
+      _log.fine('_lockPrinter: target is set to $target, try to lock that printer now');
       printQueueListener = printQueueBloc.state.listen((PrintQueueState state) {
         if (state.isException) {
           if ((state.error as ApiException).statusCode == 423)
@@ -890,19 +897,17 @@ Oben rechts kannst du neue Dokumente hochladen.
   }
 
   void _unlockPrinter() async {
-    printQueueBloc.onRefresh();
     StreamSubscription listener;
     listener = printQueueBloc.state.listen((PrintQueueState state) {
       if (state.isLocked) {
         printQueueBloc.onDelete();
-        setState(
-          () {
-            lockedPrinter = null;
-            currentIndex = 0;
-          },
-        );
+        setState(() {
+          lockedPrinter = null;
+          currentIndex = 0;
+        });
         listener.cancel();
       }
     });
+    printQueueBloc.onRefresh();
   }
 }
