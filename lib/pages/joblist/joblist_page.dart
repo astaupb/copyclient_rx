@@ -7,7 +7,6 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -21,6 +20,7 @@ import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import '../../widgets/select_printer_dialog.dart';
 import '../jobdetails/jobdetails.dart';
+import 'joblist_bottom_bar.dart';
 import 'joblist_deletion_modal.dart';
 import 'joblist_tile.dart';
 
@@ -332,119 +332,11 @@ Oben rechts kannst du neue Dokumente hochladen.
           ),
         ),
         bottomNavigationBar: Builder(
-          builder: (BuildContext context) => BubbleBottomBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            opacity: .2,
-            currentIndex: currentIndex,
-            onTap: (int index) => _changePage(context, index),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            elevation: 16,
-            items: <BubbleBottomBarItem>[
-              BubbleBottomBarItem(
-                backgroundColor: Colors.red,
-                icon: Icon(
-                  Icons.cancel,
-                  color: Theme.of(context).textTheme.title.color,
-                ),
-                activeIcon: Icon(
-                  Icons.list,
-                  color: Colors.redAccent,
-                ),
-                title: Text("Liste"),
-              ),
-              BubbleBottomBarItem(
-                backgroundColor: Colors.deepPurple,
-                icon: Column(
-                  children: <Widget>[
-                    Icon(
-                      Icons.scanner,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    Icon(
-                      Icons.picture_as_pdf,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                  ],
-                ),
-                activeIcon: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.scanner,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16.0,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    Icon(
-                      Icons.picture_as_pdf,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                  ],
-                ),
-                title: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text("Scanner"),
-                    Text(lockedPrinter ?? 'Keiner}', textScaleFactor: 0.7),
-                  ],
-                ),
-              ),
-              BubbleBottomBarItem(
-                backgroundColor: Colors.indigo,
-                icon: Column(
-                  children: <Widget>[
-                    Icon(
-                      Icons.scanner,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    Icon(
-                      Icons.print,
-                      size: 16.0,
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                  ],
-                ),
-                activeIcon: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.scanner,
-                      color: Colors.indigoAccent,
-                    ),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16.0,
-                      color: Colors.indigoAccent,
-                    ),
-                    Icon(
-                      Icons.print,
-                      color: Colors.indigoAccent,
-                    ),
-                  ],
-                ),
-                title: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text("Kopierer:"),
-                    Text(lockedPrinter ?? 'Keiner', textScaleFactor: 0.7),
-                  ],
-                ),
-              ),
-            ],
+          builder: (BuildContext context) => JoblistBottomBar(
+            context,
+            lockedPrinter: lockedPrinter,
+            current: currentIndex,
+            onPressed: (int index) => _changePage(context, index),
           ),
         ),
       ),
