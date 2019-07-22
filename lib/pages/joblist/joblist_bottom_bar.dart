@@ -131,6 +131,7 @@ class JoblistBottomBar extends StatelessWidget {
       currentIndex: current,
       elevation: elevation,
       borderRadius: borderRadius,
+      backgroundColor: backgroundColor,
     );
   }
 }
