@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/tokens.dart';
 import 'package:copyclient_rx/user_agent_icons.dart';
 import 'package:flutter/material.dart';

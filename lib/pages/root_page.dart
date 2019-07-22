@@ -54,6 +54,24 @@ class _RootPageState extends State<RootPage> {
         builder: (BuildContext context, AuthState state) {
           if (state.isAuthorized) {
             if (state.persistent) store.insertToken(state.token);
+
+            _initBlocs();
+
+            final List blocs = [
+              joblistBloc,
+              userBloc,
+              uploadBloc,
+              journalBloc,
+              previewBloc,
+              pdfBloc,
+              printQueueBloc,
+              tokensBloc
+            ];
+
+            for (var bloc in blocs) {
+              bloc.state.listen(_for401);
+            }
+
             // AUTHORIZED AND READY TO HUSTLE
             joblistBloc.onStart(state.token);
             userBloc.onStart(state.token);
@@ -133,21 +151,6 @@ class _RootPageState extends State<RootPage> {
               ),
             );
           }
-          _initBlocs();
-          final List blocs = [
-            joblistBloc,
-            userBloc,
-            uploadBloc,
-            journalBloc,
-            previewBloc,
-            pdfBloc,
-            printQueueBloc,
-            tokensBloc
-          ];
-
-          for (var bloc in blocs) {
-            bloc.state.listen(_for401);
-          }
           return LoginPage(authBloc: authBloc);
         },
       ),
@@ -196,7 +199,7 @@ class _RootPageState extends State<RootPage> {
     if (state.isException && state.error.statusCode == 401) {
       authBloc.logout();
       await DBStore().clearTokens();
-      //Navigator.pop(context);
+      Navigator.of(context).popUntil(ModalRoute.withName('/'));
     }
   }
 
