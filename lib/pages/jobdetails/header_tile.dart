@@ -41,7 +41,7 @@ class _HeaderTileState extends State<HeaderTile> {
             children: <Widget>[
               ListTile(
                 title: Text(
-                  _job.jobInfo.filename,
+                  (_job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : _job.jobInfo.filename,
                   textScaleFactor: 1.3,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,

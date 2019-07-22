@@ -42,7 +42,7 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get title => Text(
-        job.jobInfo.filename,
+        (job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : job.jobInfo.filename,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );

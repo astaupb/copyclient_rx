@@ -36,7 +36,8 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     //final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget._job.jobInfo.filename),
+        title: Text(
+            (widget._job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : widget._job.jobInfo.filename),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),
