@@ -44,7 +44,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             onSelected: _onSelectActionMenu,
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<ActionButton>(
-                  value: ActionButton.deleteAll, child: Text('Alle Geräte ausloggen'))
+                  value: ActionButton.deleteAll, child: Text('Alle anderen Geräte ausloggen'))
             ],
           ),
         ],
@@ -123,13 +123,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   void _onSelectActionMenu(ActionButton action) {
     switch (action) {
       case ActionButton.deleteAll:
-        TokensBloc bloc = BlocProvider.of<TokensBloc>(context);
-        bloc.state.skip(lastTokens.length * 2).listen(
-              (_) => BlocProvider.of<AuthBloc>(context).logout(),
-            );
-        for (Token token in lastTokens) {
-          bloc.onDeleteToken(token.id);
-        }
+        BlocProvider.of<TokensBloc>(context).onDeleteTokens();
         break;
       default:
         return;
