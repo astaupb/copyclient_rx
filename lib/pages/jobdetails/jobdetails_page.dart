@@ -130,7 +130,12 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         //Navigator.of(context).pop();
         final PdfFile pdf = state.value.last;
         await Share.file(
-            'Copyclient Download', widget._job.jobInfo.filename, pdf.file, 'application/pdf');
+            'Copyclient Download',
+            (widget._job.jobInfo.filename == '')
+                ? 'DOC_${DateTime.now().toString()}.pdf'
+                : widget._job.jobInfo.filename,
+            pdf.file,
+            'application/pdf');
         listen.cancel();
       }
     });
