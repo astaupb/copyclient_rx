@@ -36,10 +36,10 @@ class CopyclientState extends State<Copyclient> {
       child: BlocBuilder(
         bloc: themeBloc,
         builder: (BuildContext context, ThemeState state) => MaterialApp(
-              title: 'Copyclient',
-              home: RootPage(),
-              theme: state.theme,
-            ),
+          title: 'Copyclient',
+          home: RootPage(),
+          theme: state.theme,
+        ),
       ),
     );
   }

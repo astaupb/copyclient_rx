@@ -70,6 +70,7 @@ class _HeaderTileState extends State<HeaderTile> {
                                 return Text(
                                     'Fehler beim Download der PDF: ${state.error.toString()}');
                               }
+                              return Text('');
                             },
                           )
                         : Container(width: 0.0, height: 0.0),

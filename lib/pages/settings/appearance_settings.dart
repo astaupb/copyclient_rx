@@ -34,8 +34,8 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               return ListTile(
                 title: Text('Dunkles Theme'),
                 onTap: () => _changeTheme(
-                      (state.theme.brightness == Brightness.dark) ? false : true,
-                    ),
+                  (state.theme.brightness == Brightness.dark) ? false : true,
+                ),
                 trailing: Switch(
                   onChanged: (bool value) => _changeTheme(value),
                   value: (state.theme.brightness == Brightness.dark) ? true : false,

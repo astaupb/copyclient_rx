@@ -54,9 +54,9 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                       ]
                           .map(
                             (Map<int, String> duplex) => DropdownMenuItem<int>(
-                                  value: duplex.keys.single,
-                                  child: Text(duplex.values.single),
-                                ),
+                              value: duplex.keys.single,
+                              child: Text(duplex.values.single),
+                            ),
                           )
                           .toList(),
                       value: jobOptions.duplex,
@@ -127,9 +127,9 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                   items: [1, 2, 4]
                       .map(
                         (int value) => DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(value.toString()),
-                            ),
+                          value: value,
+                          child: Text(value.toString()),
+                        ),
                       )
                       .toList(),
                   value: jobOptions.nup,
@@ -149,9 +149,9 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                   ]
                       .map(
                         (Map<int, String> order) => DropdownMenuItem<int>(
-                              value: order.keys.single,
-                              child: Text(order.values.single),
-                            ),
+                          value: order.keys.single,
+                          child: Text(order.values.single),
+                        ),
                       )
                       .toList(),
                   value: jobOptions.nupPageOrder,

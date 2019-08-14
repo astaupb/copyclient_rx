@@ -121,7 +121,6 @@ class JoblistBottomBar extends StatelessWidget {
         ),
       ];
 
-
   @override
   Widget build(BuildContext context) {
     return BubbleBottomBar(

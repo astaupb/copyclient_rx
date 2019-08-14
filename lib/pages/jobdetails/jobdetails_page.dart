@@ -29,7 +29,7 @@ class JobdetailsPage extends StatefulWidget {
 }
 
 class _JobdetailsPageState extends State<JobdetailsPage> {
-  static const MethodChannel _mChannel = const MethodChannel('de.upb.copyclient/download_path');
+  static const MethodChannel _mChannel = MethodChannel('de.upb.copyclient/download_path');
 
   @override
   Widget build(BuildContext context) {

@@ -47,6 +47,8 @@ class DBStore {
       List<dynamic> results = await batch.commit();
       if (results.isNotEmpty) {
         return results[0][0]['mapValue'];
+      } else {
+        return '';
       }
     });
   }

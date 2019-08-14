@@ -147,6 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     } else {
                       return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
                     }
+                    return '';
                   },
                   onSaved: (value) => _password = value,
                 ),

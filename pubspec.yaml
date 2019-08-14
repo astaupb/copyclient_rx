@@ -1,7 +1,7 @@
 name: copyclient_rx
 description: Official AStA Copyservice app using the AStAPrint backend
 
-version: 1.1.0+65
+version: 1.1.0+68
 
 environment:
   sdk: ">=2.3.2 <3.0.0"
@@ -14,7 +14,6 @@ dependencies:
   blocs_copyclient:
     git: https://git.uni-paderborn.de/asta/blocs_copyclient.git
     #path: ../blocs_copyclient/
-  #cupertino_icons: ^0.1.2
   flutter_bloc: ^0.19.0
   http: ^0.12.0+2
   logging: ^0.11.3+2

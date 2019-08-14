@@ -258,6 +258,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
         } else {
           return Center(child: CircularProgressIndicator());
         }
+        return Container(width: 0.0, height: 0.0);
       },
     );
   }

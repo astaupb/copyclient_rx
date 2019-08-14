@@ -11,7 +11,7 @@
 ///      fonts:
 ///       - asset: fonts/UserAgentIcons.ttf
 ///
-/// 
+///
 /// * Font Awesome, Copyright (C) 2016 by Dave Gandy
 ///         Author:    Dave Gandy
 ///         License:   SIL ()
@@ -24,8 +24,8 @@ class UserAgentIcons {
 
   static const _kFontFam = 'UserAgentIcons';
 
-  static const IconData curl_symbol = const IconData(0xe800, fontFamily: _kFontFam);
-  static const IconData safari = const IconData(0xf267, fontFamily: _kFontFam);
-  static const IconData chrome = const IconData(0xf268, fontFamily: _kFontFam);
-  static const IconData firefox = const IconData(0xf269, fontFamily: _kFontFam);
+  static const IconData curl_symbol = IconData(0xe800, fontFamily: _kFontFam);
+  static const IconData safari = IconData(0xf267, fontFamily: _kFontFam);
+  static const IconData chrome = IconData(0xf268, fontFamily: _kFontFam);
+  static const IconData firefox = IconData(0xf269, fontFamily: _kFontFam);
 }

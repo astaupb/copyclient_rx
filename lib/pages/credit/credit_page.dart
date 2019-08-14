@@ -93,12 +93,12 @@ class _CreditPageState extends State<CreditPage> {
             Divider(height: 24.0),
             Builder(
               builder: (BuildContext context) => Padding(
-                    padding: EdgeInsets.only(left: 24.0, right: 24.0),
-                    child: RaisedButton(
-                      onPressed: () => _onScanCredit(context),
-                      child: Text('Guthabencode einscannen'),
-                    ),
-                  ),
+                padding: EdgeInsets.only(left: 24.0, right: 24.0),
+                child: RaisedButton(
+                  onPressed: () => _onScanCredit(context),
+                  child: Text('Guthabencode einscannen'),
+                ),
+              ),
             ),
             Divider(height: 24.0),
             ListTile(title: Text('Letzte Transaktionen')),
@@ -161,9 +161,9 @@ class _CreditPageState extends State<CreditPage> {
   List<DropdownMenuItem<int>> _getDropdownItems() => dropdownValues
       .map(
         (int value) => DropdownMenuItem<int>(
-              value: value,
-              child: Text('$value.00€'),
-            ),
+          value: value,
+          child: Text('$value.00€'),
+        ),
       )
       .toList()
         ..add(DropdownMenuItem(
@@ -186,8 +186,8 @@ class _CreditPageState extends State<CreditPage> {
           return json.decode(utf8.decode(response.bodyBytes))['link'];
         } else if (response.statusCode == 400) {
           print('error getting payment link: ${response.body}');
-          return '';
         }
+        return '';
       });
     }
     return '';
@@ -249,16 +249,16 @@ class _CreditPageState extends State<CreditPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) => WebviewScaffold(
-                url: _link,
-                appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
-                withJavascript: true,
-                clearCache: true,
-                clearCookies: true,
-                withLocalStorage: false,
-                withZoom: false,
-                allowFileURLs: false,
-                supportMultipleWindows: false,
-              ),
+            url: _link,
+            appBar: AppBar(title: Text('PayPal Bezahlvorgang')),
+            withJavascript: true,
+            clearCache: true,
+            clearCookies: true,
+            withLocalStorage: false,
+            withZoom: false,
+            allowFileURLs: false,
+            supportMultipleWindows: false,
+          ),
         ),
       );
 

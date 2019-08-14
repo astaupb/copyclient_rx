@@ -75,7 +75,7 @@ class UserSettingsPage extends StatelessWidget {
                             ),
                           );
                         else
-                          Container(width: 0.0, height: 0.0);
+                          return Container(width: 0.0, height: 0.0);
                       },
                     ),
                   ],

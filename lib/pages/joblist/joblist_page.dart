@@ -314,6 +314,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                                 ],
                               );
                           }
+                          return Container(width: 0.0, height: 0.0);
                         },
                       );
                     },
