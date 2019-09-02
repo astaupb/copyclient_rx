@@ -24,6 +24,9 @@ class _PreviewGridState extends State<PreviewGrid> {
 
   _PreviewGridState(this.job);
 
+  double currentScale = 1.0;
+  Offset currentFocalPoint;
+
   Map<String, int> getImageDimensions(List<int> imageBytes) {
     Map<String, int> _dim = {'width': 0, 'height': 0};
     int i;
@@ -71,194 +74,211 @@ class _PreviewGridState extends State<PreviewGrid> {
       builder: (BuildContext context, JoblistState state) {
         if (state.isResult) {
           job = state.value.singleWhere((Job job) => job.id == this.job.id);
-          return BlocBuilder(
-            bloc: previewBloc,
-            builder: (BuildContext context, PreviewState state) {
-              if (state.isResult && state.value.any(setsMatch)) {
-                PreviewSet previewSet = state.value.singleWhere(setsMatch);
-                Map<String, int> size = getImageDimensions(previewSet.previews[0]);
-                bool _portrait = (size['width'] < size['height']);
+          return GestureDetector(
+            onScaleStart: (ScaleStartDetails scale) {
+              print(scale);
+              currentFocalPoint = scale.focalPoint;
+            },
+            onScaleUpdate: (ScaleUpdateDetails scale) {
+              print(scale);
+              currentScale = scale.scale;
+            },
+            onScaleEnd: (ScaleEndDetails scale) {
+              print(scale);
+              //currentScale = 1.0;
+            },
+            child: Transform.scale(
+              scale: currentScale,
+              child: BlocBuilder(
+                bloc: previewBloc,
+                builder: (BuildContext context, PreviewState state) {
+                  if (state.isResult && state.value.any(setsMatch)) {
+                    PreviewSet previewSet = state.value.singleWhere(setsMatch);
+                    Map<String, int> size = getImageDimensions(previewSet.previews[0]);
+                    bool _portrait = (size['width'] < size['height']);
 
-                if (job.jobInfo.pagecount > 1 && job.jobOptions.nup > 1) {
-                  if ((_portrait && job.jobOptions.nup == 4) ||
-                      (!_portrait && job.jobOptions.nup == 2)) {
-                    /// for portrait nup4 pages or landscape nup2 pages
-                    return Stack(
-                      fit: StackFit.passthrough,
-                      children: <Widget>[
-                        Container(
-                          height: ((_portrait && job.jobOptions.nup == 4) ||
-                                  (!_portrait && job.jobOptions.nup == 2))
-                              ? 450.0
-                              : 250.0,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: MemoryImage(
-                                previewSet.previews[0],
-                                scale: 1.4,
-                              ),
-                              fit: BoxFit.none,
-                            ),
-                          ),
-                          child: BackdropFilter(
-                            filter: dui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                            child: Container(
-                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    if (job.jobInfo.pagecount > 1 && job.jobOptions.nup > 1) {
+                      if ((_portrait && job.jobOptions.nup == 4) ||
+                          (!_portrait && job.jobOptions.nup == 2)) {
+                        /// for portrait nup4 pages or landscape nup2 pages
+                        return Stack(
+                          fit: StackFit.passthrough,
                           children: <Widget>[
                             Container(
-                              margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                              padding: EdgeInsets.all(5.0),
-                              alignment: Alignment.center,
-                              color: Colors.white,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.memory(
+                              height: ((_portrait && job.jobOptions.nup == 4) ||
+                                      (!_portrait && job.jobOptions.nup == 2))
+                                  ? 450.0
+                                  : 250.0,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: MemoryImage(
                                     previewSet.previews[0],
-                                    width: (job.jobOptions.nup > 2) ? 150.0 : 300,
+                                    scale: 1.4,
                                   ),
-                                  Image.memory(
-                                    previewSet.previews[(_portrait &&
-                                            job.jobOptions.nup == 4 &&
-                                            job.jobInfo.pagecount > 2)
-                                        ? 2
-                                        : 1],
-                                    width: (job.jobOptions.nup > 2) ? 150.0 : 300,
-                                  ),
-                                ],
+                                  fit: BoxFit.none,
+                                ),
+                              ),
+                              child: BackdropFilter(
+                                filter: dui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                                child: Container(
+                                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                                ),
                               ),
                             ),
-                            if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
-                              Container(
-                                margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                                padding: EdgeInsets.all(5.0),
-                                alignment: Alignment.center,
-                                color: Colors.white,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image.memory(
-                                      previewSet
-                                          .previews[(_portrait && job.jobOptions.nup == 4) ? 1 : 2],
-                                      width: 150.0,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                  padding: EdgeInsets.all(5.0),
+                                  alignment: Alignment.center,
+                                  color: Colors.white,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Image.memory(
+                                        previewSet.previews[0],
+                                        width: (job.jobOptions.nup > 2) ? 150.0 : 300,
+                                      ),
+                                      Image.memory(
+                                        previewSet.previews[(_portrait &&
+                                                job.jobOptions.nup == 4 &&
+                                                job.jobInfo.pagecount > 2)
+                                            ? 2
+                                            : 1],
+                                        width: (job.jobOptions.nup > 2) ? 150.0 : 300,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
+                                  Container(
+                                    margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                                    padding: EdgeInsets.all(5.0),
+                                    alignment: Alignment.center,
+                                    color: Colors.white,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Image.memory(
+                                          previewSet.previews[
+                                              (_portrait && job.jobOptions.nup == 4) ? 1 : 2],
+                                          width: 150.0,
+                                        ),
+                                        (job.jobInfo.pagecount == 3)
+                                            ? Container(
+                                                width: 150,
+                                                height: 211.5,
+                                              )
+                                            : Image.memory(
+                                                previewSet.previews[3],
+                                                width: 150.0,
+                                              ),
+                                      ],
                                     ),
-                                    (job.jobInfo.pagecount == 3)
-                                        ? Container(
-                                            width: 150,
-                                            height: 211.5,
-                                          )
-                                        : Image.memory(
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      } else if ((!_portrait && job.jobOptions.nup == 4) ||
+                          (_portrait && job.jobOptions.nup == 2)) {
+                        /// for landscape nup4 pages or portrait nup2 pages
+                        return Stack(
+                          fit: StackFit.passthrough,
+                          children: <Widget>[
+                            Container(
+                              height: (!_portrait && job.jobOptions.nup == 2) ? 450.0 : 250.0,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: MemoryImage(
+                                    previewSet.previews[0],
+                                    scale: 1.4,
+                                  ),
+                                  fit: BoxFit.none,
+                                ),
+                              ),
+                              child: BackdropFilter(
+                                filter: dui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                                child: Container(
+                                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                                ),
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(top: 5.0),
+                                  padding: EdgeInsets.all(5.0),
+                                  alignment: Alignment.center,
+                                  color: Colors.white,
+                                  width: 310.0,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Image.memory(
+                                        previewSet.previews[0],
+                                        width: 150.0,
+                                      ),
+                                      Image.memory(
+                                        previewSet.previews[1],
+                                        width: 150.0,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
+                                  Container(
+                                    margin: EdgeInsets.only(bottom: 5.0),
+                                    padding: EdgeInsets.all(5.0),
+                                    alignment: Alignment.center,
+                                    color: Colors.white,
+                                    width: 310.0,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Image.memory(
+                                          previewSet.previews[2],
+                                          width: 150.0,
+                                        ),
+                                        if (job.jobInfo.pagecount > 3)
+                                          Image.memory(
                                             previewSet.previews[3],
                                             width: 150.0,
-                                          ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    );
-                  } else if ((!_portrait && job.jobOptions.nup == 4) ||
-                      (_portrait && job.jobOptions.nup == 2)) {
-                    /// for landscape nup4 pages or portrait nup2 pages
-                    return Stack(
-                      fit: StackFit.passthrough,
-                      children: <Widget>[
-                        Container(
-                          height: (!_portrait && job.jobOptions.nup == 2) ? 450.0 : 250.0,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: MemoryImage(
-                                previewSet.previews[0],
-                                scale: 1.4,
-                              ),
-                              fit: BoxFit.none,
-                            ),
-                          ),
-                          child: BackdropFilter(
-                            filter: dui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                            child: Container(
-                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.3)),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(top: 5.0),
-                              padding: EdgeInsets.all(5.0),
-                              alignment: Alignment.center,
-                              color: Colors.white,
-                              width: 310.0,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Image.memory(
-                                    previewSet.previews[0],
-                                    width: 150.0,
-                                  ),
-                                  Image.memory(
-                                    previewSet.previews[1],
-                                    width: 150.0,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (job.jobInfo.pagecount > 2 && job.jobOptions.nup > 2)
-                              Container(
-                                margin: EdgeInsets.only(bottom: 5.0),
-                                padding: EdgeInsets.all(5.0),
-                                alignment: Alignment.center,
-                                color: Colors.white,
-                                width: 310.0,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image.memory(
-                                      previewSet.previews[2],
-                                      width: 150.0,
+                                          )
+                                        else
+                                          Container(
+                                            width: 150.0,
+                                          )
+                                      ],
                                     ),
-                                    if (job.jobInfo.pagecount > 3)
-                                      Image.memory(
-                                        previewSet.previews[3],
-                                        width: 150.0,
-                                      )
-                                    else
-                                      Container(
-                                        width: 150.0,
-                                      )
-                                  ],
-                                ),
-                              ),
+                                  ),
+                              ],
+                            ),
                           ],
+                        );
+                      }
+                    } else {
+                      return Container(
+                        margin: EdgeInsets.all(10.0),
+                        alignment: Alignment.center,
+                        color: Colors.white,
+                        child: Image.memory(
+                          previewSet.previews[0],
                         ),
-                      ],
-                    );
+                      );
+                    }
                   }
-                } else {
-                  return Container(
-                    margin: EdgeInsets.all(10.0),
-                    alignment: Alignment.center,
-                    color: Colors.white,
-                    child: Image.memory(
-                      previewSet.previews[0],
-                    ),
-                  );
-                }
-              }
-              return Center(child: CircularProgressIndicator());
-            },
+                  return Center(child: CircularProgressIndicator());
+                },
+              ),
+            ),
           );
         } else
           return Center(child: CircularProgressIndicator());

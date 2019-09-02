@@ -11,4 +11,4 @@ build_apk:
     - flutter build apk
   artifacts:
     paths:
-    - example/build/app/outputs/apk
+    - build/app/outputs/apk

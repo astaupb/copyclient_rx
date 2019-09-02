@@ -19,8 +19,7 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
-  static const MethodChannel _mChannel =
-      MethodChannel('de.upb.copyclient/download_path');
+  static const MethodChannel _mChannel = MethodChannel('de.upb.copyclient/download_path');
   JournalBloc journalBloc;
 
   @override
@@ -32,9 +31,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Builder(
               builder: (BuildContext context) => IconButton(
                     icon: Icon(Icons.share),
-                    onPressed: () => (Platform.isIOS)
-                        ? _onExportJournal(context, true)
-                        : _onShowShare(context),
+                    onPressed: () =>
+                        (Platform.isIOS) ? _onExportJournal(context, true) : _onShowShare(context),
                     tooltip: 'Transaktionen als PDF exportieren',
                   )),
         ],
@@ -66,8 +64,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   }
                   return Container(
                     color: (index % 2 == 1) ? Colors.black12 : null,
-                    child:
-                        TransactionsTile(state.value.transactions[index - 1]),
+                    child: TransactionsTile(state.value.transactions[index - 1]),
                   );
                 },
               );
@@ -104,22 +101,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
       pdfListener = pdfCreation.state.listen((PdfCreationState state) async {
         if (state.isResult) {
           if (!share) {
-            await PermissionHandler()
-                .shouldShowRequestPermissionRationale(PermissionGroup.storage);
-            await PermissionHandler()
-                .requestPermissions([PermissionGroup.storage]);
+            await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
+            await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
             String downloadPath;
             try {
-              downloadPath =
-                  await _mChannel.invokeMethod('getDownloadsDirectory');
+              downloadPath = await _mChannel.invokeMethod('getDownloadsDirectory');
             } catch (e) {
               print(e.toString());
             }
-            final String _basePath =
-                (await Directory(downloadPath).create()).path;
-            await File(
-                    '$_basePath/transaktionen_${DateTime.now().toIso8601String()}.pdf')
+            final String _basePath = (await Directory(downloadPath).create()).path;
+            await File('$_basePath/transaktionen_${DateTime.now().toIso8601String()}.pdf')
                 .writeAsBytes(state.value, flush: true);
 
             Scaffold.of(context).showSnackBar(doneSnack);
