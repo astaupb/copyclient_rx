@@ -6,7 +6,6 @@ stages:
 build_apk:
   stage: build
   script:
-    - cd example
     - flutter channel stable
     - flutter upgrade
     - flutter build apk
