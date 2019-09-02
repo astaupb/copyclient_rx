@@ -1,0 +1,15 @@
+image: bchabord/flutter-android-docker:latest
+
+stages:
+  - build
+
+build_apk:
+  stage: build
+  script:
+    - cd example
+    - flutter channel stable
+    - flutter upgrade
+    - flutter build apk
+  artifacts:
+    paths:
+    - example/build/app/outputs/apk
