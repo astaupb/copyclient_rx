@@ -29,15 +29,15 @@ class JobdetailsPage extends StatefulWidget {
 }
 
 class _JobdetailsPageState extends State<JobdetailsPage> {
-  static const MethodChannel _mChannel = MethodChannel('de.upb.copyclient/download_path');
+  static const MethodChannel _mChannel =
+      MethodChannel('de.upb.copyclient/download_path');
 
   @override
   Widget build(BuildContext context) {
     //final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            (widget._job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : widget._job.jobInfo.filename),
+        title: Text('Jobdetails'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),
@@ -50,7 +50,8 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
           Builder(
             builder: (BuildContext context) => IconButton(
               icon: Icon(Icons.share),
-              onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
+              onPressed: () =>
+                  (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
             ),
           ),
           IconButton(
@@ -94,7 +95,8 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     );
     PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
 
-    await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
+    await PermissionHandler()
+        .shouldShowRequestPermissionRationale(PermissionGroup.storage);
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
     pdfBloc.onGetPdf(widget._job.id);

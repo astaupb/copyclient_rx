@@ -16,10 +16,15 @@ class JoblistTile extends ListTile {
   final String directPrinter;
 
   JoblistTile(this.context, this.index, this.job,
-      {this.onLongTap, this.onPress, this.onPressPrint, this.chosen = false, this.directPrinter});
+      {this.onLongTap,
+      this.onPress,
+      this.onPressPrint,
+      this.chosen = false,
+      this.directPrinter});
 
   @override
-  EdgeInsetsGeometry get contentPadding => EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
+  EdgeInsetsGeometry get contentPadding =>
+      EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
 
   @override
   Widget get leading => null;
@@ -35,14 +40,19 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get subtitle => Text(
-        '${DateTime.fromMillisecondsSinceEpoch(job.timestamp * 1000)}'.split('.')[0],
+        '${DateTime.fromMillisecondsSinceEpoch(job.timestamp * 1000)}'
+            .split('.')[0],
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
 
   @override
   Widget get title => Text(
-        (job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : job.jobInfo.filename,
+        (job.jobOptions.displayName.isNotEmpty)
+            ? job.jobOptions.displayName
+            : (job.jobInfo.filename.isEmpty)
+                ? 'Ohne Titel'
+                : job.jobInfo.filename,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
@@ -63,14 +73,17 @@ class JoblistTile extends ListTile {
                       children: <Widget>[
                         Icon(
                           Icons.favorite,
-                          color: (job.jobOptions.keep) ? Color(0xffff58ad) : Colors.grey,
+                          color: (job.jobOptions.keep)
+                              ? Color(0xffff58ad)
+                              : Colors.grey,
                         )
                       ],
                     ),
                     Column(
                       children: [
                         Icon(Icons.color_lens,
-                            color: (job.jobInfo.colored > 0 && job.jobOptions.color)
+                            color: (job.jobInfo.colored > 0 &&
+                                    job.jobOptions.color)
                                 ? Colors.teal[800]
                                 : Colors.grey),
                       ],
@@ -78,7 +91,9 @@ class JoblistTile extends ListTile {
                     Column(
                       children: [
                         Icon(Icons.photo_size_select_large,
-                            color: (job.jobOptions.a3) ? Colors.teal[800] : Colors.grey),
+                            color: (job.jobOptions.a3)
+                                ? Colors.teal[800]
+                                : Colors.grey),
                       ],
                     ),
                   ],

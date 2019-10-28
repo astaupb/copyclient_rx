@@ -50,7 +50,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "0abdab301619c91e5f7dc918dca931e35529b049"
+      resolved-ref: "2ef4b08f8a5d32da556c179c5c3d6445ae88df8e"
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
     version: "0.1.0"
@@ -156,7 +156,7 @@ packages:
       name: image
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   js:
     dependency: transitive
     description:
@@ -177,7 +177,7 @@ packages:
       name: matcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.5"
+    version: "0.12.6"
   meta:
     dependency: transitive
     description:
@@ -191,7 +191,7 @@ packages:
       name: package_info
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0+6"
+    version: "0.4.0+10"
   path:
     dependency: transitive
     description:
@@ -205,14 +205,14 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0"
+    version: "1.4.0"
   pdf:
     dependency: transitive
     description:
       name: pdf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.22"
+    version: "1.3.23"
   pedantic:
     dependency: transitive
     description:
@@ -226,7 +226,7 @@ packages:
       name: permission_handler
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.2"
+    version: "3.3.0"
   petitparser:
     dependency: transitive
     description:
@@ -247,14 +247,14 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.0+1"
   quiver:
     dependency: transitive
     description:
       name: quiver
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.1.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
@@ -270,7 +270,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.22.3"
+    version: "0.22.4"
   sky_engine:
     dependency: transitive
     description: flutter
