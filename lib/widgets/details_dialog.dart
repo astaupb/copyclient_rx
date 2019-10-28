@@ -37,7 +37,8 @@ class DetailsDialog extends SimpleDialog {
                 title: Text('Zeitstempel:'),
                 subtitle: Text(_job.timestamp.toString()),
                 onLongPress: () {
-                  Clipboard.setData(ClipboardData(text: _job.timestamp.toString()));
+                  Clipboard.setData(
+                      ClipboardData(text: _job.timestamp.toString()));
                 },
               ),
               Divider(),
@@ -50,37 +51,53 @@ class DetailsDialog extends SimpleDialog {
         DefaultTextStyle.merge(
           style: descTextStyle,
           child: Container(
-            padding: EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Icon(Icons.photo_size_select_large),
-                    Text('A3:'),
-                    Text(_job.jobInfo.a3 ? 'Ja' : 'Nein'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Icon(Icons.color_lens),
-                    Text('Farbseiten:'),
-                    Text(
-                      _job.jobInfo.colored.toString(),
-                      textScaleFactor: 0.9,
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Icon(Icons.filter_none),
-                    Text('Seiten:'),
-                    Text(_job.jobInfo.pagecount.toString()),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Icon(Icons.photo_size_select_large),
+                          Text('A3:'),
+                          Text(_job.jobInfo.a3 ? 'Ja' : 'Nein'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Icon(Icons.color_lens),
+                          Text('Farbseiten:'),
+                          Text(
+                            _job.jobInfo.colored.toString(),
+                            textScaleFactor: 0.9,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      Column(
+                        children: [
+                          Icon(Icons.filter_none),
+                          Text('Seiten:'),
+                          Text(_job.jobInfo.pagecount.toString()),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Icon(Icons.landscape),
+                          Text('Querformat:'),
+                          Text(_job.jobInfo.landscape ? 'Ja' : 'Nein'),
+                        ],
+                      ),
+                    ],
+                  )
+                ],
+              )),
         )
       ];
 
