@@ -254,6 +254,21 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                     },
                   ),
                 ),*/
+                ListTile(
+                  onTap: () {
+                    _job.jobOptions.bypass = !_job.jobOptions.bypass;
+                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                  },
+                  leading: null,
+                  title: Text('Seiteneinzug (Bypass)'),
+                  trailing: Switch(
+                    onChanged: (val) {
+                      _job.jobOptions.bypass = val;
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                    },
+                    value: _job.jobOptions.bypass,
+                  ),
+                ),
             ],
           );
         } else if (state.isException) {
