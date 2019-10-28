@@ -81,7 +81,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                           {1: 'Lange Kante'},
                           {2: 'Kurze Kante'},
                         ]
-                            .map((Map<int, String> duplex) => DropdownMenuItem<int>(
+                            .map((Map<int, String> duplex) =>
+                                DropdownMenuItem<int>(
                                   value: duplex.keys.single,
                                   child: Text(duplex.values.single),
                                 ))
@@ -89,7 +90,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                         value: _job.jobOptions.duplex,
                         onChanged: (val) {
                           _job.jobOptions.duplex = val;
-                          joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                          joblistBloc.onUpdateOptionsById(
+                              _job.id, _job.jobOptions);
                         },
                       ),
                     ),
@@ -115,7 +117,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
               ListTile(
                 onTap: () => showDialog(
                     context: context,
-                    builder: (BuildContext context) => _copiesDialog(context, joblistBloc)),
+                    builder: (BuildContext context) =>
+                        _copiesDialog(context, joblistBloc)),
                 leading: Icon(Icons.clear_all),
                 title: Text('Anzahl Kopien'),
                 trailing: Container(
@@ -130,11 +133,13 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                                 onPressed: () {
                                   if (_job.jobOptions.copies > 1) {
                                     _job.jobOptions.copies--;
-                                    joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                                    joblistBloc.onUpdateOptionsById(
+                                        _job.id, _job.jobOptions);
                                   } else
                                     Scaffold.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Nicht weniger als eine Kopie möglich'),
+                                        content: Text(
+                                            'Nicht weniger als eine Kopie möglich'),
                                       ),
                                     );
                                 },
@@ -158,11 +163,13 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                           onPressed: () {
                             if (_job.jobOptions.copies < 1000) {
                               _job.jobOptions.copies++;
-                              joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                              joblistBloc.onUpdateOptionsById(
+                                  _job.id, _job.jobOptions);
                             } else
                               Scaffold.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Nicht mehr als 999 Kopien möglich'),
+                                  content:
+                                      Text('Nicht mehr als 999 Kopien möglich'),
                                 ),
                               );
                           },
@@ -193,10 +200,13 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 onTap: () {
                   showDialog(
                       context: context,
-                      builder: (BuildContext context) => _rangeDialog(context, joblistBloc));
+                      builder: (BuildContext context) =>
+                          _rangeDialog(context, joblistBloc));
                 }, //open text edit
                 title: Text('Seitenbereich'),
-                trailing: Text(_job.jobOptions.range.isEmpty ? 'Alle' : _job.jobOptions.range),
+                trailing: Text(_job.jobOptions.range.isEmpty
+                    ? 'Alle'
+                    : _job.jobOptions.range),
               ),
               Divider(indent: 10.0),
               if ((_job.jobInfo.pagecount * _job.jobOptions.copies) > 1)
@@ -219,7 +229,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                     },
                   ),
                 ),
-              if (_job.jobOptions.nup > 2)
+              /*if (_job.jobOptions.nup > 2)
                 ListTile(
                   onTap: null,
                   title: Text('Reihenfolge auf Blatt'),
@@ -243,7 +253,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                       joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                     },
                   ),
-                ),
+                ),*/
             ],
           );
         } else if (state.isException) {
@@ -287,7 +297,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     TextField(
-                      controller: TextEditingController(text: _job.jobOptions.copies.toString()),
+                      controller: TextEditingController(
+                          text: _job.jobOptions.copies.toString()),
                       decoration: InputDecoration(labelText: 'z.B. "4"'),
                       autofocus: true,
                       autocorrect: false,
@@ -308,7 +319,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                       child: Text('Okay'),
                       onPressed: () {
                         _job.jobOptions.copies = newCopies;
-                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                        joblistBloc.onUpdateOptionsById(
+                            _job.id, _job.jobOptions);
                         Navigator.of(context).pop();
                       },
                     ),
@@ -338,7 +350,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     TextField(
-                      controller: TextEditingController(text: _job.jobOptions.range),
+                      controller:
+                          TextEditingController(text: _job.jobOptions.range),
                       decoration: InputDecoration(labelText: 'z.B. "1,4-7,10"'),
                       autofocus: true,
                       autocorrect: false,
@@ -349,7 +362,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                       child: Text('Okay'),
                       onPressed: () {
                         _job.jobOptions.range = newRange;
-                        joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                        joblistBloc.onUpdateOptionsById(
+                            _job.id, _job.jobOptions);
                         Navigator.of(context).pop();
                       },
                     ),
