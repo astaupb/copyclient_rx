@@ -56,7 +56,9 @@ class _HeaderTileState extends State<HeaderTile> {
                       suffixIcon: Icon(Icons.edit),
                       border: InputBorder.none),
                   onSubmitted: (String value) {
-                    if (_job.jobOptions.displayName != value) {
+                    if (value == _job.jobInfo.filename) {
+                      _job.jobOptions.displayName = '';
+                    } else if (_job.jobOptions.displayName != value) {
                       _job.jobOptions.displayName = value;
                       BlocProvider.of<JoblistBloc>(context)
                           .onUpdateOptionsById(_job.id, _job.jobOptions);
