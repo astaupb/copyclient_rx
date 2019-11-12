@@ -65,7 +65,7 @@ class _PreviewGridState extends State<PreviewGrid> {
     final PreviewBloc previewBloc = BlocProvider.of<PreviewBloc>(context);
     final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
 
-    previewBloc.getPreview(job);
+    previewBloc.onGetPreview(job);
 
     bool setsMatch(PreviewSet previewSet) => previewSet.jobId == job.id;
 

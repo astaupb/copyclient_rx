@@ -29,8 +29,7 @@ class JobdetailsPage extends StatefulWidget {
 }
 
 class _JobdetailsPageState extends State<JobdetailsPage> {
-  static const MethodChannel _mChannel =
-      MethodChannel('de.upb.copyclient/download_path');
+  static const MethodChannel _mChannel = MethodChannel('de.upb.copyclient/download_path');
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +49,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
           Builder(
             builder: (BuildContext context) => IconButton(
               icon: Icon(Icons.share),
-              onPressed: () =>
-                  (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
+              onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
             ),
           ),
           IconButton(
@@ -95,13 +93,12 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     );
     PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
 
-    await PermissionHandler()
-        .shouldShowRequestPermissionRationale(PermissionGroup.storage);
+    await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
     pdfBloc.onGetPdf(widget._job.id);
     Scaffold.of(context).showSnackBar(downloadSnack);
-    pdfBloc.state.listen((PdfState state) async {
+    pdfBloc.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         String downloadPath;
         try {
@@ -128,7 +125,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
   void _onShare(BuildContext context) {
     PdfBloc pdfBloc = BlocProvider.of<PdfBloc>(context);
     StreamSubscription listen;
-    listen = pdfBloc.state.listen((PdfState state) async {
+    listen = pdfBloc.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         //Navigator.of(context).pop();
         final PdfFile pdf = state.value.last;

@@ -24,7 +24,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
           ListTile(
             title: Text('Eingabefelder statt Kamera nutzen'),
             subtitle: Text('Zur Zuweisung eines Druckers ohne Kamera/mit defekter Kamera'),
-            trailing: BlocBuilder<CameraEvent, CameraState>(
+            trailing: BlocBuilder<CameraBloc, CameraState>(
               bloc: cameraBloc,
               builder: (BuildContext context, CameraState state) {
                 _cameraDisabled = state.cameraDisabled;

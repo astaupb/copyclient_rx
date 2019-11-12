@@ -112,6 +112,6 @@ class _LoginFormState extends State<LoginForm> {
   void _submitForm(AuthBloc authBloc) {
     final FormState _form = _formKey.currentState;
     _form.save();
-    authBloc.login(_username, _password, persistent: _stayLoggedIn);
+    authBloc.onLogin(_username, _password, persistent: _stayLoggedIn);
   }
 }

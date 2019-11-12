@@ -78,11 +78,11 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     }
   }
 
-  void onSetCopyshopTheme() => dispatch(ActivateDefaultTheme());
+  void onSetCopyshopTheme() => this.add(ActivateDefaultTheme());
 
-  void onSetDarkTheme() => dispatch(ActivateDarkTheme());
+  void onSetDarkTheme() => this.add(ActivateDarkTheme());
 
-  void onSetLightTheme() => dispatch(ActivateLightTheme());
+  void onSetLightTheme() => this.add(ActivateLightTheme());
 
   void onStart() {
     String theme = dbStore.settings['theme'];

@@ -48,8 +48,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
           ),
         ],
       ),
-      body: BlocBuilder<TokensEvent, TokensState>(
-        bloc: BlocProvider.of<TokensBloc>(context),
+      body: BlocBuilder<TokensBloc, TokensState>(
         builder: (BuildContext context, state) {
           if (state.isResult) {
             lastTokens = state.value.reversed.toList();
@@ -106,7 +105,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   Future<void> onRefresh() async {
     TokensBloc bloc = BlocProvider.of<TokensBloc>(context);
     StreamSubscription listener;
-    listener = bloc.state.listen((TokensState state) {
+    listener = bloc.listen((TokensState state) {
       if (state.isResult) {
         listener.cancel();
         return;

@@ -19,7 +19,7 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserEvent, UserState>(
+    return BlocBuilder<UserBloc, UserState>(
       bloc: widget.userBloc,
       builder: (BuildContext context, UserState state) {
         if (state.isResult && state.value.options != null) {

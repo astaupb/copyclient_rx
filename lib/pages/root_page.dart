@@ -49,7 +49,7 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return BlocProvider<AuthBloc>(
       builder: (BuildContext context) => authBloc,
-      child: BlocBuilder<AuthEvent, AuthState>(
+      child: BlocBuilder<AuthBloc, AuthState>(
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
           if (state.isAuthorized) {
@@ -69,7 +69,7 @@ class _RootPageState extends State<RootPage> {
             ];
 
             for (var bloc in blocs) {
-              bloc.state.listen(_for401);
+              bloc.listen(_for401);
             }
 
             // AUTHORIZED AND READY TO HUSTLE
@@ -177,6 +177,29 @@ class _RootPageState extends State<RootPage> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    _checkExistingToken();
+
+    super.initState();
+  }
+
+  void _checkExistingToken() async {
+    await store.openDb();
+    _token = store.currentToken;
+    if (_token != null) authBloc.onTokenLogin(_token);
+    cameraBloc.onStart();
+    BlocProvider.of<ThemeBloc>(context).onStart();
+  }
+
+  void _for401(state) async {
+    if (state.isException && state.error.statusCode == 401) {
+      authBloc.onLogout();
+      await DBStore().clearTokens();
+      Navigator.of(context).popUntil(ModalRoute.withName('/'));
+    }
+  }
+
   void _initBlocs() {
     joblistBloc = JoblistBloc(backend);
     userBloc = UserBloc(backend);
@@ -186,29 +209,6 @@ class _RootPageState extends State<RootPage> {
     pdfBloc = PdfBloc(backend);
     printQueueBloc = PrintQueueBloc(backend);
     tokensBloc = TokensBloc(backend);
-  }
-
-  @override
-  void initState() {
-    _checkExistingToken();
-
-    super.initState();
-  }
-
-  void _for401(state) async {
-    if (state.isException && state.error.statusCode == 401) {
-      authBloc.logout();
-      await DBStore().clearTokens();
-      Navigator.of(context).popUntil(ModalRoute.withName('/'));
-    }
-  }
-
-  void _checkExistingToken() async {
-    await store.openDb();
-    _token = store.currentToken;
-    if (_token != null) authBloc.tokenLogin(_token);
-    cameraBloc.onStart();
-    BlocProvider.of<ThemeBloc>(context).onStart();
   }
 
   Future<bool> _onWillPop() async {

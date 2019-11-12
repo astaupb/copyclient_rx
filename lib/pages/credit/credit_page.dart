@@ -129,7 +129,7 @@ class _CreditPageState extends State<CreditPage> {
 
     journalBloc.onRefresh();
 
-    journalListener = journalBloc.state.listen((JournalState state) {
+    journalListener = journalBloc.listen((JournalState state) {
       if (state.isResult) {
         setState(() => transactionsExcerpt = state.value.transactions.take(5).toList());
       }
@@ -173,7 +173,7 @@ class _CreditPageState extends State<CreditPage> {
 
   Future<String> _getPaymentLink(int value) async {
     int userId;
-    await userBloc.state
+    await userBloc
         .takeWhile((UserState state) => state.isResult)
         .first
         .then((UserState state) => userId = state.value.userId);
@@ -199,7 +199,7 @@ class _CreditPageState extends State<CreditPage> {
 
   Future<void> _onRefresh() async {
     journalBloc.onRefresh();
-    journalBloc.state.take(1).first.then((JournalState state) {
+    journalBloc.take(1).first.then((JournalState state) {
       return;
     });
   }
@@ -209,7 +209,7 @@ class _CreditPageState extends State<CreditPage> {
       String token = await BarcodeScanner.scan();
       journalBloc.onAddTransaction(token);
       var listener;
-      listener = journalBloc.state.listen((JournalState state) async {
+      listener = journalBloc.listen((JournalState state) async {
         if (state.isResult) {
           Future.delayed(Duration(seconds: 2)).then((val) => userBloc.onRefresh());
           listener.cancel();

@@ -35,7 +35,7 @@ class UserSettingsPage extends StatelessWidget {
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.fromLTRB(40.0, 24.0, 40.0, 24.0),
-                      child: BlocBuilder<UserEvent, UserState>(
+                      child: BlocBuilder<UserBloc, UserState>(
                         bloc: userBloc,
                         builder: (BuildContext context, UserState state) {
                           if (state.isResult) {
@@ -62,7 +62,7 @@ class UserSettingsPage extends StatelessWidget {
                         },
                       ),
                     ),
-                    BlocBuilder<UserEvent, UserState>(
+                    BlocBuilder<UserBloc, UserState>(
                       bloc: userBloc,
                       builder: (BuildContext context, UserState state) {
                         if (state.isResult)
@@ -82,7 +82,7 @@ class UserSettingsPage extends StatelessWidget {
                 ),
               ),
               Spacer(),
-              BlocBuilder<UserEvent, UserState>(
+              BlocBuilder<UserBloc, UserState>(
                 bloc: userBloc,
                 builder: (BuildContext context, UserState state) {
                   if (state.isResult) {
@@ -154,7 +154,7 @@ class UserSettingsPage extends StatelessWidget {
             context: context,
             builder: (BuildContext context) => ChangePasswordDialog(userBloc: userBloc))) ??
         false) {
-      BlocProvider.of<AuthBloc>(context).logout();
+      BlocProvider.of<AuthBloc>(context).onLogout();
       DBStore().clearTokens();
     }
   }

@@ -12,6 +12,8 @@ class HeartPin extends StatefulWidget {
 }
 
 class _HeartPinState extends State<HeartPin> {
+  JoblistBloc joblistBloc;
+
   int jobId;
   bool lastKeep;
 
@@ -19,8 +21,7 @@ class _HeartPinState extends State<HeartPin> {
 
   @override
   Widget build(BuildContext context) {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
-    return BlocBuilder<JoblistEvent, JoblistState>(
+    return BlocBuilder<JoblistBloc, JoblistState>(
       bloc: joblistBloc,
       builder: (BuildContext context, JoblistState state) {
         Job job;
@@ -40,5 +41,11 @@ class _HeartPinState extends State<HeartPin> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    joblistBloc = BlocProvider.of<JoblistBloc>(context);
+    super.initState();
   }
 }

@@ -75,7 +75,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   Widget build(BuildContext context) {
-    jobListener = joblistBloc.state.listen((JoblistState state) async {
+    jobListener = joblistBloc.listen((JoblistState state) async {
       if (state.isException) {
         joblistBloc.onRefresh();
         ApiException error = (state.error as ApiException);
@@ -86,15 +86,14 @@ class _JoblistPageState extends State<JoblistPage> {
           text =
               'Dieser Drucker ist gerade von jemand Anderem in Benutzung. Falls das nicht so aussieht wende dich bitte ans Personal.';
         } else if (error.statusCode >= 500) {
-          text =
-              'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
+          text = 'Serverfehler (${error.statusCode}) - Bitte in ein paar Sekunden aktualisieren';
         } else {
           text = error.toString();
         }
         currentIndex = 0;
         if (newException)
-          Scaffold.of(_scaffoldContext).showSnackBar(
-              SnackBar(duration: Duration(seconds: 3), content: Text(text)));
+          Scaffold.of(_scaffoldContext)
+              .showSnackBar(SnackBar(duration: Duration(seconds: 3), content: Text(text)));
         newException = false;
       } else if (state.isResult) {
         newException = true;
@@ -106,9 +105,7 @@ class _JoblistPageState extends State<JoblistPage> {
         appBar: AppBar(
           automaticallyImplyLeading:
               !selectableTiles, // make drawer and title disappear on  multiselect
-          title: (!selectableTiles)
-              ? Text('Jobliste')
-              : Container(width: 0.0, height: 0.0),
+          title: (!selectableTiles) ? Text('Jobliste') : Container(width: 0.0, height: 0.0),
           actions: (selectableTiles)
               ? <Widget>[
                   Builder(
@@ -119,11 +116,10 @@ class _JoblistPageState extends State<JoblistPage> {
                         if (selectedIds.length > 0) {
                           String target;
                           try {
-                            if (cameraBloc.currentState.cameraDisabled) {
+                            if (cameraBloc.state.cameraDisabled) {
                               target = await showDialog<String>(
                                 context: context,
-                                builder: (BuildContext context) =>
-                                    selectPrinterDialog(context),
+                                builder: (BuildContext context) => selectPrinterDialog(context),
                               );
                             } else {
                               target = await BarcodeScanner.scan();
@@ -132,8 +128,7 @@ class _JoblistPageState extends State<JoblistPage> {
                               joblistBloc.onPrintById(target, id);
                             }
                             Scaffold.of(context).showSnackBar(SnackBar(
-                              content:
-                                  Text('Ausgewählte Jobs wurden abgeschickt'),
+                              content: Text('Ausgewählte Jobs wurden abgeschickt'),
                               duration: Duration(seconds: 1),
                             ));
                             selectedIds.clear();
@@ -158,37 +153,33 @@ class _JoblistPageState extends State<JoblistPage> {
                       tooltip: 'Ausgewählte löschen',
                       icon: Icon(Icons.delete),
                       onPressed: () => showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) =>
-                              JoblistDeletionModal(selectedIds)).then(
-                          (val) => setState(() => selectableTiles = false)),
+                              context: context,
+                              builder: (BuildContext context) => JoblistDeletionModal(selectedIds))
+                          .then((val) => setState(() => selectableTiles = false)),
                     ),
                   ),
-                  BlocBuilder<JoblistEvent, JoblistState>(
+                  BlocBuilder<JoblistBloc, JoblistState>(
                     bloc: joblistBloc,
-                    builder: (BuildContext context, JoblistState state) =>
-                        (state.isResult)
-                            ? IconButton(
-                                tooltip: 'Alle auswählen',
-                                icon: Icon(Icons.select_all),
-                                onPressed: () {
-                                  if (state.value.length ==
-                                      selectedIds.length) {
-                                    setState(() => selectedIds.clear());
-                                  } else {
-                                    List<int> allIds = [];
-                                    for (Job job in state.value)
-                                      allIds.add(job.id);
-                                    selectedIds.clear();
-                                    setState(() => selectedIds.addAll(allIds));
-                                  }
-                                },
-                              )
-                            : IconButton(
-                                tooltip: 'Alle auswählen',
-                                icon: Icon(Icons.select_all),
-                                onPressed: () => null,
-                              ),
+                    builder: (BuildContext context, JoblistState state) => (state.isResult)
+                        ? IconButton(
+                            tooltip: 'Alle auswählen',
+                            icon: Icon(Icons.select_all),
+                            onPressed: () {
+                              if (state.value.length == selectedIds.length) {
+                                setState(() => selectedIds.clear());
+                              } else {
+                                List<int> allIds = [];
+                                for (Job job in state.value) allIds.add(job.id);
+                                selectedIds.clear();
+                                setState(() => selectedIds.addAll(allIds));
+                              }
+                            },
+                          )
+                        : IconButton(
+                            tooltip: 'Alle auswählen',
+                            icon: Icon(Icons.select_all),
+                            onPressed: () => null,
+                          ),
                   ),
                   Spacer(),
                   IconButton(
@@ -203,19 +194,17 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                 ]
               : <Widget>[
-                  (cameraBloc.currentState.cameraDisabled)
+                  (cameraBloc.state.cameraDisabled)
                       ? IconButton(
                           tooltip: 'Direktdrucker festlegen',
                           icon: Icon(Icons.print),
-                          onPressed: () async => lockedPrinter =
-                              await showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      selectPrinterDialog(context)),
+                          onPressed: () async => lockedPrinter = await showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => selectPrinterDialog(context)),
                         )
                       : Container(width: 0.0, height: 0.0),
                   MaterialButton(
-                    child: BlocBuilder<UserEvent, UserState>(
+                    child: BlocBuilder<UserBloc, UserState>(
                       bloc: userBloc,
                       builder: (BuildContext context, UserState state) {
                         if (state.isResult) {
@@ -226,8 +215,7 @@ class _JoblistPageState extends State<JoblistPage> {
                           children: <Widget>[
                             Text('Guthaben:', textScaleFactor: 0.8),
                             (state.isResult)
-                                ? Text(
-                                    '${((lastCredit) / 100.0).toStringAsFixed(2)} €')
+                                ? Text('${((lastCredit) / 100.0).toStringAsFixed(2)} €')
                                 : Text('Laden...'),
                           ],
                         );
@@ -252,7 +240,7 @@ class _JoblistPageState extends State<JoblistPage> {
         drawer: MainDrawer(),
         body: RefreshIndicator(
           onRefresh: () => _onRefresh(),
-          child: BlocBuilder<JoblistEvent, JoblistState>(
+          child: BlocBuilder<JoblistBloc, JoblistState>(
             bloc: joblistBloc,
             builder: (BuildContext context, JoblistState state) {
               _scaffoldContext = context;
@@ -284,8 +272,7 @@ Oben rechts kannst du neue Dokumente hochladen.
                             return Column(
                               children: <Widget>[
                                 ListTile(
-                                  title: Text(
-                                      '${uploadList[index].filename ?? 'Neuer Druckjob'}'),
+                                  title: Text('${uploadList[index].filename ?? 'Neuer Druckjob'}'),
                                   subtitle: Text((uploadList[index].isUploading)
                                       ? 'Am Hochladen...'
                                       : 'Dokument am Verarbeiten...'),
@@ -302,16 +289,13 @@ Oben rechts kannst du neue Dokumente hochladen.
                                   Dismissible(
                                     key: Key(reverseList[index].id.toString()),
                                     onDismissed: (DismissDirection direction) =>
-                                        _onTileDismissed(
-                                            context, reverseList[index].id),
+                                        _onTileDismissed(context, reverseList[index].id),
                                     background: _dismissableBackground(),
-                                    confirmDismiss: (DismissDirection
-                                            direction) =>
+                                    confirmDismiss: (DismissDirection direction) =>
                                         _onConfirmDismiss(context, direction),
                                     child: Container(
                                       color: (selectableTiles)
-                                          ? (selectedIds.contains(
-                                                  reverseList[index].id))
+                                          ? (selectedIds.contains(reverseList[index].id))
                                               ? Colors.black12
                                               : null
                                           : null,
@@ -321,19 +305,14 @@ Oben rechts kannst du neue Dokumente hochladen.
                                           context,
                                           index,
                                           reverseList[index],
-                                          onPress: (int index) => _onPressed(
-                                              context, reverseList[index]),
-                                          onLongTap: (int index) =>
-                                              _onLongTapped(
-                                                  context,
-                                                  reverseList[index].id,
-                                                  reverseList[index]
-                                                      .jobOptions),
+                                          onPress: (int index) =>
+                                              _onPressed(context, reverseList[index]),
+                                          onLongTap: (int index) => _onLongTapped(context,
+                                              reverseList[index].id, reverseList[index].jobOptions),
                                           directPrinter: lockedPrinter,
-                                          chosen: selectedIds
-                                              .contains(reverseList[index].id),
-                                          onPressPrint: () => _onPressPrint(
-                                              context, reverseList, index),
+                                          chosen: selectedIds.contains(reverseList[index].id),
+                                          onPressPrint: () =>
+                                              _onPressPrint(context, reverseList, index),
                                         ),
                                       ),
                                     ),
@@ -393,8 +372,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (jobListener != null) jobListener.cancel();
     if (printQueueListener != null) printQueueListener.cancel();
     if (uploadListener != null) uploadListener.cancel();
-    if (_intentDataStreamSubscription != null)
-      _intentDataStreamSubscription.cancel();
+    if (_intentDataStreamSubscription != null) _intentDataStreamSubscription.cancel();
     if (_intentImageSubscription != null) _intentImageSubscription.cancel();
     currentIndex = 0;
     selectableTiles = false;
@@ -411,7 +389,7 @@ Oben rechts kannst du neue Dokumente hochladen.
 
     pdfCreation = PdfCreationBloc();
 
-    uploadListener = uploadBloc.state.listen(
+    uploadListener = uploadBloc.listen(
       (UploadState state) {
         if (state.isResult) {
           if (state.value.length < uploadCount) {
@@ -430,8 +408,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     currentIndex = 0;
     _cancelTimers();
 
-    _intentTextSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String text) {
+    _intentTextSubscription = ReceiveSharingIntent.getTextStream().listen((String text) {
       ReceiveSharingIntent.reset();
       _handleIntentText(text);
     }, onError: (err) {
@@ -443,8 +420,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       _handleIntentText(text);
     });
 
-    _intentImageSubscription =
-        ReceiveSharingIntent.getImageStream().listen((List<String> value) {
+    _intentImageSubscription = ReceiveSharingIntent.getImageStream().listen((List<String> value) {
       ReceiveSharingIntent.reset();
       _handleIntentValue(value);
     }, onError: (err) {
@@ -565,12 +541,11 @@ Oben rechts kannst du neue Dokumente hochladen.
       if (dialogResult == 0) {
         _lockPrinter();
         copyStartTime = DateTime.now();
-        copyListener = joblistBloc.state.listen(
+        copyListener = joblistBloc.listen(
           (JoblistState state) {
             if (state.isResult) {
               for (Job job in state.value.where((Job job) =>
-                  ((job.timestamp * 1000) >
-                      copyStartTime.millisecondsSinceEpoch) &&
+                  ((job.timestamp * 1000) > copyStartTime.millisecondsSinceEpoch) &&
                   !copiedJobIds.contains(job.id))) {
                 joblistBloc.onPrintById(lockedPrinter, job.id);
                 copyStartTime = DateTime.now();
@@ -624,7 +599,7 @@ Oben rechts kannst du neue Dokumente hochladen.
   void _handleIntentText(String text) {
     if (text != null) {
       StreamSubscription listener;
-      listener = pdfCreation.state.skip(1).listen((PdfCreationState state) {
+      listener = pdfCreation.skip(1).listen((PdfCreationState state) {
         if (state.isResult) {
           uploadBloc.onUpload(state.value,
               filename: 'text_${DateTime.now().toIso8601String()}.txt');
@@ -636,12 +611,10 @@ Oben rechts kannst du neue Dokumente hochladen.
     }
 
     StreamSubscription listener;
-    listener = uploadBloc.state.listen((UploadState state) {
+    listener = uploadBloc.listen((UploadState state) {
       if (state.isResult &&
-          state.value.where((DispatcherTask task) => task.isUploading).length >
-              0) {
-        uploadTimer = Timer.periodic(
-            const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
+          state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
+        uploadTimer = Timer.periodic(const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
         listener.cancel();
       }
     });
@@ -649,8 +622,7 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   void _handleIntentValue(List<String> value) async {
     if (value != null) {
-      await PermissionHandler()
-          .shouldShowRequestPermissionRationale(PermissionGroup.storage);
+      await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
       await PermissionHandler().requestPermissions([PermissionGroup.storage]);
       for (String url in value) {
         final File file = File(url);
@@ -663,7 +635,7 @@ Oben rechts kannst du neue Dokumente hochladen.
               filename: (numericFilename == null) ? filename : null);
         } else if (_isSupportedImage(filename)) {
           StreamSubscription listener;
-          listener = pdfCreation.state.skip(1).listen((PdfCreationState state) {
+          listener = pdfCreation.skip(1).listen((PdfCreationState state) {
             if (state.isResult) {
               uploadBloc.onUpload(state.value, filename: filename);
               listener.cancel();
@@ -675,14 +647,10 @@ Oben rechts kannst du neue Dokumente hochladen.
       }
 
       StreamSubscription listener;
-      listener = uploadBloc.state.listen((UploadState state) {
+      listener = uploadBloc.listen((UploadState state) {
         if (state.isResult &&
-            state.value
-                    .where((DispatcherTask task) => task.isUploading)
-                    .length >
-                0) {
-          uploadTimer = Timer.periodic(
-              const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
+            state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
+          uploadTimer = Timer.periodic(const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
           listener.cancel();
         }
       });
@@ -750,7 +718,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       _log.fine('_lockPrinter: lockedPrinter is null, trying dialog or camera');
       try {
         //target = "44332";
-        if (cameraBloc.currentState.cameraDisabled) {
+        if (cameraBloc.state.cameraDisabled) {
           target = await showDialog<String>(
             context: context,
             builder: (BuildContext context) => selectPrinterDialog(context),
@@ -763,15 +731,13 @@ Oben rechts kannst du neue Dokumente hochladen.
         setState(() => currentIndex = 0);
       }
     } else {
-      _log.fine(
-          '_lockPrinter: lockedPrinter != null, setting target to $lockedPrinter');
+      _log.fine('_lockPrinter: lockedPrinter != null, setting target to $lockedPrinter');
       target = lockedPrinter;
     }
 
     if (target != null) {
-      _log.fine(
-          '_lockPrinter: target is set to $target, try to lock that printer now');
-      printQueueListener = printQueueBloc.state.listen((PrintQueueState state) {
+      _log.fine('_lockPrinter: target is set to $target, try to lock that printer now');
+      printQueueListener = printQueueBloc.listen((PrintQueueState state) {
         if (state.isException) {
           if ((state.error as ApiException).statusCode == 423)
             Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
@@ -813,15 +779,13 @@ Oben rechts kannst du neue Dokumente hochladen.
       );
 
       if (jobTimer != null) jobTimer.cancel();
-      jobTimer = Timer.periodic(
-          const Duration(seconds: 3), (Timer t) => joblistBloc.onRefresh());
+      jobTimer = Timer.periodic(const Duration(seconds: 3), (Timer t) => joblistBloc.onRefresh());
     } else {
       setState(() => currentIndex = 0);
     }
   }
 
-  Future<bool> _onConfirmDismiss(
-      BuildContext context, DismissDirection diection) async {
+  Future<bool> _onConfirmDismiss(BuildContext context, DismissDirection diection) async {
     bool keepJob = false;
     SnackBar snack = SnackBar(
       duration: Duration(seconds: 1),
@@ -838,8 +802,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       ),
     );
 
-    ScaffoldFeatureController snackController =
-        Scaffold.of(context).showSnackBar(snack);
+    ScaffoldFeatureController snackController = Scaffold.of(context).showSnackBar(snack);
 
     if (keepJob) snackController.close();
 
@@ -855,9 +818,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     Scaffold.of(context).showSnackBar(
       SnackBar(
         duration: Duration(seconds: 1),
-        content: Text((newOptions.keep)
-            ? 'Job wird behalten'
-            : 'Job wird nicht mehr behalten'),
+        content: Text((newOptions.keep) ? 'Job wird behalten' : 'Job wird nicht mehr behalten'),
       ),
     );
   }
@@ -884,15 +845,14 @@ Oben rechts kannst du neue Dokumente hochladen.
       String target;
       if (lockedPrinter != null) {
         target = lockedPrinter;
-        joblistBloc.onPrintById(
-            (lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+        joblistBloc.onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
         Scaffold.of(context).showSnackBar(SnackBar(
           content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
           duration: Duration(seconds: 1),
         ));
       } else {
         try {
-          if (cameraBloc.currentState.cameraDisabled) {
+          if (cameraBloc.state.cameraDisabled) {
             target = await showDialog<String>(
               context: context,
               builder: (BuildContext context) => selectPrinterDialog(context),
@@ -900,8 +860,7 @@ Oben rechts kannst du neue Dokumente hochladen.
           } else {
             target = await BarcodeScanner.scan();
           }
-          joblistBloc.onPrintById(
-              (lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
+          joblistBloc.onPrintById((lockedPrinter == null) ? target : lockedPrinter, jobs[index].id);
           Scaffold.of(context).showSnackBar(SnackBar(
             content: Text('${jobs[index].jobInfo.filename} wurde abgeschickt'),
             duration: Duration(seconds: 1),
@@ -925,7 +884,7 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   Future<void> _onRefresh() async {
     var listener;
-    listener = joblistBloc.state.listen((JoblistState state) {
+    listener = joblistBloc.listen((JoblistState state) {
       if (state.isResult) {
         listener.cancel();
         return;
@@ -938,13 +897,12 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   void _onSelectedUpload(BuildContext context) async {
     await _getFilePath().then(
-      (Map<String, String> paths) =>
-          paths.forEach((String filename, String path) {
+      (Map<String, String> paths) => paths.forEach((String filename, String path) {
         if (_isSupportedDocument(filename)) {
           uploadBloc.onUpload(File(path).readAsBytesSync(), filename: filename);
         } else if (_isSupportedImage(filename)) {
           StreamSubscription listener;
-          listener = pdfCreation.state.skip(1).listen((PdfCreationState state) {
+          listener = pdfCreation.skip(1).listen((PdfCreationState state) {
             if (state.isResult) {
               uploadBloc.onUpload(state.value, filename: filename);
               listener.cancel();
@@ -954,7 +912,7 @@ Oben rechts kannst du neue Dokumente hochladen.
           pdfCreation.onCreateFromImage(File(path).readAsBytesSync());
         } else if (_isSupportedText(filename)) {
           StreamSubscription listener;
-          listener = pdfCreation.state.skip(1).listen((PdfCreationState state) {
+          listener = pdfCreation.skip(1).listen((PdfCreationState state) {
             if (state.isResult) {
               uploadBloc.onUpload(state.value, filename: filename);
               listener.cancel();
@@ -972,8 +930,7 @@ Oben rechts kannst du neue Dokumente hochladen.
         }
       }),
     );
-    uploadTimer = Timer.periodic(
-        const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
+    uploadTimer = Timer.periodic(const Duration(seconds: 1), (_) => uploadBloc.onRefresh());
   }
 
   void _onTileDismissed(BuildContext context, int id) async {
@@ -990,7 +947,7 @@ Oben rechts kannst du neue Dokumente hochladen.
 
   void _unlockPrinter() async {
     StreamSubscription listener;
-    listener = printQueueBloc.state.listen((PrintQueueState state) {
+    listener = printQueueBloc.listen((PrintQueueState state) {
       if (state.isLocked) {
         printQueueBloc.onDelete();
         setState(() {

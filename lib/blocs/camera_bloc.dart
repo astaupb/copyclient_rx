@@ -25,21 +25,21 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     }
   }
 
-  @override
-  void onTransition(Transition transition) {
-    _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
-    super.onTransition(transition);
-  }
+  void onDisable() => this.add(DisableCamera());
 
-  void onEnable() => dispatch(EnableCamera());
-
-  void onDisable() => dispatch(DisableCamera());
+  void onEnable() => this.add(EnableCamera());
 
   void onStart() async {
     if (_dbStore.settings['camera_disabled'] == 'true')
       onDisable();
     else
       onEnable();
+  }
+
+  @override
+  void onTransition(Transition transition) {
+    _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
+    super.onTransition(transition);
   }
 }
 

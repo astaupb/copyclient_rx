@@ -39,8 +39,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
       body: RefreshIndicator(
         onRefresh: () => _onRefresh(),
-        child: BlocBuilder<JournalEvent, JournalState>(
-          bloc: BlocProvider.of<JournalBloc>(context),
+        child: BlocBuilder<JournalBloc, JournalState>(
           builder: (BuildContext context, JournalState state) {
             if (state.isResult) {
               return ListView.builder(
@@ -93,12 +92,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
       content: Text('PDF unter Downloads gespeichert'),
     );
 
-    if (journalBloc.currentState.isResult) {
+    if (journalBloc.state.isResult) {
       PdfCreationBloc pdfCreation = PdfCreationBloc();
 
       StreamSubscription pdfListener;
 
-      pdfListener = pdfCreation.state.listen((PdfCreationState state) async {
+      pdfListener = pdfCreation.listen((PdfCreationState state) async {
         if (state.isResult) {
           if (!share) {
             await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
@@ -123,27 +122,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 'application/pdf');
           }
           pdfListener.cancel();
-          pdfCreation.dispose();
+          pdfCreation.close();
         }
       });
 
       pdfCreation.onCreateFromCsv(journalBloc.csvJournal,
           showPageCount: true,
           header:
-              'AStA Copyservice Druckvolumen und Aufladungen für "${BlocProvider.of<UserBloc>(context).currentState.value.name}" seit ${journalBloc.currentState.value.transactions.last.timestamp}',
+              'AStA Copyservice Druckvolumen und Aufladungen für "${BlocProvider.of<UserBloc>(context).state.value.name}" seit ${journalBloc.state.value.transactions.last.timestamp}',
           titles: ['Betrag in Euro', 'Beschreibung', 'Zeit']);
     }
   }
 
   Future<void> _onRefresh() async {
     var listener;
-    listener = journalBloc.state.listen((JournalState state) {
+    listener = journalBloc.listen((JournalState state) {
       if (state.isResult) {
         listener.cancel();
         return;
       }
     });
-    journalBloc.dispatch(RefreshJournal());
+    journalBloc.add(RefreshJournal());
   }
 
   void _onShowShare(BuildContext scaffoldContext) async {

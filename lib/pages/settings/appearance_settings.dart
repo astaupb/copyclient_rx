@@ -13,9 +13,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
 
   void _changeTheme(bool dark) {
     if (!dark) {
-      themeBloc.dispatch(ActivateDefaultTheme());
+      themeBloc.add(ActivateDefaultTheme());
     } else {
-      themeBloc.dispatch(ActivateDarkTheme());
+      themeBloc.add(ActivateDarkTheme());
     }
   }
 
@@ -28,7 +28,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
       ),
       body: ListView(
         children: <Widget>[
-          BlocBuilder<ThemeEvent, ThemeState>(
+          BlocBuilder<ThemeBloc, ThemeState>(
             bloc: themeBloc,
             builder: (BuildContext context, ThemeState state) {
               return ListTile(

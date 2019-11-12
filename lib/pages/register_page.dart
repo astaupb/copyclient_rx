@@ -52,11 +52,11 @@ class _RegisterPageState extends State<RegisterPage> {
       body: ListView(
         children: <Widget>[
           _registerForm(),
-          BlocBuilder<AuthEvent, AuthState>(
+          BlocBuilder<AuthBloc, AuthState>(
             bloc: widget.authBloc,
             builder: (BuildContext context, AuthState state) {
               if (authListener != null) authListener.cancel();
-              authListener = widget.authBloc.state.listen((AuthState state) {
+              authListener = widget.authBloc.listen((AuthState state) {
                 if (state.isRegistered) {
                   ScaffoldFeatureController snackbarFeatureController = Scaffold.of(context)
                       .showSnackBar(SnackBar(
@@ -104,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onPressedButton(BuildContext context, AuthBloc authBloc) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      authBloc.register(_username, _password);
+      authBloc.onRegister(_username, _password);
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text('Registriert neuen Nutzer...'),
         duration: Duration(seconds: 2),

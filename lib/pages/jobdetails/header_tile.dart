@@ -25,15 +25,17 @@ class HeaderTile extends StatefulWidget {
 }
 
 class _HeaderTileState extends State<HeaderTile> {
+  UserBloc userBloc;
+  JoblistBloc joblistBloc;
+
   Job _job;
 
   _HeaderTileState(this._job);
 
   @override
   Widget build(BuildContext context) {
-    final UserBloc userBloc = BlocProvider.of<UserBloc>(context);
-    return BlocBuilder<JoblistEvent, JoblistState>(
-      bloc: BlocProvider.of<JoblistBloc>(context),
+    return BlocBuilder<JoblistBloc, JoblistState>(
+      bloc: joblistBloc,
       builder: (BuildContext context, JoblistState state) {
         if (state.isResult) {
           _job = state.value.singleWhere((Job job) => job.id == _job.id);
@@ -44,41 +46,34 @@ class _HeaderTileState extends State<HeaderTile> {
                   controller: TextEditingController(
                       text: (_job.jobOptions.displayName.isNotEmpty)
                           ? _job.jobOptions.displayName
-                          : (_job.jobInfo.filename.isEmpty)
-                              ? 'Ohne Titel'
-                              : _job.jobInfo.filename),
+                          : (_job.jobInfo.filename.isEmpty) ? 'Ohne Titel' : _job.jobInfo.filename),
                   style: TextStyle(fontSize: 20.0),
                   autocorrect: false,
                   maxLines: null,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                      isDense: true,
-                      suffixIcon: Icon(Icons.edit),
-                      border: InputBorder.none),
+                      isDense: true, suffixIcon: Icon(Icons.edit), border: InputBorder.none),
                   onSubmitted: (String value) {
                     if (value == _job.jobInfo.filename) {
                       _job.jobOptions.displayName = '';
                     } else if (_job.jobOptions.displayName != value) {
                       _job.jobOptions.displayName = value;
-                      BlocProvider.of<JoblistBloc>(context)
-                          .onUpdateOptionsById(_job.id, _job.jobOptions);
+                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                     }
                   },
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(DateTime.fromMillisecondsSinceEpoch(
-                            _job.timestamp * 1000)
+                    Text(DateTime.fromMillisecondsSinceEpoch(_job.timestamp * 1000)
                         .toString()
                         .split('.')[0]),
                     (!Platform.isIOS)
-                        ? BlocBuilder<PdfEvent, PdfState>(
-                            bloc: BlocProvider.of<PdfBloc>(context),
+                        ? BlocBuilder<PdfBloc, PdfState>(
                             builder: (BuildContext context, PdfState state) {
                               if (state.isResult || state.isInit) {
-                                Iterable idResults = state.value.where(
-                                    (PdfFile file) => file.id == _job.id);
+                                Iterable idResults =
+                                    state.value.where((PdfFile file) => file.id == _job.id);
                                 return Text(
                                   (idResults.length == 1)
                                       ? 'Heruntergeladen'
@@ -109,8 +104,8 @@ class _HeaderTileState extends State<HeaderTile> {
                         textColor: Colors.grey[100],
                         label: Padding(
                           padding: EdgeInsets.only(right: 16.0),
-                          child: Text(
-                              '${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
+                          child:
+                              Text('${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
                         ),
                         icon: Padding(
                           padding: EdgeInsets.only(left: 16.0),
@@ -119,27 +114,22 @@ class _HeaderTileState extends State<HeaderTile> {
                         onPressed: () async {
                           String target;
                           try {
-                            if (BlocProvider.of<CameraBloc>(context)
-                                .currentState
-                                .cameraDisabled) {
+                            if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
                               target = await showDialog<String>(
                                 context: context,
-                                builder: (BuildContext context) =>
-                                    selectPrinterDialog(context),
+                                builder: (BuildContext context) => selectPrinterDialog(context),
                               );
                             } else {
                               target = await BarcodeScanner.scan();
                             }
                             if (target != null) {
-                              BlocProvider.of<JoblistBloc>(context)
-                                  .onPrintById(target, _job.id);
+                              joblistBloc.onPrintById(target, _job.id);
                               Navigator.of(context).pop();
                             }
                           } catch (e) {
                             print('MetaTile: $e');
-                            Scaffold.of(context).showSnackBar(SnackBar(
-                                content:
-                                    Text('Es wurde kein Drucker ausgewählt')));
+                            Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
                           }
                         },
                       ),
@@ -148,9 +138,7 @@ class _HeaderTileState extends State<HeaderTile> {
                         builder: (BuildContext context, UserState state) {
                           if (state.isResult) {
                             return Text(
-                              ((userBloc.user.credit -
-                                          (_job.priceEstimation / 100.0)) >
-                                      0)
+                              ((userBloc.user.credit - (_job.priceEstimation / 100.0)) > 0)
                                   ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
                                   : 'Fehlendes Guthaben vmtl.: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
                               textAlign: TextAlign.left,
@@ -172,5 +160,12 @@ class _HeaderTileState extends State<HeaderTile> {
         }
       },
     );
+  }
+
+  @override
+  void initState() {
+    userBloc = BlocProvider.of<UserBloc>(context);
+    joblistBloc = joblistBloc;
+    super.initState();
   }
 }

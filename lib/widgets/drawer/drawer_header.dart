@@ -17,8 +17,7 @@ class _DrawerHeaderState extends State<DrawerHeader> {
   @override
   Widget build(BuildContext context) {
     return UserAccountsDrawerHeader(
-      accountName: BlocBuilder<UserEvent, UserState>(
-        bloc: BlocProvider.of<UserBloc>(context),
+      accountName: BlocBuilder<UserBloc, UserState>(
         builder: (BuildContext context, state) {
           if (state.isResult) {
             return Text(state.value?.name, style: TextStyle(fontSize: 27.0));
@@ -29,8 +28,7 @@ class _DrawerHeaderState extends State<DrawerHeader> {
           }
         },
       ),
-      accountEmail: BlocBuilder<UserEvent, UserState>(
-        bloc: BlocProvider.of<UserBloc>(context),
+      accountEmail: BlocBuilder<UserBloc, UserState>(
         builder: (BuildContext context, state) {
           if (state.isResult) {
             return Text(
