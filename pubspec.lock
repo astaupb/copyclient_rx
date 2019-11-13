@@ -50,10 +50,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "18a509816cfdbc52d992835fdd866cc2dab8c789"
+      resolved-ref: "6072c3704d5b7b1066b05799df6c3d8a34db0109"
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
-    version: "1.0.0+1"
+    version: "1.0.1"
   bubble_bottom_bar:
     dependency: "direct main"
     description:
