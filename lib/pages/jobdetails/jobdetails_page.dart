@@ -109,9 +109,14 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         }
         final String _basePath = (await Directory(downloadPath).create()).path;
         String _path;
-        (widget._job.jobInfo.filename.isEmpty)
-            ? _path = _basePath + '/${widget._job.id}.pdf'
-            : _path = _basePath + '/${widget._job.jobInfo.filename}';
+        if (widget._job.jobInfo.filename.isEmpty) {
+          _path = _basePath + '/${widget._job.id}.pdf';
+        } else {
+          if (widget._job.jobInfo.filename.endsWith('.pdf'))
+            _path = _basePath + '/${widget._job.jobInfo.filename}';
+          else
+            _path = _basePath + '/${widget._job.jobInfo.filename}.pdf';
+        }
         await File(_path).writeAsBytes(state.value.last.file, flush: true);
 
         Scaffold.of(context).removeCurrentSnackBar();
@@ -133,7 +138,9 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
             'Copyclient Download',
             (widget._job.jobInfo.filename == '')
                 ? 'DOC_${DateTime.now().toString()}.pdf'
-                : widget._job.jobInfo.filename,
+                : (widget._job.jobInfo.filename.endsWith('.pdf'))
+                    ? widget._job.jobInfo.filename
+                    : '${widget._job.jobInfo.filename}.pdf',
             pdf.file,
             'application/pdf');
         listen.cancel();
