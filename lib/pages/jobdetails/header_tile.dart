@@ -165,7 +165,7 @@ class _HeaderTileState extends State<HeaderTile> {
   @override
   void initState() {
     userBloc = BlocProvider.of<UserBloc>(context);
-    joblistBloc = joblistBloc;
+    joblistBloc = BlocProvider.of<JoblistBloc>(context);
     super.initState();
   }
 }
