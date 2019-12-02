@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../db_store.dart';
+import 'user_dialogs/change_email_dialog.dart';
 import 'user_dialogs/change_name_dialog.dart';
 import 'user_dialogs/change_password_dialog.dart';
 import 'user_dialogs/default_options_dialog.dart';
@@ -34,7 +35,7 @@ class UserSettingsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.fromLTRB(40.0, 24.0, 40.0, 24.0),
+                      padding: EdgeInsets.fromLTRB(92.0, 24.0, 92.0, 24.0),
                       child: BlocBuilder<UserBloc, UserState>(
                         bloc: userBloc,
                         builder: (BuildContext context, UserState state) {
@@ -67,13 +68,23 @@ class UserSettingsPage extends StatelessWidget {
                       builder: (BuildContext context, UserState state) {
                         if (state.isResult)
                           return Padding(
-                            padding: EdgeInsets.only(bottom: 8.0, right: 8.0),
-                            child: Text(
-                              state.value.userId.toString(),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(color: Color(0xE6FFFFFF)),
-                            ),
-                          );
+                              padding: EdgeInsets.only(bottom: 8.0, right: 8.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  Text(
+                                    state.value.email ?? '',
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(color: Color(0xE6FFFFFF)),
+                                  ),
+                                  Text(
+                                    state.value.userId.toString(),
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(color: Color(0xE6FFFFFF)),
+                                  ),
+                                ],
+                              ));
                         else
                           return Container(width: 0.0, height: 0.0);
                       },
@@ -117,6 +128,10 @@ class UserSettingsPage extends StatelessWidget {
           ListTile(
             title: Text('Namen/SN ändern'),
             onTap: () => _showUsernameDialog(context),
+          ),
+          ListTile(
+            title: Text('E-Mail ändern'),
+            onTap: () => _showEmailDialog(context),
           ),
           ListTile(
             title: Text('Standard-Joboptionen festlegen'),
@@ -163,6 +178,13 @@ class UserSettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) => ChangeNameDialog(userBloc: userBloc),
+    );
+  }
+
+  _showEmailDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ChangeEmailDialog(userBloc: userBloc),
     );
   }
 }
