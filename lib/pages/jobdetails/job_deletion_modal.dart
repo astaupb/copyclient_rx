@@ -17,7 +17,6 @@ class JobDeletionModal extends StatefulWidget {
 class _JobDeletionModalState extends State<JobDeletionModal> {
   @override
   Widget build(BuildContext context) {
-    JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Row(
@@ -32,7 +31,7 @@ class _JobDeletionModalState extends State<JobDeletionModal> {
           MaterialButton(
             child: Text('Ja'),
             onPressed: () {
-              joblistBloc.onDeleteById(widget.id);
+              BlocProvider.of<JoblistBloc>(context).onDeleteById(widget.id);
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },

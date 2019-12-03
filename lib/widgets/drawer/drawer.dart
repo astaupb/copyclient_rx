@@ -11,7 +11,6 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -66,7 +65,7 @@ class MainDrawer extends StatelessWidget {
             title: Text('Logout'),
             trailing: Icon(Icons.exit_to_app),
             onTap: () async {
-              authBloc.onLogout();
+              BlocProvider.of<AuthBloc>(context).onLogout();
               await DBStore().clearTokens();
               Navigator.of(context).popUntil(ModalRoute.withName('/'));
             },

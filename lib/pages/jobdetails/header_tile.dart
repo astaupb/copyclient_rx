@@ -25,9 +25,6 @@ class HeaderTile extends StatefulWidget {
 }
 
 class _HeaderTileState extends State<HeaderTile> {
-  UserBloc userBloc;
-  JoblistBloc joblistBloc;
-
   Job _job;
 
   _HeaderTileState(this._job);
@@ -35,7 +32,6 @@ class _HeaderTileState extends State<HeaderTile> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<JoblistBloc, JoblistState>(
-      bloc: joblistBloc,
       builder: (BuildContext context, JoblistState state) {
         if (state.isResult) {
           _job = state.value.singleWhere((Job job) => job.id == _job.id);
@@ -58,7 +54,8 @@ class _HeaderTileState extends State<HeaderTile> {
                       _job.jobOptions.displayName = '';
                     } else if (_job.jobOptions.displayName != value) {
                       _job.jobOptions.displayName = value;
-                      joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
+                      BlocProvider.of<JoblistBloc>(context)
+                          .onUpdateOptionsById(_job.id, _job.jobOptions);
                     }
                   },
                 ),
@@ -123,7 +120,7 @@ class _HeaderTileState extends State<HeaderTile> {
                               target = await BarcodeScanner.scan();
                             }
                             if (target != null) {
-                              joblistBloc.onPrintById(target, _job.id);
+                              BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);
                               Navigator.of(context).pop();
                             }
                           } catch (e) {
@@ -133,14 +130,13 @@ class _HeaderTileState extends State<HeaderTile> {
                           }
                         },
                       ),
-                      BlocBuilder(
-                        bloc: userBloc,
+                      BlocBuilder<UserBloc, UserState>(
                         builder: (BuildContext context, UserState state) {
                           if (state.isResult) {
                             return Text(
-                              ((userBloc.user.credit - (_job.priceEstimation / 100.0)) > 0)
-                                  ? 'Neues Guthaben vmtl.: ${((userBloc.user.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
-                                  : 'Fehlendes Guthaben vmtl.: ${(((userBloc.user.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
+                              ((state.value.credit - (_job.priceEstimation / 100.0)) > 0)
+                                  ? 'Neues Guthaben vmtl.: ${((state.value.credit - _job.priceEstimation) / 100.0).toStringAsFixed(2)} €'
+                                  : 'Fehlendes Guthaben vmtl.: ${(((state.value.credit - _job.priceEstimation) / 100.0) * -1).toStringAsFixed(2)} €',
                               textAlign: TextAlign.left,
                               style: TextStyle(color: Colors.black54),
                               textScaleFactor: 0.8,
@@ -160,12 +156,5 @@ class _HeaderTileState extends State<HeaderTile> {
         }
       },
     );
-  }
-
-  @override
-  void initState() {
-    userBloc = BlocProvider.of<UserBloc>(context);
-    joblistBloc = BlocProvider.of<JoblistBloc>(context);
-    super.initState();
   }
 }

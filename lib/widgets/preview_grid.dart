@@ -61,16 +61,16 @@ class _PreviewGridState extends State<PreviewGrid> {
   }
 
   @override
+  void initState() {
+    BlocProvider.of<PreviewBloc>(context).onGetPreview(job);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final PreviewBloc previewBloc = BlocProvider.of<PreviewBloc>(context);
-    final JoblistBloc joblistBloc = BlocProvider.of<JoblistBloc>(context);
-
-    previewBloc.onGetPreview(job);
-
     bool setsMatch(PreviewSet previewSet) => previewSet.jobId == job.id;
 
-    return BlocBuilder(
-      bloc: joblistBloc,
+    return BlocBuilder<JoblistBloc, JoblistState>(
       builder: (BuildContext context, JoblistState state) {
         if (state.isResult) {
           job = state.value.singleWhere((Job job) => job.id == this.job.id);
@@ -89,8 +89,7 @@ class _PreviewGridState extends State<PreviewGrid> {
             },
             child: Transform.scale(
               scale: currentScale,
-              child: BlocBuilder(
-                bloc: previewBloc,
+              child: BlocBuilder<PreviewBloc, PreviewState>(
                 builder: (BuildContext context, PreviewState state) {
                   if (state.isResult && state.value.any(setsMatch)) {
                     PreviewSet previewSet = state.value.singleWhere(setsMatch);

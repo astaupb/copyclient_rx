@@ -36,7 +36,6 @@ class _JoblistPageState extends State<JoblistPage> {
   PrintQueueBloc printQueueBloc;
   JoblistBloc joblistBloc;
   UploadBloc uploadBloc;
-  CameraBloc cameraBloc;
   UserBloc userBloc;
 
   PdfCreationBloc pdfCreation;
@@ -116,7 +115,7 @@ class _JoblistPageState extends State<JoblistPage> {
                         if (selectedIds.length > 0) {
                           String target;
                           try {
-                            if (cameraBloc.state.cameraDisabled) {
+                            if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
                               target = await showDialog<String>(
                                 context: context,
                                 builder: (BuildContext context) => selectPrinterDialog(context),
@@ -194,7 +193,7 @@ class _JoblistPageState extends State<JoblistPage> {
                   ),
                 ]
               : <Widget>[
-                  (cameraBloc.state.cameraDisabled)
+                  (BlocProvider.of<CameraBloc>(context).state.cameraDisabled)
                       ? IconButton(
                           tooltip: 'Direktdrucker festlegen',
                           icon: Icon(Icons.print),
@@ -374,6 +373,7 @@ Oben rechts kannst du neue Dokumente hochladen.
     if (uploadListener != null) uploadListener.cancel();
     if (_intentDataStreamSubscription != null) _intentDataStreamSubscription.cancel();
     if (_intentImageSubscription != null) _intentImageSubscription.cancel();
+    if (_intentTextSubscription != null) _intentTextSubscription.cancel();
     currentIndex = 0;
     selectableTiles = false;
     super.dispose();
@@ -384,7 +384,6 @@ Oben rechts kannst du neue Dokumente hochladen.
     joblistBloc = BlocProvider.of<JoblistBloc>(context);
     printQueueBloc = BlocProvider.of<PrintQueueBloc>(context);
     uploadBloc = BlocProvider.of<UploadBloc>(context);
-    cameraBloc = BlocProvider.of<CameraBloc>(context);
     userBloc = BlocProvider.of<UserBloc>(context);
 
     pdfCreation = PdfCreationBloc();
@@ -718,7 +717,7 @@ Oben rechts kannst du neue Dokumente hochladen.
       _log.fine('_lockPrinter: lockedPrinter is null, trying dialog or camera');
       try {
         //target = "44332";
-        if (cameraBloc.state.cameraDisabled) {
+        if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
           target = await showDialog<String>(
             context: context,
             builder: (BuildContext context) => selectPrinterDialog(context),
@@ -852,7 +851,7 @@ Oben rechts kannst du neue Dokumente hochladen.
         ));
       } else {
         try {
-          if (cameraBloc.state.cameraDisabled) {
+          if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
             target = await showDialog<String>(
               context: context,
               builder: (BuildContext context) => selectPrinterDialog(context),

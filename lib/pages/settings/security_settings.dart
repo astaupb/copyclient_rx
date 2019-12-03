@@ -31,6 +31,7 @@ class SecuritySettingsPage extends StatefulWidget {
 }
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
+  TokensBloc tokensBloc;
   List<Token> lastTokens = [];
 
   @override
@@ -98,30 +99,30 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   @override
   void initState() {
-    BlocProvider.of<TokensBloc>(context).onGetTokens();
+    tokensBloc = BlocProvider.of<TokensBloc>(context);
+    tokensBloc.onGetTokens();
     super.initState();
   }
 
   Future<void> onRefresh() async {
-    TokensBloc bloc = BlocProvider.of<TokensBloc>(context);
     StreamSubscription listener;
-    listener = bloc.listen((TokensState state) {
+    listener = tokensBloc.listen((TokensState state) {
       if (state.isResult) {
         listener.cancel();
         return;
       }
     });
-    bloc.onGetTokens();
+    tokensBloc.onGetTokens();
   }
 
   void _onPressedDelete(int id) {
-    BlocProvider.of<TokensBloc>(context).onDeleteToken(id);
+    tokensBloc.onDeleteToken(id);
   }
 
   void _onSelectActionMenu(ActionButton action) {
     switch (action) {
       case ActionButton.deleteAll:
-        BlocProvider.of<TokensBloc>(context).onDeleteTokens();
+        tokensBloc.onDeleteTokens();
         break;
       default:
         return;

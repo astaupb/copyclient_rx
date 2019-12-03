@@ -48,7 +48,7 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AuthBloc>(
-      builder: (BuildContext context) => authBloc,
+      create: (BuildContext context) => authBloc,
       child: BlocBuilder<AuthBloc, AuthState>(
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
@@ -84,15 +84,15 @@ class _RootPageState extends State<RootPage> {
 
             return MultiBlocProvider(
               providers: [
-                BlocProvider<JoblistBloc>(builder: (BuildContext context) => joblistBloc),
-                BlocProvider<UserBloc>(builder: (BuildContext context) => userBloc),
-                BlocProvider<UploadBloc>(builder: (BuildContext context) => uploadBloc),
-                BlocProvider<JournalBloc>(builder: (BuildContext context) => journalBloc),
-                BlocProvider<PreviewBloc>(builder: (BuildContext context) => previewBloc),
-                BlocProvider<PdfBloc>(builder: (BuildContext context) => pdfBloc),
-                BlocProvider<PrintQueueBloc>(builder: (BuildContext context) => printQueueBloc),
-                BlocProvider<CameraBloc>(builder: (BuildContext context) => cameraBloc),
-                BlocProvider<TokensBloc>(builder: (BuildContext context) => tokensBloc),
+                BlocProvider<JoblistBloc>(create: (BuildContext context) => joblistBloc),
+                BlocProvider<UserBloc>(create: (BuildContext context) => userBloc),
+                BlocProvider<UploadBloc>(create: (BuildContext context) => uploadBloc),
+                BlocProvider<JournalBloc>(create: (BuildContext context) => journalBloc),
+                BlocProvider<PreviewBloc>(create: (BuildContext context) => previewBloc),
+                BlocProvider<PdfBloc>(create: (BuildContext context) => pdfBloc),
+                BlocProvider<PrintQueueBloc>(create: (BuildContext context) => printQueueBloc),
+                BlocProvider<CameraBloc>(create: (BuildContext context) => cameraBloc),
+                BlocProvider<TokensBloc>(create: (BuildContext context) => tokensBloc),
               ],
               child: WillPopScope(
                 onWillPop: () async => !await _onWillPop(),
@@ -159,20 +159,14 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void dispose() {
-    final List blocs = [
-      joblistBloc,
-      userBloc,
-      uploadBloc,
-      journalBloc,
-      previewBloc,
-      pdfBloc,
-      printQueueBloc,
-      tokensBloc
-    ];
-
-    for (var bloc in blocs) {
-      if (bloc != null) bloc.cancel();
-    }
+    joblistBloc.close();
+    userBloc.close();
+    uploadBloc.close();
+    journalBloc.close();
+    previewBloc.close();
+    pdfBloc.close();
+    printQueueBloc.close();
+    tokensBloc.close();
 
     super.dispose();
   }
