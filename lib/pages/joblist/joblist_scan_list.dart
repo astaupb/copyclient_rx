@@ -34,7 +34,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _uploadTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       BlocProvider.of<UploadBloc>(context).onRefresh();
     });
-
+    
     super.initState();
   }
 
