@@ -52,13 +52,6 @@ packages:
       url: "https://git.uni-paderborn.de/asta/blocs_copyclient.git"
     source: git
     version: "1.0.2"
-  bubble_bottom_bar:
-    dependency: "direct main"
-    description:
-      name: bubble_bottom_bar
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.0"
   charcode:
     dependency: transitive
     description:
@@ -183,6 +176,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.8"
+  mime:
+    dependency: "direct main"
+    description:
+      name: mime
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.6+3"
   package_info:
     dependency: "direct main"
     description:
@@ -343,7 +343,7 @@ packages:
       name: xml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.0"
 sdks:
-  dart: ">=2.5.0 <3.0.0"
+  dart: ">=2.6.0 <3.0.0"
   flutter: ">=1.9.1+hotfix.5 <2.0.0"

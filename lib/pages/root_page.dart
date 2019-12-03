@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:blocs_copyclient/blocs.dart';
 import 'package:blocs_copyclient/exceptions.dart';
+import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,6 +40,7 @@ class _RootPageState extends State<RootPage> {
   PrintQueueBloc printQueueBloc;
   TokensBloc tokensBloc;
 
+  PdfCreationBloc pdfCreationBloc;
   CameraBloc cameraBloc = CameraBloc();
 
   String _token;
@@ -93,6 +95,7 @@ class _RootPageState extends State<RootPage> {
                 BlocProvider<PrintQueueBloc>(create: (BuildContext context) => printQueueBloc),
                 BlocProvider<CameraBloc>(create: (BuildContext context) => cameraBloc),
                 BlocProvider<TokensBloc>(create: (BuildContext context) => tokensBloc),
+                BlocProvider<PdfCreationBloc>(create: (BuildContext context) => pdfCreationBloc),
               ],
               child: WillPopScope(
                 onWillPop: () async => !await _onWillPop(),
@@ -167,6 +170,7 @@ class _RootPageState extends State<RootPage> {
     pdfBloc.close();
     printQueueBloc.close();
     tokensBloc.close();
+    pdfCreationBloc.close();
 
     super.dispose();
   }
@@ -203,6 +207,7 @@ class _RootPageState extends State<RootPage> {
     pdfBloc = PdfBloc(backend);
     printQueueBloc = PrintQueueBloc(backend);
     tokensBloc = TokensBloc(backend);
+    pdfCreationBloc = PdfCreationBloc();
   }
 
   Future<bool> _onWillPop() async {

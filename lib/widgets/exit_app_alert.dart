@@ -15,11 +15,11 @@ class ExitAppAlert extends StatelessWidget {
       actions: <Widget>[
         FlatButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text('Nein'),
+          child: Text('Nein', style: TextStyle(color: Colors.black87)),
         ),
         FlatButton(
           onPressed: () => exit(0),
-          child: Text('Ja'),
+          child: Text('Ja', style: TextStyle(color: Colors.black87)),
         ),
       ],
     );

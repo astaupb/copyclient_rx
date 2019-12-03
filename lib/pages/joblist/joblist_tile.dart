@@ -22,13 +22,20 @@ class JoblistTile extends ListTile {
   EdgeInsetsGeometry get contentPadding => EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
 
   @override
-  Widget get leading => null;
+  Widget get leading => MaterialButton(
+        color: Colors.teal[800],
+        child: Icon(
+          Icons.print,
+          color: Colors.white,
+        ),
+        onPressed: onPressPrint,
+      );
 
   @override
-  get onLongPress => () => onLongTap(index);
+  get onLongPress => () => onLongTap();
 
   @override
-  get onTap => () => onPress(index);
+  get onTap => () => onPress();
 
   @override
   bool get selected => chosen;
@@ -51,63 +58,47 @@ class JoblistTile extends ListTile {
 
   @override
   Widget get trailing => Container(
-        width: 136.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        width: 72.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: <Widget>[
-                        Icon(
-                          Icons.favorite,
-                          color: (job.jobOptions.keep) ? Color(0xffff58ad) : Colors.grey,
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Icon(Icons.color_lens,
-                            color: (job.jobInfo.colored > 0 && job.jobOptions.color)
-                                ? Colors.teal[800]
-                                : Colors.grey),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Icon(Icons.photo_size_select_large,
-                            color: (job.jobOptions.a3) ? Colors.teal[800] : Colors.grey),
-                      ],
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: <Widget>[
+                    Icon(
+                      Icons.favorite,
+                      color: (job.jobOptions.keep) ? Color(0xffff58ad) : Colors.grey,
+                    )
                   ],
                 ),
-                Divider(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
-                    Icon(Icons.filter_none, color: Colors.black38, size: 19.0),
-                    Text(
-                      ' ${(job.jobInfo.pagecount * job.jobOptions.copies).toString()}',
-                      textAlign: TextAlign.right,
-                    ),
+                    Icon(Icons.color_lens,
+                        color: (job.jobInfo.colored > 0 && job.jobOptions.color)
+                            ? Colors.teal[800]
+                            : Colors.grey),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Icon(Icons.photo_size_select_large,
+                        color: (job.jobOptions.a3) ? Colors.teal[800] : Colors.grey),
                   ],
                 ),
               ],
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: MaterialButton(
-                color: Colors.teal[800],
-                child: Icon(
-                  Icons.print,
-                  color: Colors.white,
+            Divider(height: 8.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.filter_none, color: Colors.black38, size: 19.0),
+                Text(
+                  ' ${(job.jobInfo.pagecount * job.jobOptions.copies).toString()}',
+                  textAlign: TextAlign.right,
                 ),
-                onPressed: onPressPrint,
-              ),
+              ],
             ),
           ],
         ),
