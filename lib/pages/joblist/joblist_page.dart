@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
+import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +28,7 @@ class JoblistPage extends StatefulWidget {
 enum ListMode { print, scan, copy }
 
 class _JoblistPageState extends State<JoblistPage> {
+  SelectionBloc selectionBloc;
   ListMode _mode = ListMode.print;
 
   StreamSubscription<String> _intentTextSubscription;
@@ -35,36 +38,76 @@ class _JoblistPageState extends State<JoblistPage> {
   Timer uploadTimer;
   StreamSubscription uploadListener;
 
+  StreamSubscription<SelectionState> selectionListener;
+
+  List<int> items = [];
+
+  bool allSelected = false;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: DefaultTabController(
         length: 3,
-        child: Scaffold(
-          bottomNavigationBar: CupertinoTabBar(
-            currentIndex: _mode.index,
-            onTap: _onTapTab,
-            items: [
-              BottomNavigationBarItem(icon: Icon(Icons.print), title: Text('Drucken')),
-              BottomNavigationBarItem(icon: Icon(Icons.scanner), title: Text('Scannen')),
-              BottomNavigationBarItem(icon: Icon(Icons.content_copy), title: Text('Kopieren')),
-            ],
-          ),
-          appBar: AppBar(
-            title: Text('AStA Copyclient'),
-          ),
-          drawer: MainDrawer(),
-          floatingActionButton: (_mode == ListMode.print) ? JoblistUploadFab() : null,
-          body: RefreshIndicator(
-            onRefresh: () => _onRefresh(),
-            child: ListView(
-              semanticChildCount: 2,
-              children: <Widget>[
-                JoblistUploadQueue(),
-                if (_mode == ListMode.print) JoblistJobList(),
-                if (_mode == ListMode.scan) JoblistScanList(),
+        child: BlocProvider<SelectionBloc>(
+          create: (BuildContext context) => selectionBloc,
+          child: Scaffold(
+            bottomNavigationBar: CupertinoTabBar(
+              currentIndex: _mode.index,
+              onTap: _onTapTab,
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.print), title: Text('Drucken')),
+                BottomNavigationBarItem(icon: Icon(Icons.scanner), title: Text('Scannen')),
+                BottomNavigationBarItem(icon: Icon(Icons.content_copy), title: Text('Kopieren')),
               ],
+            ),
+            appBar: AppBar(
+              actions: (items.isNotEmpty)
+                  ? <Widget>[
+                      IconButton(icon: Icon(Icons.clear), onPressed: () => selectionBloc.onClear()),
+                      Center(
+                          child: Text(
+                        '${selectionBloc.items.length} Job${selectionBloc.items.length > 1 ? 's' : ''} ausgewählt',
+                        style: TextStyle(fontSize: 20.0),
+                      )),
+                      Spacer(),
+                      IconButton(icon: Icon(Icons.select_all), onPressed: _onSelectAll),
+                    ]
+                  : null,
+              automaticallyImplyLeading: items.isEmpty,
+              title: Text('AStA Copyclient'),
+            ),
+            drawer: MainDrawer(),
+            floatingActionButton: (_mode == ListMode.print)
+                ? (selectionBloc.items.isEmpty)
+                    ? JoblistUploadFab()
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          FloatingActionButton(
+                            child: Icon(Icons.delete, color: Colors.white),
+                            onPressed: _onDeleteSelected,
+                          ),
+                          Container(width: 8.0, height: 0.0),
+                          FloatingActionButton(
+                            child: Icon(Icons.print, color: Colors.white),
+                            onPressed: _onPrintSelected,
+                          ),
+                        ],
+                      )
+                : null,
+            body: RefreshIndicator(
+              onRefresh: () => _onRefresh(),
+              child: ListView(
+                semanticChildCount: 2,
+                children: <Widget>[
+                  JoblistUploadQueue(),
+                  if (_mode == ListMode.print) JoblistJobList(),
+                  if (_mode == ListMode.scan) JoblistScanList(),
+                  if (_mode == ListMode.copy) JoblistScanList(copyMode: true),
+                ],
+              ),
             ),
           ),
         ),
@@ -78,6 +121,8 @@ class _JoblistPageState extends State<JoblistPage> {
     _intentImageSubscription.cancel();
     _intentDataStreamSubscription.cancel();
     uploadListener.cancel();
+    selectionListener.cancel();
+    selectionBloc.close();
 
     if (uploadTimer != null) uploadTimer.cancel();
 
@@ -86,6 +131,12 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   void initState() {
+    selectionBloc = SelectionBloc();
+
+    selectionListener = selectionBloc.listen((SelectionState state) {
+      setState(() => items = state.items);
+    });
+
     uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
       if (state.isResult && state.value.length == 0) {
         if (uploadTimer != null) uploadTimer.cancel();
@@ -203,10 +254,42 @@ class _JoblistPageState extends State<JoblistPage> {
     }
   }
 
+  void _onDeleteSelected() {
+    for (int item in selectionBloc.items) {
+      BlocProvider.of<JoblistBloc>(context).onDeleteById(item);
+      selectionBloc.onToggleItem(item);
+    }
+  }
+
+  void _onPrintSelected() async {
+    String barcode = '';
+    try {
+      barcode = await BarcodeScanner.scan();
+    } catch (e) {
+      print(e);
+    }
+
+    for (int item in selectionBloc.items) {
+      BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, item);
+      selectionBloc.onToggleItem(item);
+    }
+  }
+
   Future<void> _onRefresh() async {
     BlocProvider.of<JoblistBloc>(context).onRefresh();
     BlocProvider.of<UploadBloc>(context).onRefresh();
     return;
+  }
+
+  void _onSelectAll() {
+    selectionBloc.onClear();
+    if (!allSelected) {
+      for (Job job in BlocProvider.of<JoblistBloc>(context).jobs) {
+        selectionBloc.onToggleItem(job.id);
+      }
+      allSelected = true;
+    } else
+      allSelected = false;
   }
 
   void _onTapTab(int value) {

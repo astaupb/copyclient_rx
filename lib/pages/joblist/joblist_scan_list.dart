@@ -8,6 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'joblist_tile.dart';
 
 class JoblistScanList extends StatefulWidget {
+  final bool copyMode;
+
+  JoblistScanList({this.copyMode = false});
+
   @override
   _JoblistScanListState createState() => _JoblistScanListState();
 }
@@ -34,7 +38,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _uploadTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       BlocProvider.of<UploadBloc>(context).onRefresh();
     });
-    
+
     super.initState();
   }
 

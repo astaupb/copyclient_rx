@@ -7,6 +7,8 @@ class JoblistTile extends ListTile {
   final int index;
   final BuildContext context;
 
+  final Widget leader;
+
   final onLongTap;
   final onPress;
   final onPressPrint;
@@ -16,20 +18,27 @@ class JoblistTile extends ListTile {
   final String directPrinter;
 
   JoblistTile(this.context, this.index, this.job,
-      {this.onLongTap, this.onPress, this.onPressPrint, this.chosen = false, this.directPrinter});
+      {this.onLongTap,
+      this.onPress,
+      this.onPressPrint,
+      this.chosen = false,
+      this.directPrinter,
+      this.leader});
 
   @override
   EdgeInsetsGeometry get contentPadding => EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0);
 
   @override
-  Widget get leading => MaterialButton(
-        color: Colors.teal[800],
-        child: Icon(
-          Icons.print,
-          color: Colors.white,
-        ),
-        onPressed: onPressPrint,
-      );
+  Widget get leading => (leader != null)
+      ? leader
+      : MaterialButton(
+          color: Colors.teal[800],
+          child: Icon(
+            Icons.print,
+            color: Colors.white,
+          ),
+          onPressed: onPressPrint,
+        );
 
   @override
   get onLongPress => () => onLongTap();

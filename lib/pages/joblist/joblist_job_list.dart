@@ -1,5 +1,6 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,12 +37,22 @@ class _JoblistJobListState extends State<JoblistJobList> {
               ),
               Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
               for (int i = _jobs.length - 1; i >= 0; i--)
-                JoblistTile(
-                  context,
-                  i,
-                  _jobs[i],
-                  onPress: () => _onPressed(_jobs[i]),
-                  onPressPrint: () => _onPressedPrint(_jobs[i].id),
+                BlocBuilder<SelectionBloc, SelectionState>(
+                  builder: (BuildContext context, SelectionState state) => JoblistTile(
+                    context,
+                    i,
+                    _jobs[i],
+                    onPress: () => _onPressed(_jobs[i]),
+                    onPressPrint: () => _onPressedPrint(_jobs[i].id),
+                    onLongTap: () =>
+                        BlocProvider.of<SelectionBloc>(context).onToggleItem(_jobs[i].id),
+                    chosen: state.items.contains(_jobs[i].id),
+                    leader: (state.items.length > 0)
+                        ? Icon((state.items.contains(_jobs[i].id))
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank)
+                        : null,
+                  ),
                 ),
             ]);
           } else if (state.isResult) {
@@ -57,9 +68,13 @@ class _JoblistJobListState extends State<JoblistJobList> {
   }
 
   void _onPressed(Job job) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (BuildContext context) => JobdetailsPage(job)),
-    );
+    if (BlocProvider.of<SelectionBloc>(context).items.isNotEmpty) {
+      BlocProvider.of<SelectionBloc>(context).onToggleItem(job.id);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (BuildContext context) => JobdetailsPage(job)),
+      );
+    }
   }
 
   void _onPressedPrint(int id) async {
