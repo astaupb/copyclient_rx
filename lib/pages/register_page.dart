@@ -102,6 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _onPressedButton(BuildContext context, AuthBloc authBloc) {
+    print('register dispatched');
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       authBloc.onRegister(_username, _password);
@@ -147,7 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     } else {
                       return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
                     }
-                    return '';
+                    return null;
                   },
                   onSaved: (value) => _password = value,
                 ),
