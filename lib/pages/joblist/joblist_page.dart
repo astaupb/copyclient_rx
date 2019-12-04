@@ -7,6 +7,7 @@ import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_popup_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +21,7 @@ import 'joblist_job_list.dart';
 import 'joblist_scan_list.dart';
 import 'joblist_upload_fab.dart';
 import 'joblist_upload_queue.dart';
+import 'joblist_intent_handlers.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -62,13 +64,16 @@ class _JoblistPageState extends State<JoblistPage> {
               currentIndex: _mode.index,
               onTap: _onTapTab,
               activeColor: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
-                      ? Colors.white
-                      : null,
+                  ? Colors.white
+                  : null,
               iconSize: 28.0,
               items: [
-                BottomNavigationBarItem(icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.3)),
-                BottomNavigationBarItem(icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.3)),
-                BottomNavigationBarItem(icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.3)),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.3)),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.3)),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.3)),
               ],
             ),
             appBar: AppBar(
@@ -83,7 +88,7 @@ class _JoblistPageState extends State<JoblistPage> {
                       Spacer(),
                       IconButton(icon: Icon(Icons.select_all), onPressed: _onSelectAll),
                     ]
-                  : null,
+                  : <Widget>[JoblistPopupButton()],
               automaticallyImplyLeading: items.isEmpty,
               title: Text('AStA Copyclient'),
             ),
@@ -154,19 +159,19 @@ class _JoblistPageState extends State<JoblistPage> {
 
     _intentTextSubscription = ReceiveSharingIntent.getTextStream().listen((String text) {
       ReceiveSharingIntent.reset();
-      _handleIntentText(text);
+      handleIntentText(text, context, uploadTimer);
     }, onError: (err) {
       print("intentTextSubscription error: $err");
     });
 
     ReceiveSharingIntent.getInitialText().then((String text) {
       ReceiveSharingIntent.reset();
-      _handleIntentText(text);
+      handleIntentText(text, context, uploadTimer);
     });
 
     _intentImageSubscription = ReceiveSharingIntent.getImageStream().listen((List<String> value) {
       ReceiveSharingIntent.reset();
-      _handleIntentValue(value);
+      handleIntentValue(value, context, uploadTimer);
     }, onError: (err) {
       print("intentImageSubscription error: $err");
     });
@@ -174,7 +179,7 @@ class _JoblistPageState extends State<JoblistPage> {
     ReceiveSharingIntent.getInitialImage().then((List<String> value) {
       // Call reset method if you don't want to see this callback again.
       ReceiveSharingIntent.reset();
-      _handleIntentValue(value);
+      handleIntentValue(value, context, uploadTimer);
     });
 
     // For sharing images coming from outside the app while the app is in the memory
@@ -183,7 +188,7 @@ class _JoblistPageState extends State<JoblistPage> {
           ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
-        _handleIntentValue(value);
+        handleIntentValue(value, context, uploadTimer);
       }, onError: (err) {
         print("intentDataStreamSubscription error: $err");
       });
@@ -193,74 +198,10 @@ class _JoblistPageState extends State<JoblistPage> {
       ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
-        _handleIntentValue(value);
+        handleIntentValue(value, context, uploadTimer);
       });
 
     super.initState();
-  }
-
-  void _handleIntentText(String text) {
-    if (text != null) {
-      StreamSubscription listener;
-      listener = BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
-        if (state.isResult) {
-          BlocProvider.of<UploadBloc>(context)
-              .onUpload(state.value, filename: 'text_${DateTime.now().toIso8601String()}.txt');
-          listener.cancel();
-        }
-      });
-      BlocProvider.of<PdfCreationBloc>(context).onCreateFromText(text);
-    }
-
-    StreamSubscription listener;
-    listener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-      if (state.isResult &&
-          state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
-        uploadTimer = Timer.periodic(
-            const Duration(seconds: 1), (_) => BlocProvider.of<UploadBloc>(context).onRefresh());
-        listener.cancel();
-      }
-    });
-  }
-
-  void _handleIntentValue(List<String> value) async {
-    if (value != null) {
-      await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
-      await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-
-      for (String url in value) {
-        final File file = File(url);
-        final String filename = file.path.split('/').last;
-        final int numericFilename = int.tryParse(filename);
-        print('upload filename $filename');
-
-        if (lookupMimeType(filename).contains('application/pdf')) {
-          BlocProvider.of<UploadBloc>(context).onUpload(await file.readAsBytes(),
-              filename: (numericFilename == null) ? filename : null);
-        } else if (lookupMimeType(filename).contains('image/')) {
-          StreamSubscription listener;
-          listener =
-              BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
-            if (state.isResult) {
-              BlocProvider.of<UploadBloc>(context).onUpload(state.value, filename: filename);
-              listener.cancel();
-            }
-          });
-
-          BlocProvider.of<PdfCreationBloc>(context).onCreateFromImage(await file.readAsBytes());
-        }
-      }
-
-      StreamSubscription listener;
-      listener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-        if (state.isResult &&
-            state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
-          uploadTimer = Timer.periodic(
-              const Duration(seconds: 1), (_) => BlocProvider.of<UploadBloc>(context).onRefresh());
-          listener.cancel();
-        }
-      });
-    }
   }
 
   void _onDeleteSelected() {
