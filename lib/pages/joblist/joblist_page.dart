@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
-import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
@@ -11,8 +10,6 @@ import 'package:copyclient_rx/pages/joblist/joblist_popup_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mime/mime.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../widgets/drawer/drawer.dart';

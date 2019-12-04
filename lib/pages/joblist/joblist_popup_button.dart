@@ -78,9 +78,10 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
       ),
     );
 
-    for (Job job in BlocProvider.of<JoblistBloc>(context).state.value) {
-      BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, job.id);
-    }
+    if (dialogPositive)
+      for (Job job in BlocProvider.of<JoblistBloc>(context).state.value) {
+        BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, job.id);
+      }
   }
 
   void _onDeleteAll() async {
