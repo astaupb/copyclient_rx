@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
@@ -47,6 +49,26 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
           if (uploadTimer != null) uploadTimer.cancel();
         }
         lastUploads = state.value.length;
+      } else if (state.isException) {
+        final int status = (state.error as ApiException).statusCode;
+        String errorText;
+        switch (status) {
+          case 400:
+            errorText =
+                'Die hochgeladene Datei ist defekt. Überprüfe deine Datei und versuche es noch ein Mal.';
+            break;
+          case 401:
+            BlocProvider.of<AuthBloc>(context).onLogout();
+            break;
+          case 415:
+            errorText = 'Das Format der hochgeladenen Datei wird nicht unterstützt.';
+            break;
+          default:
+            errorText = 'Beim Hochladen ist ein unbekannter Fehler aufgetreten.';
+        }
+        Scaffold.of(context).showSnackBar(
+            SnackBar(duration: Duration(seconds: 3), content: Text('$errorText ($status)')));
+        BlocProvider.of<UploadBloc>(context).onRefresh();
       }
     });
     super.initState();
@@ -67,10 +89,10 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
   void _onUploadPressed() async {
     await _getFilePath().then(
       (Map<String, String> paths) => paths.forEach((String filename, String path) {
-        if (lookupMimeType(filename).contains('application/pdf')) {
+        if ((lookupMimeType(filename) ?? '').contains('application/pdf')) {
           BlocProvider.of<UploadBloc>(context)
               .onUpload(File(path).readAsBytesSync(), filename: filename);
-        } else if (lookupMimeType(filename).contains('image/')) {
+        } else if ((lookupMimeType(filename) ?? '').contains('image/')) {
           StreamSubscription listener;
           listener =
               BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
@@ -81,7 +103,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
           });
 
           BlocProvider.of<PdfCreationBloc>(context).onCreateFromImage(File(path).readAsBytesSync());
-        } else if (lookupMimeType(filename).contains('text/')) {
+        } else if ((lookupMimeType(filename) ?? '').contains('text/')) {
           StreamSubscription listener;
           listener =
               BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {

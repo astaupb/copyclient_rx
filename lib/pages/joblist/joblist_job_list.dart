@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
@@ -15,11 +19,7 @@ class JoblistJobList extends StatefulWidget {
 class _JoblistJobListState extends State<JoblistJobList> {
   List<Job> _jobs = [];
 
-  @override
-  void initState() {
-    BlocProvider.of<JoblistBloc>(context).onRefresh();
-    super.initState();
-  }
+  StreamSubscription<JoblistState> _joblistListener;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +74,39 @@ class _JoblistJobListState extends State<JoblistJobList> {
         return Center(child: CircularProgressIndicator());
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _joblistListener.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
+      if (state.isException) {
+        final int status = (state.error as ApiException).statusCode;
+        String message;
+        switch (status) {
+          case 401:
+            BlocProvider.of<AuthBloc>(context).onLogout();
+            break;
+          case 404:
+            Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
+            message = 'Dieser Job war nie da oder ist nicht mehr da.';
+            break;
+          default:
+            message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
+        }
+        Scaffold.of(context).showSnackBar(
+            SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+      }
+    });
+
+    BlocProvider.of<JoblistBloc>(context).onRefresh();
+    super.initState();
   }
 
   void _onPressed(Job job) {

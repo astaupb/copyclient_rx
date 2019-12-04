@@ -1,5 +1,6 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:copyclient_rx/blocs/theme_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,10 +22,26 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
       icon: Icon(Icons.more_vert),
       itemBuilder: (BuildContext context) => [
         PopupMenuItem(
-            child: Row(children: [Icon(Icons.delete), Text(' Alle Jobs löschen')]),
+            child: Row(children: [
+              Icon(
+                Icons.delete,
+                color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                    ? Colors.grey[800]
+                    : null,
+              ),
+              Text(' Alle Jobs löschen')
+            ]),
             value: PopupMenuEntry.deleteAll),
         PopupMenuItem(
-            child: Row(children: [Icon(Icons.print), Text(' Alle Jobs drucken')]),
+            child: Row(children: [
+              Icon(
+                Icons.print,
+                color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                    ? Colors.grey[800]
+                    : null,
+              ),
+              Text(' Alle Jobs drucken')
+            ]),
             value: PopupMenuEntry.printAll),
       ],
     );

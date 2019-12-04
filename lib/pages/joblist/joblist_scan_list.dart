@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
@@ -27,6 +29,8 @@ class _JoblistScanListState extends State<JoblistScanList> {
   int _lastUploads = 0;
 
   String _device = '';
+
+  StreamSubscription<PrintQueueState> _printQueueListener;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +79,28 @@ class _JoblistScanListState extends State<JoblistScanList> {
   @override
   void initState() {
     _startIds = BlocProvider.of<JoblistBloc>(context).state.value.map((Job job) => job.id).toList();
+
+    _printQueueListener = BlocProvider.of<PrintQueueBloc>(context).listen((PrintQueueState state) {
+      if (state.isException) {
+        final int status = (state.error as ApiException).statusCode;
+        String message;
+        switch (status) {
+          case 404:
+            message = 'Dieser Drucker konnte nicht im System gefunden werden';
+            break;
+          case 400:
+            message = 'Problem bei der Anfrage an die Druckerwarteschlange';
+            break;
+          case 401:
+            BlocProvider.of<AuthBloc>(context).onLogout();
+            break;
+          default:
+            message = 'Unbekanntes Problem bei der Druckerwarteschlange aufgetreten';
+        }
+        Scaffold.of(context).showSnackBar(
+            SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+      }
+    });
 
     _initDevice();
 

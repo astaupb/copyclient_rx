@@ -48,7 +48,7 @@ final ThemeData darkTheme = ThemeData(
   ),
   bottomAppBarTheme: BottomAppBarTheme(color: Colors.black),
   floatingActionButtonTheme: FloatingActionButtonThemeData(
-    backgroundColor: Colors.teal,
+    backgroundColor: Colors.teal[800],
     //focusColor: Colors.tealAccent,
   ),
 );

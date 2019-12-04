@@ -14,11 +14,11 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
+import 'joblist_intent_handlers.dart';
 import 'joblist_job_list.dart';
 import 'joblist_scan_list.dart';
 import 'joblist_upload_fab.dart';
 import 'joblist_upload_queue.dart';
-import 'joblist_intent_handlers.dart';
 
 class JoblistPage extends StatefulWidget {
   @override
@@ -36,11 +36,11 @@ class _JoblistPageState extends State<JoblistPage> {
   StreamSubscription<List<String>> _intentDataStreamSubscription;
 
   Timer uploadTimer;
-  StreamSubscription uploadListener;
+  StreamSubscription _uploadListener;
 
-  StreamSubscription<SelectionState> selectionListener;
+  StreamSubscription<SelectionState> _selectionListener;
 
-  List<int> items = [];
+  List<int> _selectedItems = [];
 
   bool allSelected = false;
 
@@ -74,7 +74,7 @@ class _JoblistPageState extends State<JoblistPage> {
               ],
             ),
             appBar: AppBar(
-              actions: (items.isNotEmpty)
+              actions: (_selectedItems.isNotEmpty)
                   ? <Widget>[
                       IconButton(icon: Icon(Icons.clear), onPressed: () => selectionBloc.onClear()),
                       Center(
@@ -86,7 +86,7 @@ class _JoblistPageState extends State<JoblistPage> {
                       IconButton(icon: Icon(Icons.select_all), onPressed: _onSelectAll),
                     ]
                   : <Widget>[JoblistPopupButton()],
-              automaticallyImplyLeading: items.isEmpty,
+              automaticallyImplyLeading: _selectedItems.isEmpty,
               title: Text('AStA Copyclient'),
             ),
             drawer: MainDrawer(),
@@ -131,8 +131,8 @@ class _JoblistPageState extends State<JoblistPage> {
     _intentTextSubscription.cancel();
     _intentImageSubscription.cancel();
     _intentDataStreamSubscription.cancel();
-    uploadListener.cancel();
-    selectionListener.cancel();
+    _uploadListener.cancel();
+    _selectionListener.cancel();
     selectionBloc.close();
 
     if (uploadTimer != null) uploadTimer.cancel();
@@ -144,11 +144,11 @@ class _JoblistPageState extends State<JoblistPage> {
   void initState() {
     selectionBloc = SelectionBloc();
 
-    selectionListener = selectionBloc.listen((SelectionState state) {
-      setState(() => items = state.items);
+    _selectionListener = selectionBloc.listen((SelectionState state) {
+      setState(() => _selectedItems = state.items);
     });
 
-    uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
+    _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
       if (state.isResult && state.value.length == 0) {
         if (uploadTimer != null) uploadTimer.cancel();
       }
