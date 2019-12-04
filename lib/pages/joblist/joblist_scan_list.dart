@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,32 +24,9 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   StreamSubscription _uploadListener;
   Timer _uploadTimer;
-  int lastUploads = 0;
+  int _lastUploads = 0;
 
-  @override
-  void initState() {
-    _startIds = BlocProvider.of<JoblistBloc>(context).state.value.map((Job job) => job.id).toList();
-
-    _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-      if (state.isResult) {
-        if (state.value.length < lastUploads) BlocProvider.of<JoblistBloc>(context).onRefresh();
-        lastUploads = state.value.length;
-      }
-    });
-
-    _uploadTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      BlocProvider.of<UploadBloc>(context).onRefresh();
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _uploadTimer.cancel();
-    _uploadListener.cancel();
-    super.dispose();
-  }
+  String _device = '';
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +56,52 @@ class _JoblistScanListState extends State<JoblistScanList> {
           } else if (state.isResult) {
             return ListTile(
               title: Text(
-                  'Es sind noch keine Scans in dieser Liste. Wähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.'),
+                  'Es sind noch keine Scans in dieser Liste. Wähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nDein ausgewählter Drucker hat die Stellplatznummer $_device'),
             );
           }
         }
         return Center(child: CircularProgressIndicator());
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _uploadTimer.cancel();
+    _uploadListener.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _startIds = BlocProvider.of<JoblistBloc>(context).state.value.map((Job job) => job.id).toList();
+
+    _initDevice();
+
+    _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
+      if (state.isResult) {
+        if (state.value.length < _lastUploads) BlocProvider.of<JoblistBloc>(context).onRefresh();
+        _lastUploads = state.value.length;
+      }
+    });
+
+    _uploadTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      BlocProvider.of<UploadBloc>(context).onRefresh();
+    });
+
+    super.initState();
+  }
+
+  void _initDevice() async {
+    try {
+      _device = await BarcodeScanner.scan();
+      setState(() => _device);
+    } catch (e) {
+      print(e);
+    }
+
+    BlocProvider.of<PrintQueueBloc>(context)
+      ..setDeviceId(int.tryParse(_device))
+      ..onLockDevice();
   }
 }
