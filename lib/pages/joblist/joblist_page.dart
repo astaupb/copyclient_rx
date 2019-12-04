@@ -6,6 +6,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
+import 'package:copyclient_rx/blocs/theme_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,12 +55,20 @@ class _JoblistPageState extends State<JoblistPage> {
           create: (BuildContext context) => selectionBloc,
           child: Scaffold(
             bottomNavigationBar: CupertinoTabBar(
+              backgroundColor:
+                  (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                      ? Colors.grey[900]
+                      : null,
               currentIndex: _mode.index,
               onTap: _onTapTab,
+              activeColor: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                      ? Colors.white
+                      : null,
+              iconSize: 28.0,
               items: [
-                BottomNavigationBarItem(icon: Icon(Icons.print), title: Text('Drucken')),
-                BottomNavigationBarItem(icon: Icon(Icons.scanner), title: Text('Scannen')),
-                BottomNavigationBarItem(icon: Icon(Icons.content_copy), title: Text('Kopieren')),
+                BottomNavigationBarItem(icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.3)),
+                BottomNavigationBarItem(icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.3)),
+                BottomNavigationBarItem(icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.3)),
               ],
             ),
             appBar: AppBar(

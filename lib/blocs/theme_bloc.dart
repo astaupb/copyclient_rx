@@ -5,6 +5,13 @@ import 'package:flutter/material.dart';
 
 import '../db_store.dart';
 
+enum CopyclientTheme {
+  copyshop,
+  dark,
+  light,
+  custom
+}
+
 final ThemeData copyshopTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.pink,
@@ -38,6 +45,11 @@ final ThemeData darkTheme = ThemeData(
     colorScheme: ColorScheme.dark(),
     shape: StadiumBorder(),
     minWidth: 16.0,
+  ),
+  bottomAppBarTheme: BottomAppBarTheme(color: Colors.black),
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
+    backgroundColor: Colors.teal,
+    //focusColor: Colors.tealAccent,
   ),
 );
 
@@ -100,16 +112,17 @@ abstract class ThemeEvent {}
 
 class ThemeState {
   final ThemeData theme;
+  final CopyclientTheme id;
 
-  ThemeState(this.theme);
+  ThemeState(this.theme, this.id);
 
-  factory ThemeState.copyshopTheme() => ThemeState(copyshopTheme);
+  factory ThemeState.copyshopTheme() => ThemeState(copyshopTheme, CopyclientTheme.copyshop);
 
-  factory ThemeState.custom(ThemeData theme) => ThemeState(theme);
+  factory ThemeState.custom(ThemeData theme) => ThemeState(theme, CopyclientTheme.custom);
 
-  factory ThemeState.darkTheme() => ThemeState(darkTheme);
+  factory ThemeState.darkTheme() => ThemeState(darkTheme, CopyclientTheme.dark);
 
-  factory ThemeState.lightTheme() => ThemeState(ThemeData.light());
+  factory ThemeState.lightTheme() => ThemeState(ThemeData.light(), CopyclientTheme.light);
 
   Map<String, dynamic> toMap() => {'theme': theme};
 
