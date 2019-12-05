@@ -102,7 +102,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _onPressedButton(BuildContext context, AuthBloc authBloc) {
-    print('register dispatched');
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       authBloc.onRegister(_username, _password);

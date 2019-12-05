@@ -17,10 +17,7 @@ class JoblistUploadFab extends StatefulWidget {
 }
 
 class _JoblistUploadFabState extends State<JoblistUploadFab> {
-  Timer uploadTimer;
-
   StreamSubscription uploadListener;
-  int lastUploads = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -33,23 +30,13 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
   @override
   void dispose() {
     uploadListener.cancel();
-    if (uploadTimer != null) uploadTimer.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
     uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) async {
-      if (state.isResult) {
-        if (state.value.length < lastUploads) {
-          await Future.delayed(Duration(milliseconds: 100));
-          BlocProvider.of<JoblistBloc>(context).onRefresh();
-        }
-        if (state.value.length == 0) {
-          if (uploadTimer != null) uploadTimer.cancel();
-        }
-        lastUploads = state.value.length;
-      } else if (state.isException) {
+      if (state.isException) {
         final int status = (state.error as ApiException).statusCode;
         String errorText;
         switch (status) {
@@ -71,6 +58,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
         BlocProvider.of<UploadBloc>(context).onRefresh();
       }
     });
+    
     super.initState();
   }
 
@@ -124,7 +112,5 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
         }
       }),
     );
-    uploadTimer = Timer.periodic(
-        const Duration(seconds: 1), (_) => BlocProvider.of<UploadBloc>(context).onRefresh());
   }
 }

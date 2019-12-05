@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void handleIntentText(String text, BuildContext context, Timer timer) {
+void handleIntentText(String text, BuildContext context) {
   if (text != null) {
     StreamSubscription listener;
     listener = BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
@@ -20,18 +20,9 @@ void handleIntentText(String text, BuildContext context, Timer timer) {
     });
     BlocProvider.of<PdfCreationBloc>(context).onCreateFromText(text);
   }
-
-  StreamSubscription listener;
-  listener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-    if (state.isResult && state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
-      timer = Timer.periodic(
-          const Duration(seconds: 1), (_) => BlocProvider.of<UploadBloc>(context).onRefresh());
-      listener.cancel();
-    }
-  });
 }
 
-void handleIntentValue(List<String> value, BuildContext context, Timer uploadTimer) async {
+void handleIntentValue(List<String> value, BuildContext context) async {
   if (value != null) {
     await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
@@ -58,15 +49,5 @@ void handleIntentValue(List<String> value, BuildContext context, Timer uploadTim
         BlocProvider.of<PdfCreationBloc>(context).onCreateFromImage(await file.readAsBytes());
       }
     }
-
-    StreamSubscription listener;
-    listener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-      if (state.isResult &&
-          state.value.where((DispatcherTask task) => task.isUploading).length > 0) {
-        uploadTimer = Timer.periodic(
-            const Duration(seconds: 1), (_) => BlocProvider.of<UploadBloc>(context).onRefresh());
-        listener.cancel();
-      }
-    });
   }
 }

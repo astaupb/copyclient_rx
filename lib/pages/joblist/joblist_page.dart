@@ -16,6 +16,7 @@ import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import 'joblist_intent_handlers.dart';
 import 'joblist_job_list.dart';
+import 'joblist_refreshing_bloc.dart';
 import 'joblist_scan_list.dart';
 import 'joblist_upload_fab.dart';
 import 'joblist_upload_queue.dart';
@@ -29,20 +30,21 @@ enum ListMode { print, scan, copy }
 
 class _JoblistPageState extends State<JoblistPage> {
   SelectionBloc selectionBloc;
+  RefreshingBloc refreshingBloc;
   ListMode _mode = ListMode.print;
 
   StreamSubscription<String> _intentTextSubscription;
   StreamSubscription<List<String>> _intentImageSubscription;
   StreamSubscription<List<String>> _intentDataStreamSubscription;
 
-  Timer uploadTimer;
   StreamSubscription _uploadListener;
-
   StreamSubscription<SelectionState> _selectionListener;
+  StreamSubscription _refreshingListener;
 
   List<int> _selectedItems = [];
 
   bool allSelected = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,8 +136,7 @@ class _JoblistPageState extends State<JoblistPage> {
     _uploadListener.cancel();
     _selectionListener.cancel();
     selectionBloc.close();
-
-    if (uploadTimer != null) uploadTimer.cancel();
+    refreshingBloc.close();
 
     super.dispose();
   }
@@ -143,32 +144,44 @@ class _JoblistPageState extends State<JoblistPage> {
   @override
   void initState() {
     selectionBloc = SelectionBloc();
+    refreshingBloc = RefreshingBloc();
+
+    _refreshingListener = refreshingBloc.listen((RefreshingState state) {
+      if (state.isRefreshing) {
+        if (state.refreshJobs) {
+          BlocProvider.of<JoblistBloc>(context).onRefresh();
+        }
+        if (state.refreshQueue) {
+          BlocProvider.of<UploadBloc>(context).onRefresh();
+        }
+      }
+    });
 
     _selectionListener = selectionBloc.listen((SelectionState state) {
       setState(() => _selectedItems = state.items);
     });
 
     _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-      if (state.isResult && state.value.length == 0) {
-        if (uploadTimer != null) uploadTimer.cancel();
+      if (state.isResult) {
+        refreshingBloc.onAddUploads(state.value);
       }
     });
 
     _intentTextSubscription = ReceiveSharingIntent.getTextStream().listen((String text) {
       ReceiveSharingIntent.reset();
-      handleIntentText(text, context, uploadTimer);
+      handleIntentText(text, context);
     }, onError: (err) {
       print("intentTextSubscription error: $err");
     });
 
     ReceiveSharingIntent.getInitialText().then((String text) {
       ReceiveSharingIntent.reset();
-      handleIntentText(text, context, uploadTimer);
+      handleIntentText(text, context);
     });
 
     _intentImageSubscription = ReceiveSharingIntent.getImageStream().listen((List<String> value) {
       ReceiveSharingIntent.reset();
-      handleIntentValue(value, context, uploadTimer);
+      handleIntentValue(value, context);
     }, onError: (err) {
       print("intentImageSubscription error: $err");
     });
@@ -176,7 +189,7 @@ class _JoblistPageState extends State<JoblistPage> {
     ReceiveSharingIntent.getInitialImage().then((List<String> value) {
       // Call reset method if you don't want to see this callback again.
       ReceiveSharingIntent.reset();
-      handleIntentValue(value, context, uploadTimer);
+      handleIntentValue(value, context);
     });
 
     // For sharing images coming from outside the app while the app is in the memory
@@ -185,7 +198,7 @@ class _JoblistPageState extends State<JoblistPage> {
           ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
-        handleIntentValue(value, context, uploadTimer);
+        handleIntentValue(value, context);
       }, onError: (err) {
         print("intentDataStreamSubscription error: $err");
       });
@@ -195,7 +208,7 @@ class _JoblistPageState extends State<JoblistPage> {
       ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
-        handleIntentValue(value, context, uploadTimer);
+        handleIntentValue(value, context);
       });
 
     super.initState();
