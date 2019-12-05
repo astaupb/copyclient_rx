@@ -6,6 +6,8 @@ import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_refreshing_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_scan_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,13 +61,15 @@ class _JoblistScanListState extends State<JoblistScanList> {
                     Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
                 trailing: BlocBuilder<PrintQueueBloc, PrintQueueState>(
                     builder: (BuildContext context, PrintQueueState state) {
-                  if (state.isResult || state.isLocked) {
-                    return Icon(
+                  return GestureDetector(
+                    child: Icon(
                       Icons.fiber_manual_record,
-                      color: (state.value.processing.isNotEmpty) ? Colors.green : Colors.grey,
-                    );
-                  }
-                  return Container(width: 0, height: 0);
+                      color: state.isLocked ? Colors.green : Colors.red,
+                    ),
+                    onDoubleTap: () => (state.isLocked)
+                        ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
+                        : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
+                  );
                 }),
               ),
               Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
@@ -74,9 +78,12 @@ class _JoblistScanListState extends State<JoblistScanList> {
                   context,
                   i,
                   _jobs[i],
-                  onPress: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (BuildContext context) => JobdetailsPage(_jobs[i])),
-                  ),
+                  onPress: () {
+                    BlocProvider.of<RefreshingBloc>(context).onDisableForce();
+                    BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
+                  },
                   leader: widget.copyMode
                       ? null
                       : MaterialButton(
@@ -89,28 +96,26 @@ class _JoblistScanListState extends State<JoblistScanList> {
                         ),
                 ),
             ]);
-          } else if (state.isResult) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  title: Text(
-                      'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(height: 64.0),
-                    Icon(Icons.print, size: 64.0),
-                    Text(_device, textScaleFactor: 3.0),
-                  ],
-                )
-              ],
-            );
           }
         }
-        return Center(child: CircularProgressIndicator());
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              title: Text(
+                  'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(height: 64.0),
+                Icon(Icons.print, size: 64.0),
+                Text(_device, textScaleFactor: 3.0),
+              ],
+            )
+          ],
+        );
       },
     );
   }
@@ -130,7 +135,8 @@ class _JoblistScanListState extends State<JoblistScanList> {
   @override
   void initState() {
     _scanBloc = ScanBloc();
-    _startIds = BlocProvider.of<JoblistBloc>(context).state.value.map((Job job) => job.id).toList();
+
+    _startIds = (BlocProvider.of<JoblistBloc>(context).state.value ?? []).map((Job job) => job.id).toList();
 
     _scanListener = _scanBloc.listen((ScanState state) {
       if (state.isBeating && state.shouldBeat) {

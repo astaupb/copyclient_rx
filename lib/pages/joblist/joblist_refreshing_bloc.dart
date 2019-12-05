@@ -61,7 +61,7 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
       if (_lastUploads < _uploads.length) {
         yield RefreshingState.refreshing(refreshJobs: true, refreshQueue: true);
       } else {
-        yield RefreshingState.refreshing(refreshQueue: true, refreshJobs: false);
+        yield RefreshingState.refreshing(refreshQueue: true, refreshJobs: _force);
       }
     }
   }

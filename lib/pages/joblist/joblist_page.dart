@@ -6,6 +6,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_popup_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,12 +27,12 @@ class JoblistPage extends StatefulWidget {
   _JoblistPageState createState() => _JoblistPageState();
 }
 
-enum ListMode { print, scan, copy }
-
 class _JoblistPageState extends State<JoblistPage> {
   SelectionBloc selectionBloc;
   RefreshingBloc refreshingBloc;
-  ListMode _mode = ListMode.print;
+  JoblistModeBloc joblistModeBloc;
+
+  JoblistMode _mode = JoblistMode.print;
 
   StreamSubscription<String> _intentTextSubscription;
   StreamSubscription<List<String>> _intentImageSubscription;
@@ -39,6 +40,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
   StreamSubscription _uploadListener;
   StreamSubscription<SelectionState> _selectionListener;
+  StreamSubscription<JoblistMode> _joblistModeListener;
   StreamSubscription _refreshingListener;
 
   List<int> _selectedItems = [];
@@ -91,34 +93,50 @@ class _JoblistPageState extends State<JoblistPage> {
               title: Text('AStA Copyclient'),
             ),
             drawer: MainDrawer(),
-            floatingActionButton: (_mode == ListMode.print)
-                ? (selectionBloc.items.isEmpty)
-                    ? JoblistUploadFab()
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          FloatingActionButton(
-                            child: Icon(Icons.delete, color: Colors.white),
-                            onPressed: _onDeleteSelected,
-                          ),
-                          Container(width: 8.0, height: 0.0),
-                          FloatingActionButton(
-                            child: Icon(Icons.print, color: Colors.white),
-                            onPressed: _onPrintSelected,
-                          ),
-                        ],
-                      )
-                : null,
+            floatingActionButton: BlocBuilder<JoblistModeBloc, JoblistMode>(
+              bloc: joblistModeBloc,
+              builder: (BuildContext context, JoblistMode mode) {
+                if (mode == JoblistMode.print) {
+                  if (selectionBloc.items.isEmpty)
+                    return JoblistUploadFab();
+                  else
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        FloatingActionButton(
+                          child: Icon(Icons.delete, color: Colors.white),
+                          onPressed: _onDeleteSelected,
+                        ),
+                        Container(width: 8.0, height: 0.0),
+                        FloatingActionButton(
+                          child: Icon(Icons.print, color: Colors.white),
+                          onPressed: _onPrintSelected,
+                        ),
+                      ],
+                    );
+                } else
+                  return Container(width: 0.0, height: 0.0);
+              },
+            ),
             body: RefreshIndicator(
               onRefresh: () => _onRefresh(),
-              child: ListView(
-                semanticChildCount: 2,
-                children: <Widget>[
-                  JoblistUploadQueue(),
-                  if (_mode == ListMode.print) JoblistJobList(),
-                  if (_mode == ListMode.scan) JoblistScanList(),
-                  if (_mode == ListMode.copy) JoblistScanList(copyMode: true),
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider<RefreshingBloc>(create: (BuildContext context) => refreshingBloc),
+                  BlocProvider<JoblistModeBloc>(create: (BuildContext context) => joblistModeBloc),
                 ],
+                child: ListView(
+                  semanticChildCount: 2,
+                  children: <Widget>[
+                    JoblistUploadQueue(),
+                    if (_mode == JoblistMode.print)
+                      JoblistJobList()
+                    else if (_mode == JoblistMode.scan)
+                      JoblistScanList()
+                    else if (_mode == JoblistMode.copy)
+                      JoblistScanList(copyMode: true),
+                  ],
+                ),
               ),
             ),
           ),
@@ -135,6 +153,7 @@ class _JoblistPageState extends State<JoblistPage> {
     _uploadListener.cancel();
     _selectionListener.cancel();
     _refreshingListener.cancel();
+    _joblistModeListener.cancel();
     selectionBloc.close();
     refreshingBloc.close();
 
@@ -143,6 +162,8 @@ class _JoblistPageState extends State<JoblistPage> {
 
   @override
   void initState() {
+    joblistModeBloc = JoblistModeBloc(JoblistMode.print);
+    joblistModeBloc.onSwitch(JoblistMode.print);
     selectionBloc = SelectionBloc();
     refreshingBloc = RefreshingBloc();
 
@@ -159,6 +180,15 @@ class _JoblistPageState extends State<JoblistPage> {
 
     _selectionListener = selectionBloc.listen((SelectionState state) {
       setState(() => _selectedItems = state.items);
+    });
+
+    _joblistModeListener = joblistModeBloc.listen((JoblistMode mode) {
+      setState(() => _mode = mode);
+      if (mode == JoblistMode.scan || mode == JoblistMode.copy) {
+        refreshingBloc.onEnableForce();
+      } else if (mode == JoblistMode.print) {
+        refreshingBloc.onDisableForce();
+      }
     });
 
     _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
@@ -253,18 +283,13 @@ class _JoblistPageState extends State<JoblistPage> {
   }
 
   void _onTapTab(int value) {
-    setState(
-        () => _mode = (value == 0) ? ListMode.print : (value == 1) ? ListMode.scan : ListMode.copy);
-    if (_mode == ListMode.scan || _mode == ListMode.copy) {
-      refreshingBloc.onEnableForce();
-    } else if (_mode == ListMode.print) {
-      refreshingBloc.onDisableForce();
-    }
+    joblistModeBloc.onSwitch(
+        (value == 0) ? JoblistMode.print : (value == 1) ? JoblistMode.scan : JoblistMode.copy);
   }
 
   Future<bool> _onWillPop() {
-    if (_mode != ListMode.print) {
-      setState(() => _mode = ListMode.print);
+    if (joblistModeBloc.mode != JoblistMode.print) {
+      joblistModeBloc.onSwitch(JoblistMode.print);
       refreshingBloc.onDisableForce();
       return Future.value(false);
     } else {
