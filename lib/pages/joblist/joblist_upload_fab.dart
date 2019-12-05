@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/exceptions.dart';
-import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:file_picker/file_picker.dart';
@@ -58,7 +57,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
         BlocProvider.of<UploadBloc>(context).onRefresh();
       }
     });
-    
+
     super.initState();
   }
 

@@ -134,6 +134,7 @@ class _JoblistPageState extends State<JoblistPage> {
     _intentDataStreamSubscription.cancel();
     _uploadListener.cancel();
     _selectionListener.cancel();
+    _refreshingListener.cancel();
     selectionBloc.close();
     refreshingBloc.close();
 
@@ -262,10 +263,16 @@ class _JoblistPageState extends State<JoblistPage> {
   }
 
   Future<bool> _onWillPop() {
-    return showDialog(
-          context: context,
-          builder: (context) => ExitAppAlert(),
-        ) ??
-        false;
+    if (_mode != ListMode.print) {
+      setState(() => _mode = ListMode.print);
+      refreshingBloc.onDisableForce();
+      return Future.value(false);
+    } else {
+      return showDialog(
+            context: context,
+            builder: (context) => ExitAppAlert(),
+          ) ??
+          false;
+    }
   }
 }

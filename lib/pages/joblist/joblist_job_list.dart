@@ -48,7 +48,6 @@ class _JoblistJobListState extends State<JoblistJobList> {
                         i,
                         _jobs[i],
                         onPress: () => _onPressed(_jobs[i]),
-                        onPressPrint: () => _onPressedPrint(_jobs[i].id),
                         onLongTap: () =>
                             BlocProvider.of<SelectionBloc>(context).onToggleItem(_jobs[i].id),
                         chosen: state.items.contains(_jobs[i].id),
@@ -58,7 +57,14 @@ class _JoblistJobListState extends State<JoblistJobList> {
                                 child: Icon((state.items.contains(_jobs[i].id))
                                     ? Icons.check_box
                                     : Icons.check_box_outline_blank))
-                            : null,
+                            : MaterialButton(
+                                color: Colors.teal[800],
+                                child: Icon(
+                                  Icons.print,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => _onPressedPrint(_jobs[i].id),
+                              ),
                       ),
                     ),
                   ),
