@@ -24,11 +24,9 @@ class _JoblistScanListState extends State<JoblistScanList> {
   List<Job> _jobs = [];
   List<int> _startIds;
 
-  StreamSubscription _uploadListener;
-  Timer _uploadTimer;
-  int _lastUploads = 0;
-
   String _device = '';
+
+  Timer _heartbeatTimer;
 
   StreamSubscription<PrintQueueState> _printQueueListener;
 
@@ -46,6 +44,16 @@ class _JoblistScanListState extends State<JoblistScanList> {
               ListTile(
                 title: Text('Scans', textScaleFactor: 1.5),
                 subtitle: Text('${_jobs.length} Scans in der Liste'),
+                trailing: BlocBuilder<PrintQueueBloc, PrintQueueState>(
+                    builder: (BuildContext context, PrintQueueState state) {
+                  if (state.isResult || state.isLocked) {
+                    return Icon(
+                      Icons.fiber_manual_record,
+                      color: (state.value.processing.isNotEmpty) ? Colors.green : Colors.grey,
+                    );
+                  }
+                  return Container(width: 0, height: 0);
+                }),
               ),
               Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
               for (int i = _jobs.length - 1; i >= 0; i--)
@@ -71,8 +79,9 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   @override
   void dispose() {
-    _uploadTimer.cancel();
-    _uploadListener.cancel();
+    _printQueueListener.cancel();
+
+    if (_heartbeatTimer != null) _heartbeatTimer.cancel();
     super.dispose();
   }
 
@@ -81,7 +90,10 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _startIds = BlocProvider.of<JoblistBloc>(context).state.value.map((Job job) => job.id).toList();
 
     _printQueueListener = BlocProvider.of<PrintQueueBloc>(context).listen((PrintQueueState state) {
-      if (state.isException) {
+      if (state.isLocked) {
+        _heartbeatTimer = Timer.periodic(
+            const Duration(seconds: 50), BlocProvider.of<PrintQueueBloc>(context).onLockDevice());
+      } else if (state.isException) {
         final int status = (state.error as ApiException).statusCode;
         String message;
         switch (status) {
@@ -103,17 +115,6 @@ class _JoblistScanListState extends State<JoblistScanList> {
     });
 
     _initDevice();
-
-    _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
-      if (state.isResult) {
-        if (state.value.length < _lastUploads) BlocProvider.of<JoblistBloc>(context).onRefresh();
-        _lastUploads = state.value.length;
-      }
-    });
-
-    _uploadTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      BlocProvider.of<UploadBloc>(context).onRefresh();
-    });
 
     super.initState();
   }

@@ -45,7 +45,6 @@ class _JoblistPageState extends State<JoblistPage> {
 
   bool allSelected = false;
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -255,6 +254,11 @@ class _JoblistPageState extends State<JoblistPage> {
   void _onTapTab(int value) {
     setState(
         () => _mode = (value == 0) ? ListMode.print : (value == 1) ? ListMode.scan : ListMode.copy);
+    if (_mode == ListMode.scan || _mode == ListMode.copy) {
+      refreshingBloc.onEnableForce();
+    } else if (_mode == ListMode.print) {
+      refreshingBloc.onDisableForce();
+    }
   }
 
   Future<bool> _onWillPop() {

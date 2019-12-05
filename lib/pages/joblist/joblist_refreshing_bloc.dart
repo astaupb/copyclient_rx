@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:logging/logging.dart';
 
+class ForceRefreshing extends RefreshingEvent {}
+
 class PutUploads extends RefreshingEvent {
   final List<DispatcherTask> uploads;
 
@@ -17,24 +19,41 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
 
   Timer _timer;
 
+  bool _force = false;
+
   @override
   get initialState => RefreshingState.idle();
 
   @override
   Stream<RefreshingState> mapEventToState(RefreshingEvent event) async* {
-    if (event is PutUploads) {
-      _log.finer('[RefreshingBloc] ${event.uploads.length} ${event.uploads}');
+    _log.fine('Event: $event');
+
+    if (event is ForceRefreshing) {
+      _force = true;
+      if (_timer?.isActive ?? false) {
+        _log.finer('timer already running');
+      } else {
+        _log.finer('starting locked timer');
+        _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => this.add(Trigger()));
+      }
+    } else if (event is UnforceRefreshing) {
+      _force = false;
+      _log.finer('cancelling locked timer');
+      _timer.cancel();
+      yield RefreshingState.idle();
+    } else if (event is PutUploads) {
+      _log.finer('${event.uploads.length} ${event.uploads}');
       _uploads = event.uploads;
 
-      if (_uploads.isNotEmpty) {
+      if (_uploads.isNotEmpty && !_force) {
         if (_timer?.isActive ?? false) {
-          _log.finer('[RefreshingBloc] timer already running');
+          _log.finer('timer already running');
         } else {
-          _log.finer('[RefreshingBloc] starting timer');
+          _log.finer('starting timer');
           _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => this.add(Trigger()));
         }
-      } else {
-        _log.finer('[RefreshingBloc] cancelling timer');
+      } else if (!_force) {
+        _log.finer('cancelling timer');
         _timer.cancel();
         yield RefreshingState.idle();
       }
@@ -48,6 +67,10 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
   }
 
   void onAddUploads(List<DispatcherTask> uploads) => this.add(PutUploads(uploads));
+
+  void onDisableForce() => this.add(UnforceRefreshing());
+  
+  void onEnableForce() => this.add(ForceRefreshing());
 }
 
 abstract class RefreshingEvent {}
@@ -80,3 +103,5 @@ class RefreshingState {
 }
 
 class Trigger extends RefreshingEvent {}
+
+class UnforceRefreshing extends RefreshingEvent {}
