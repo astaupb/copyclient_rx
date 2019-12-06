@@ -25,8 +25,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
         _log.finer('heartbeat already running');
       } else {
         _log.finer('starting heartbeat');
-        _timer =
-            Timer.periodic(const Duration(seconds: 50), (Timer t) => add(TriggerHeartbeat()));
+        _timer = Timer.periodic(const Duration(seconds: 50), (Timer t) => add(TriggerHeartbeat()));
       }
     } else if (event is DisableHeartbeat) {
       _log.finer('cancelling heartbeat');

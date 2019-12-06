@@ -70,11 +70,11 @@ class ChangeEmailDialogState extends State<ChangeEmailDialog> {
   String _validateEmail(String value) {
     final email = value.split('@');
 
-    if(email.length == 2 && email[1].contains('.')) {
+    if (email.length == 2 && email[1].contains('.')) {
       print(email);
       return null;
     }
-    
+
     return 'Bitte gebe eine richtige E-Mail Adresse ein';
   }
 }

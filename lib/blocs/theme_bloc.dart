@@ -5,12 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../db_store.dart';
 
-enum CopyclientTheme {
-  copyshop,
-  dark,
-  light,
-  custom
-}
+enum CopyclientTheme { copyshop, dark, light, custom }
 
 final ThemeData copyshopTheme = ThemeData(
   brightness: Brightness.light,
