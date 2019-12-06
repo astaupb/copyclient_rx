@@ -13,13 +13,13 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
 
-  String _username = "";
-  String _password = "";
+  String _username = '';
+  String _password = '';
   bool _stayLoggedIn = false;
 
   @override
   Widget build(BuildContext context) {
-    AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
+    final authBloc = BlocProvider.of<AuthBloc>(context);
     return Column(
       children: <Widget>[
         Padding(
@@ -34,13 +34,13 @@ class _LoginFormState extends State<LoginForm> {
                     BlocBuilder(
                       bloc: authBloc,
                       builder: (BuildContext context, AuthState state) {
-                        TextEditingController _usernameController = TextEditingController(
+                        final _usernameController = TextEditingController(
                             text: (state.isRegistered) ? state.username : _username);
                         _usernameController.addListener(() => _username = _usernameController.text);
                         return TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(labelText: 'Nutzername/SN'),
-                          validator: (val) => val.length < 1 ? 'Nutzername benötigt' : null,
+                          validator: (val) => val.isEmpty ? 'Nutzername benötigt' : null,
                           onSaved: (val) => _username = val.trim(),
                           obscureText: false,
                           keyboardType: TextInputType.text,
@@ -50,7 +50,7 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                     TextFormField(
                       decoration: InputDecoration(labelText: 'Passwort/PIN'),
-                      validator: (val) => val.length < 1 ? 'Passwort benötigt' : null,
+                      validator: (val) => val.isEmpty ? 'Passwort benötigt' : null,
                       onSaved: (val) => _password = val.trim(),
                       obscureText: true,
                       keyboardType: TextInputType.text,
@@ -110,7 +110,7 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _submitForm(AuthBloc authBloc) {
-    final FormState _form = _formKey.currentState;
+    final _form = _formKey.currentState;
     _form.save();
     authBloc.onLogin(_username, _password, persistent: _stayLoggedIn);
   }

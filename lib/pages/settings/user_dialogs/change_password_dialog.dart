@@ -34,7 +34,7 @@ class ChangePasswordDialogState extends State<ChangePasswordDialog> {
                   obscureText: true,
                   autocorrect: false,
                   decoration: InputDecoration(labelText: 'Altes Passwort'),
-                  validator: (val) => val.length < 1 ? 'Altes Passwort benötigt' : null,
+                  validator: (val) => val.isEmpty ? 'Altes Passwort benötigt' : null,
                   onSaved: (val) => _oldPassword = val,
                 ),
                 TextFormField(

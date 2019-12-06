@@ -29,7 +29,7 @@ class _HeartPinState extends State<HeartPin> {
           job = state.value[joblistBloc.getIndexById(jobId)];
           lastKeep = job.jobOptions.keep;
         }
-        bool keep = job?.jobOptions?.keep ?? lastKeep ?? false;
+        final keep = job?.jobOptions?.keep ?? lastKeep ?? false;
         return IconButton(
           color: Color(0xffff58ad),
           splashColor: Color(0xffff8ddf),

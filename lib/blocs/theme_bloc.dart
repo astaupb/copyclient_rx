@@ -69,7 +69,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   DBStore dbStore = DBStore();
 
   @override
-  get initialState => ThemeState.copyshopTheme();
+  ThemeState get initialState => ThemeState.copyshopTheme();
 
   @override
   Stream<ThemeState> mapEventToState(ThemeEvent event) async* {
@@ -77,27 +77,27 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       yield ThemeState.custom(event.newTheme);
     }
     if (event is ActivateDarkTheme) {
-      dbStore.insertSetting(MapEntry('theme', 'dark'));
+      await dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
       yield ThemeState.darkTheme();
     }
     if (event is ActivateLightTheme) {
-      dbStore.insertSetting(MapEntry('theme', 'light'));
+      await dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
       yield ThemeState.lightTheme();
     }
     if (event is ActivateDefaultTheme) {
-      dbStore.insertSetting(MapEntry('theme', 'copyshop'));
+      await dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
       yield ThemeState.copyshopTheme();
     }
   }
 
-  void onSetCopyshopTheme() => this.add(ActivateDefaultTheme());
+  void onSetCopyshopTheme() => add(ActivateDefaultTheme());
 
-  void onSetDarkTheme() => this.add(ActivateDarkTheme());
+  void onSetDarkTheme() => add(ActivateDarkTheme());
 
-  void onSetLightTheme() => this.add(ActivateLightTheme());
+  void onSetLightTheme() => add(ActivateLightTheme());
 
   void onStart() {
-    String theme = dbStore.settings['theme'];
+    var theme = dbStore.settings['theme'];
     if (theme == 'copyshop') {
       onSetCopyshopTheme();
     } else if (theme == 'dark') {
@@ -124,7 +124,7 @@ class ThemeState {
 
   factory ThemeState.lightTheme() => ThemeState(ThemeData.light(), CopyclientTheme.light);
 
-  Map<String, dynamic> toMap() => {'theme': theme};
+  Map<String, dynamic> toMap() => <String, dynamic>{'theme': theme};
 
   @override
   String toString() => toMap().toString();

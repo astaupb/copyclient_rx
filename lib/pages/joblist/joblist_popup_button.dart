@@ -61,16 +61,16 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
   }
 
   void _onPrintAll() async {
-    String barcode = '';
+    var barcode = '';
     try {
       barcode = await BarcodeScanner.scan();
     } catch (e) {
       print(e);
     }
 
-    bool dialogPositive = false;
+    var dialogPositive = false;
 
-    await showDialog(
+    await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: Text('Wirklich alle Jobs drucken?'),
@@ -95,16 +95,17 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
       ),
     );
 
-    if (dialogPositive)
-      for (Job job in BlocProvider.of<JoblistBloc>(context).state.value) {
+    if (dialogPositive) {
+      for (var job in BlocProvider.of<JoblistBloc>(context).state.value) {
         BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, job.id);
       }
+    }
   }
 
   void _onDeleteAll() async {
-    bool dialogPositive = false;
+    var dialogPositive = false;
 
-    await showDialog(
+    await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: Text('Wirklich alle Jobs löschen?'),

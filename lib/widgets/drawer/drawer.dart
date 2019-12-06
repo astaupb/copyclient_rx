@@ -36,9 +36,9 @@ class MainDrawer extends StatelessWidget {
             title: Text('Über'),
             trailing: Icon(Icons.help),
             onTap: () async {
-              PackageInfo packageInfo = await PackageInfo.fromPlatform();
+              final packageInfo = await PackageInfo.fromPlatform();
               Navigator.of(context).pop();
-              showDialog(
+              await showDialog<SimpleDialog>(
                 context: context,
                 builder: (BuildContext context) {
                   return SimpleDialog(

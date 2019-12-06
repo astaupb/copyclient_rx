@@ -14,10 +14,10 @@ String onValidateUsername(String val) {
 }
 
 bool containsUmlaute(String val) {
-  const List<String> umlaute = ['Ä', 'ä', 'Ö', 'ö', 'Ü', 'ü', 'ß'];
-  bool contains = false;
+  const umlaute = ['Ä', 'ä', 'Ö', 'ö', 'Ü', 'ü', 'ß'];
+  var contains = false;
 
-  for (String umlaut in umlaute) {
+  for (var umlaut in umlaute) {
     if (val.contains(umlaut)) {
       contains = true;
     }
@@ -27,11 +27,11 @@ bool containsUmlaute(String val) {
 }
 
 bool containsSpecialChars(String val) {
-  const List<String> specials = ['/', '.', ':'];
+  const specials = ['/', '.', ':'];
 
-  bool contains = false;
+  var contains = false;
 
-  for (String special in specials) {
+  for (var special in specials) {
     if (val.contains(special)) {
       contains = true;
     }

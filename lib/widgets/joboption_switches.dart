@@ -87,7 +87,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                                 ))
                             .toList(),
                         value: _job.jobOptions.duplex,
-                        onChanged: (val) {
+                        onChanged: (int val) {
                           _job.jobOptions.duplex = val;
                           joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                         },
@@ -113,7 +113,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
               ),
               Divider(indent: 10.0),
               ListTile(
-                onTap: () => showDialog(
+                onTap: () async => await showDialog<Dialog>(
                     context: context,
                     builder: (BuildContext context) => _copiesDialog(context, joblistBloc)),
                 leading: Icon(Icons.clear_all),
@@ -131,12 +131,13 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                                   if (_job.jobOptions.copies > 1) {
                                     _job.jobOptions.copies--;
                                     joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                                  } else
+                                  } else {
                                     Scaffold.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text('Nicht weniger als eine Kopie möglich'),
                                       ),
                                     );
+                                  }
                                 },
                               ),
                             )
@@ -159,12 +160,13 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                             if (_job.jobOptions.copies < 1000) {
                               _job.jobOptions.copies++;
                               joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
-                            } else
+                            } else {
                               Scaffold.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Nicht mehr als 999 Kopien möglich'),
                                 ),
                               );
+                            }
                           },
                         ),
                       ),
@@ -190,8 +192,8 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                 ),
               Divider(indent: 10.0),
               ListTile(
-                onTap: () {
-                  showDialog(
+                onTap: () async {
+                  await showDialog<Dialog>(
                       context: context,
                       builder: (BuildContext context) => _rangeDialog(context, joblistBloc));
                 }, //open text edit
@@ -213,7 +215,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                         )
                         .toList(),
                     value: _job.jobOptions.nup,
-                    onChanged: (val) {
+                    onChanged: (int val) {
                       _job.jobOptions.nup = val;
                       joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                     },

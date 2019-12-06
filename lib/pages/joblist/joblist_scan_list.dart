@@ -29,7 +29,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   List<Job> _jobs = [];
   List<int> _startIds;
-  List<int> _copiedIds = [];
+  List<int> _copiedIds;
 
   String _device = '';
   bool _deviceSelected = false;
@@ -38,9 +38,13 @@ class _JoblistScanListState extends State<JoblistScanList> {
   StreamSubscription<ScanState> _scanListener;
   StreamSubscription<JoblistState> _joblistListener;
 
+  _JoblistScanListState() {
+    _copiedIds = [];
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_deviceSelected)
+    if (_deviceSelected) {
       return BlocBuilder<JoblistBloc, JoblistState>(
         builder: (BuildContext context, JoblistState state) {
           if (state.isResult || state.isBusy) {
@@ -48,19 +52,19 @@ class _JoblistScanListState extends State<JoblistScanList> {
               _jobs = state.value;
               _jobs.removeWhere((Job job) => _startIds.contains(job.id));
               if (widget.copyMode) {
-                for (Job job in _jobs) {
+                for (var job in _jobs) {
                   if (!_copiedIds.contains(job.id)) {
                     BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
                     _copiedIds.add(job.id);
                   }
                 }
               } else {
-                for (Job job in _jobs) {
+                for (var job in _jobs) {
                   if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
                 }
               }
             }
-            if (_jobs.length > 0) {
+            if (_jobs.isNotEmpty) {
               return Column(children: <Widget>[
                 ListTile(
                   title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.5),
@@ -88,7 +92,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
                     onPress: () {
                       BlocProvider.of<RefreshingBloc>(context).onDisableForce();
                       BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-                      Navigator.of(context).push(MaterialPageRoute(
+                      Navigator.of(context).push<JobdetailsPage>(MaterialPageRoute(
                           builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
                     },
                     leader: widget.copyMode
@@ -125,8 +129,9 @@ class _JoblistScanListState extends State<JoblistScanList> {
           );
         },
       );
-    else
+    } else {
       return Container(width: 0.0, height: 0.0);
+    }
   }
 
   @override
@@ -156,7 +161,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
     _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
       if (state.isException) {
-        final int status = (state.error as ApiException).statusCode;
+        final status = (state.error as ApiException).statusCode;
         String message;
         switch (status) {
           case 401:
@@ -181,7 +186,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
     _printQueueListener = BlocProvider.of<PrintQueueBloc>(context).listen((PrintQueueState state) {
       if (state.isException) {
-        final int status = (state.error as ApiException).statusCode;
+        final status = (state.error as ApiException).statusCode;
         String message;
         switch (status) {
           case 404:
@@ -215,18 +220,22 @@ class _JoblistScanListState extends State<JoblistScanList> {
       _device = await BarcodeScanner.scan();
       setState(() => _deviceSelected = true);
 
-      if (_device == '' || _device.length > 5) {
-        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-        Scaffold.of(context).showSnackBar(SnackBar(
-            duration: Duration(seconds: 5),
-            content: Text(
-                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
-      } else {
+      int deviceId;
+
+      if (_device != '' && !(_device.length > 5)) deviceId = int.tryParse(_device);
+
+      if (deviceId != null) {
         BlocProvider.of<PrintQueueBloc>(context)
           ..setDeviceId(int.tryParse(_device))
           ..onLockDevice();
 
         _scanBloc.onStart();
+      } else {
+        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+        Scaffold.of(context).showSnackBar(SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
       }
     } catch (e) {
       print('exception while scanning barcode: $e');
@@ -243,7 +252,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     }
   }
 
-  _onPressedPrint(int id) {
+  void _onPressedPrint(int id) {
     if (_device != '') {
       BlocProvider.of<JoblistBloc>(context).onPrintById(_device, id);
     }

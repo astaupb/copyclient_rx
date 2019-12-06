@@ -27,10 +27,10 @@ void handleIntentValue(List<String> value, BuildContext context) async {
     await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
-    for (String url in value) {
-      final File file = File(url);
-      final String filename = file.path.split('/').last;
-      final int numericFilename = int.tryParse(filename);
+    for (var url in value) {
+      final file = File(url);
+      final filename = file.path.split('/').last;
+      final numericFilename = int.tryParse(filename);
       print('upload filename $filename');
 
       if (lookupMimeType(filename).contains('application/pdf')) {

@@ -30,7 +30,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
           if (state.isResult) {
             _jobs = state.value;
           }
-          if (_jobs.length > 0) {
+          if (_jobs.isNotEmpty) {
             return Column(
               children: <Widget>[
                 ListTile(
@@ -52,7 +52,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
                         onLongTap: () =>
                             BlocProvider.of<SelectionBloc>(context).onToggleItem(_jobs[i].id),
                         chosen: state.items.contains(_jobs[i].id),
-                        leader: (state.items.length > 0)
+                        leader: (state.items.isNotEmpty)
                             ? Padding(
                                 padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
                                 child: Icon((state.items.contains(_jobs[i].id))
@@ -93,7 +93,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
   void initState() {
     _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
       if (state.isException) {
-        final int status = (state.error as ApiException).statusCode;
+        final status = (state.error as ApiException).statusCode;
         String message;
         switch (status) {
           case 401:
@@ -123,7 +123,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
     if (BlocProvider.of<SelectionBloc>(context).items.isNotEmpty) {
       BlocProvider.of<SelectionBloc>(context).onToggleItem(job.id);
     } else {
-      Navigator.of(context).push(
+      Navigator.of(context).push<JobdetailsPage>(
         MaterialPageRoute(builder: (BuildContext context) => JobdetailsPage(job)),
       );
     }
@@ -146,7 +146,8 @@ class _JoblistJobListState extends State<JoblistJobList> {
       }
     }
 
-    if (barcode != null && barcode != '')
+    if (barcode != null && barcode != '') {
       BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
+    }
   }
 }

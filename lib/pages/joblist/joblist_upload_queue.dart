@@ -9,7 +9,7 @@ class JoblistUploadQueue extends StatelessWidget {
     return BlocBuilder<UploadBloc, UploadState>(
       builder: (BuildContext context, UploadState state) {
         if (state.isResult) {
-          if (state.value.length > 0) {
+          if (state.value.isNotEmpty) {
             return Column(
               children: <Widget>[
                 ListTile(

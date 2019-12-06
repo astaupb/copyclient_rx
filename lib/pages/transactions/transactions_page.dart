@@ -87,13 +87,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void _onExportJournal(BuildContext context, bool share) {
-    const SnackBar doneSnack = SnackBar(
+    const doneSnack = SnackBar(
       duration: Duration(seconds: 1),
       content: Text('PDF unter Downloads gespeichert'),
     );
 
     if (journalBloc.state.isResult) {
-      PdfCreationBloc pdfCreation = PdfCreationBloc();
+      var pdfCreation = PdfCreationBloc();
 
       StreamSubscription pdfListener;
 
@@ -109,7 +109,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             } catch (e) {
               print(e.toString());
             }
-            final String _basePath = (await Directory(downloadPath).create()).path;
+            final _basePath = (await Directory(downloadPath).create()).path;
             await File('$_basePath/transaktionen_${DateTime.now().toIso8601String()}.pdf')
                 .writeAsBytes(state.value, flush: true);
 
@@ -121,8 +121,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 state.value,
                 'application/pdf');
           }
-          pdfListener.cancel();
-          pdfCreation.close();
+          await pdfListener.cancel();
+          await pdfCreation.close();
         }
       });
 
@@ -135,7 +135,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Future<void> _onRefresh() async {
-    var listener;
+    StreamSubscription listener;
     listener = journalBloc.listen((JournalState state) {
       if (state.isResult) {
         listener.cancel();
@@ -146,7 +146,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void _onShowShare(BuildContext scaffoldContext) async {
-    await showModalBottomSheet(
+    await showModalBottomSheet<Padding>(
       context: scaffoldContext,
       builder: (BuildContext context) {
         return Padding(

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:blocs_copyclient/blocs.dart';
+import 'package:blocs_copyclient/src/common.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import '../db_store.dart';
 import '../models/backend_shiva.dart';
 import '../routes.dart';
 import 'login/login.dart';
+import 'settings/settings_page.dart';
 
 class RootPage extends StatefulWidget {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -59,7 +62,7 @@ class _RootPageState extends State<RootPage> {
 
             _initBlocs();
 
-            final List blocs = [
+            final blocs = [
               joblistBloc,
               userBloc,
               uploadBloc,
@@ -71,7 +74,7 @@ class _RootPageState extends State<RootPage> {
             ];
 
             for (var bloc in blocs) {
-              bloc.listen(_for401);
+              (bloc as Bloc).listen((dynamic state) => _for401(state as ResultState));
             }
 
             // AUTHORIZED AND READY TO HUSTLE
@@ -103,7 +106,7 @@ class _RootPageState extends State<RootPage> {
                   key: widget.navigatorKey,
                   initialRoute: '/',
                   onGenerateRoute: (RouteSettings settings) {
-                    return MaterialPageRoute(
+                    return MaterialPageRoute<SettingsPage>(
                       settings: settings,
                       maintainState: true,
                       builder: (context) => routes[settings.name](context),
@@ -113,8 +116,8 @@ class _RootPageState extends State<RootPage> {
               ),
             );
           } else if (state.isException) {
-            String snackText = 'Fehler: ${state.error}';
-            int code = (state.error as ApiException).statusCode;
+            var snackText = 'Fehler: ${state.error}';
+            var code = (state.error as ApiException).statusCode;
             if (code == 401) {
               snackText = 'Fehler: Name oder Passwort ist falsch/Nutzer nicht vorhanden';
             } else if (code == 400 || (code > 401 && code < 500)) {
@@ -190,8 +193,8 @@ class _RootPageState extends State<RootPage> {
     BlocProvider.of<ThemeBloc>(context).onStart();
   }
 
-  void _for401(state) async {
-    if (state.isException && state.error.statusCode == 401) {
+  void _for401(ResultState state) async {
+    if (state.isException && (state.error as ApiException).statusCode == 401) {
       authBloc.onLogout();
       await DBStore().clearTokens();
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
@@ -211,7 +214,7 @@ class _RootPageState extends State<RootPage> {
   }
 
   Future<bool> _onWillPop() async {
-    final NavigatorState navigator = widget.navigatorKey.currentState;
+    final navigator = widget.navigatorKey.currentState;
     assert(navigator != null);
     return await navigator.maybePop();
   }

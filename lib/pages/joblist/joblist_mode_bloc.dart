@@ -4,12 +4,12 @@ import 'package:logging/logging.dart';
 enum JoblistMode { print, scan, copy }
 
 class JoblistModeBloc extends Bloc<JoblistModeEvent, JoblistMode> {
-  Logger _log = Logger('JoblistModeBloc');
+  final Logger _log = Logger('JoblistModeBloc');
   JoblistMode mode;
 
   JoblistModeBloc(this.mode);
 
-  void onSwitch(JoblistMode mode) => this.add(SwitchMode(mode));
+  void onSwitch(JoblistMode mode) => add(SwitchMode(mode));
 
   @override
   JoblistMode get initialState => JoblistMode.copy;

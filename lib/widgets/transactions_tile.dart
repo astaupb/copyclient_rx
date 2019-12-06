@@ -13,7 +13,7 @@ class TransactionsTile extends ListTile {
   Widget get leading => (transaction.value < 0) ? Icon(Icons.remove) : Icon(Icons.add);
 
   @override
-  get onTap => () => null;
+  Function() get onTap => () => null;
 
   @override
   Widget get subtitle => Text(transaction.timestamp);

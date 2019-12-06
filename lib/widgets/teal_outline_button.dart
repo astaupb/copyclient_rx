@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 class TealOutlineButton extends OutlineButton {
-  final Widget _child;
-  final _onPressed;
+  @override
+  final Widget child;
 
-  TealOutlineButton({@required Widget child, @required onPressed})
-      : _child = child,
-        _onPressed = onPressed;
+  @override
+  final onPressed;
+
+  TealOutlineButton({@required this.child, @required this.onPressed});
 
   @override
   BorderSide get borderSide => BorderSide(color: Colors.teal[800]);
@@ -19,10 +20,4 @@ class TealOutlineButton extends OutlineButton {
 
   @override
   Color get color => Colors.white70;
-
-  @override
-  Widget get child => _child;
-
-  @override
-  get onPressed => _onPressed;
 }

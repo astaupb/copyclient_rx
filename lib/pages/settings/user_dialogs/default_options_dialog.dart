@@ -60,7 +60,7 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                           )
                           .toList(),
                       value: jobOptions.duplex,
-                      onChanged: (val) {
+                      onChanged: (int val) {
                         setState(() => jobOptions.duplex = val);
                       },
                     ),
@@ -133,7 +133,7 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                       )
                       .toList(),
                   value: jobOptions.nup,
-                  onChanged: (val) {
+                  onChanged: (int val) {
                     setState(() => jobOptions.nup = val);
                   },
                 ),
@@ -155,7 +155,7 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
                       )
                       .toList(),
                   value: jobOptions.nupPageOrder,
-                  onChanged: (val) {
+                  onChanged: (int val) {
                     setState(() => jobOptions.nupPageOrder = val);
                   },
                 ),
@@ -175,8 +175,9 @@ class _DefaultOptionsDialogState extends State<DefaultOptionsDialog> {
               ),
             ],
           );
-        } else
+        } else {
           return Center(child: CircularProgressIndicator());
+        }
       },
     );
   }

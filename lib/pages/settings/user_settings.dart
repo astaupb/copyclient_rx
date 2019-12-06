@@ -66,7 +66,7 @@ class UserSettingsPage extends StatelessWidget {
                     BlocBuilder<UserBloc, UserState>(
                       bloc: userBloc,
                       builder: (BuildContext context, UserState state) {
-                        if (state.isResult)
+                        if (state.isResult) {
                           return Padding(
                               padding: EdgeInsets.only(bottom: 8.0, right: 8.0),
                               child: Column(
@@ -85,8 +85,9 @@ class UserSettingsPage extends StatelessWidget {
                                   ),
                                 ],
                               ));
-                        else
+                        } else {
                           return Container(width: 0.0, height: 0.0);
+                        }
                       },
                     ),
                   ],
@@ -97,7 +98,7 @@ class UserSettingsPage extends StatelessWidget {
                 bloc: userBloc,
                 builder: (BuildContext context, UserState state) {
                   if (state.isResult) {
-                    if (state.value.card != null)
+                    if (state.value.card != null) {
                       return Padding(
                         padding: EdgeInsets.only(right: 24.0),
                         child: Column(
@@ -111,8 +112,9 @@ class UserSettingsPage extends StatelessWidget {
                           ],
                         ),
                       );
-                    else
+                    } else {
                       return Container(width: 0.0, height: 0.0);
+                    }
                   } else {
                     return Container(width: 0.0, height: 0.0);
                   }
@@ -151,15 +153,15 @@ class UserSettingsPage extends StatelessWidget {
   }
 
   void _showCreditTokenDialog(BuildContext context, JournalBloc journalBloc) async {
-    showDialog(
+    await showDialog<RedeemTokenDialog>(
       context: context,
       builder: (BuildContext context) => RedeemTokenDialog(journalBloc: journalBloc),
     );
-    Future.delayed(Duration(seconds: 2)).then((val) => userBloc.onRefresh());
+    await Future<dynamic>.delayed(Duration(seconds: 2)).then((dynamic val) => userBloc.onRefresh());
   }
 
-  _showDefaultOptionsDialog(BuildContext context) {
-    showDialog(
+  void _showDefaultOptionsDialog(BuildContext context) async {
+    await showDialog<DefaultOptionsDialog>(
         context: context,
         builder: (BuildContext context) => DefaultOptionsDialog(userBloc: userBloc));
   }
@@ -170,19 +172,19 @@ class UserSettingsPage extends StatelessWidget {
             builder: (BuildContext context) => ChangePasswordDialog(userBloc: userBloc))) ??
         false) {
       BlocProvider.of<AuthBloc>(context).onLogout();
-      DBStore().clearTokens();
+      await DBStore().clearTokens();
     }
   }
 
-  void _showUsernameDialog(BuildContext context) {
-    showDialog(
+  void _showUsernameDialog(BuildContext context) async {
+    await showDialog<ChangeNameDialog>(
       context: context,
       builder: (BuildContext context) => ChangeNameDialog(userBloc: userBloc),
     );
   }
 
-  _showEmailDialog(BuildContext context) {
-    showDialog(
+  void _showEmailDialog(BuildContext context) async {
+    await showDialog<ChangeEmailDialog>(
       context: context,
       builder: (BuildContext context) => ChangeEmailDialog(userBloc: userBloc),
     );

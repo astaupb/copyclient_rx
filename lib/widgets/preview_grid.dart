@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as dui;
 
 import 'package:blocs_copyclient/joblist.dart';
@@ -28,10 +29,10 @@ class _PreviewGridState extends State<PreviewGrid> {
   Offset currentFocalPoint;
 
   Map<String, int> getImageDimensions(List<int> imageBytes) {
-    Map<String, int> _dim = {'width': 0, 'height': 0};
+    var _dim = {'width': 0, 'height': 0};
     int i;
 
-    String header = '';
+    var header = '';
     for (i = 0; i < 8; i++) {
       header = header +
           ((imageBytes[i].toRadixString(16).length < 2) ? '0' : '') +
@@ -39,7 +40,7 @@ class _PreviewGridState extends State<PreviewGrid> {
     }
 
     if (header == '89504e470d0a1a0a') {
-      String width = '';
+      var width = '';
       for (i = 16; i < 20; i++) {
         width = width +
             ((imageBytes[i].toRadixString(16).length < 2) ? '0' : '') +
@@ -47,7 +48,7 @@ class _PreviewGridState extends State<PreviewGrid> {
       }
       _dim['width'] = int.parse(width, radix: 16);
 
-      String height = '';
+      var height = '';
       for (i = i; i < 24; i++) {
         height = height +
             ((imageBytes[i].toRadixString(16).length < 2) ? '0' : '') +
@@ -92,9 +93,9 @@ class _PreviewGridState extends State<PreviewGrid> {
               child: BlocBuilder<PreviewBloc, PreviewState>(
                 builder: (BuildContext context, PreviewState state) {
                   if (state.isResult && state.value.any(setsMatch)) {
-                    PreviewSet previewSet = state.value.singleWhere(setsMatch);
-                    Map<String, int> size = getImageDimensions(previewSet.previews[0]);
-                    bool _portrait = (size['width'] < size['height']);
+                    var previewSet = state.value.singleWhere(setsMatch);
+                    var size = getImageDimensions(previewSet.previews[0]);
+                    var _portrait = (size['width'] < size['height']);
 
                     if (job.jobInfo.pagecount > 1 && job.jobOptions.nup > 1) {
                       if ((_portrait && job.jobOptions.nup == 4) ||
@@ -111,7 +112,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: MemoryImage(
-                                    previewSet.previews[0],
+                                    previewSet.previews[0] as Uint8List,
                                     scale: 1.4,
                                   ),
                                   fit: BoxFit.none,
@@ -138,7 +139,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Image.memory(
-                                        previewSet.previews[0],
+                                        previewSet.previews[0] as Uint8List,
                                         width: (job.jobOptions.nup > 2) ? 150.0 : 300,
                                       ),
                                       Image.memory(
@@ -146,7 +147,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                                                 job.jobOptions.nup == 4 &&
                                                 job.jobInfo.pagecount > 2)
                                             ? 2
-                                            : 1],
+                                            : 1] as Uint8List,
                                         width: (job.jobOptions.nup > 2) ? 150.0 : 300,
                                       ),
                                     ],
@@ -163,8 +164,9 @@ class _PreviewGridState extends State<PreviewGrid> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
                                         Image.memory(
-                                          previewSet.previews[
-                                              (_portrait && job.jobOptions.nup == 4) ? 1 : 2],
+                                          previewSet.previews[(_portrait && job.jobOptions.nup == 4)
+                                              ? 1
+                                              : 2] as Uint8List,
                                           width: 150.0,
                                         ),
                                         (job.jobInfo.pagecount == 3)
@@ -173,7 +175,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                                                 height: 211.5,
                                               )
                                             : Image.memory(
-                                                previewSet.previews[3],
+                                                previewSet.previews[3] as Uint8List,
                                                 width: 150.0,
                                               ),
                                       ],
@@ -194,7 +196,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: MemoryImage(
-                                    previewSet.previews[0],
+                                    previewSet.previews[0] as Uint8List,
                                     scale: 1.4,
                                   ),
                                   fit: BoxFit.none,
@@ -221,11 +223,11 @@ class _PreviewGridState extends State<PreviewGrid> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Image.memory(
-                                        previewSet.previews[0],
+                                        previewSet.previews[0] as Uint8List,
                                         width: 150.0,
                                       ),
                                       Image.memory(
-                                        previewSet.previews[1],
+                                        previewSet.previews[1] as Uint8List,
                                         width: 150.0,
                                       ),
                                     ],
@@ -243,12 +245,12 @@ class _PreviewGridState extends State<PreviewGrid> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
                                         Image.memory(
-                                          previewSet.previews[2],
+                                          previewSet.previews[2] as Uint8List,
                                           width: 150.0,
                                         ),
                                         if (job.jobInfo.pagecount > 3)
                                           Image.memory(
-                                            previewSet.previews[3],
+                                            previewSet.previews[3] as Uint8List,
                                             width: 150.0,
                                           )
                                         else
@@ -269,7 +271,7 @@ class _PreviewGridState extends State<PreviewGrid> {
                         alignment: Alignment.center,
                         color: Colors.white,
                         child: Image.memory(
-                          previewSet.previews[0],
+                          previewSet.previews[0] as Uint8List,
                         ),
                       );
                     }
@@ -279,8 +281,9 @@ class _PreviewGridState extends State<PreviewGrid> {
               ),
             ),
           );
-        } else
+        } else {
           return Center(child: CircularProgressIndicator());
+        }
       },
     );
   }

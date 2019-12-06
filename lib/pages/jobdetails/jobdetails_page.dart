@@ -40,7 +40,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: () => showModalBottomSheet(
+            onPressed: () => showModalBottomSheet<JobDeletionModal>(
                 context: context,
                 builder: (BuildContext context) {
                   return JobDeletionModal(widget._job.id);
@@ -54,7 +54,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
           ),
           IconButton(
             icon: Icon(Icons.info),
-            onPressed: () => showDialog(
+            onPressed: () => showDialog<DetailsDialog>(
               context: context,
               builder: (context) => DetailsDialog(widget._job),
             ),
@@ -79,15 +79,15 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
   }
 
   Future<void> _onPdfDownload(BuildContext context) async {
-    const SnackBar doneSnack = SnackBar(
+    const doneSnack = SnackBar(
       duration: Duration(seconds: 1),
       content: Text('PDF unter Downloads gespeichert'),
     );
-    const SnackBar errorSnack = SnackBar(
+    const errorSnack = SnackBar(
       duration: Duration(seconds: 1),
       content: Text('Fehler beim Download der PDF'),
     );
-    const SnackBar downloadSnack = SnackBar(
+    const downloadSnack = SnackBar(
       duration: Duration(seconds: 30),
       content: Text('Lade PDF...'),
     );
@@ -105,15 +105,16 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         } catch (e) {
           print(e.toString());
         }
-        final String _basePath = (await Directory(downloadPath).create()).path;
+        final _basePath = (await Directory(downloadPath).create()).path;
         String _path;
         if (widget._job.jobInfo.filename.isEmpty) {
           _path = _basePath + '/${widget._job.id}.pdf';
         } else {
-          if (widget._job.jobInfo.filename.endsWith('.pdf'))
+          if (widget._job.jobInfo.filename.endsWith('.pdf')) {
             _path = _basePath + '/${widget._job.jobInfo.filename}';
-          else
+          } else {
             _path = _basePath + '/${widget._job.jobInfo.filename}.pdf';
+          }
         }
         await File(_path).writeAsBytes(state.value.last.file, flush: true);
 
@@ -132,7 +133,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     listen = BlocProvider.of<PdfBloc>(context).listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         //Navigator.of(context).pop();
-        final PdfFile pdf = state.value.last;
+        final pdf = state.value.last;
         await Share.file(
             'Copyclient Download',
             (widget._job.jobInfo.filename == '')
@@ -142,14 +143,14 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                     : '${widget._job.jobInfo.filename}.pdf',
             pdf.file,
             'application/pdf');
-        listen.cancel();
+        await listen.cancel();
       }
     });
     BlocProvider.of<PdfBloc>(context).onGetPdf(widget._job.id);
   }
 
   void _onShowShare(BuildContext scaffoldContext) async {
-    await showModalBottomSheet(
+    await showModalBottomSheet<Padding>(
       context: scaffoldContext,
       builder: (BuildContext context) {
         return Padding(

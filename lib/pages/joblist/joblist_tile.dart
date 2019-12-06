@@ -9,8 +9,8 @@ class JoblistTile extends ListTile {
 
   final Widget leader;
 
-  final onLongTap;
-  final onPress;
+  final Function onLongTap;
+  final Function onPress;
 
   final bool chosen;
 
@@ -34,10 +34,10 @@ class JoblistTile extends ListTile {
   Widget get leading => leader;
 
   @override
-  get onLongPress => () => onLongTap();
+  Function() get onLongPress => () => onLongTap();
 
   @override
-  get onTap => () => onPress();
+  Function() get onTap => () => onPress();
 
   @override
   bool get selected => chosen;

@@ -6,38 +6,39 @@ import 'package:logging/logging.dart';
 import '../db_store.dart';
 
 class CameraBloc extends Bloc<CameraEvent, CameraState> {
-  Logger _log = Logger('CameraBloc');
-  DBStore _dbStore = DBStore();
+  final Logger _log = Logger('CameraBloc');
+  final DBStore _dbStore = DBStore();
 
   @override
-  get initialState => CameraState.enabled();
+  CameraState get initialState => CameraState.enabled();
 
   @override
   Stream<CameraState> mapEventToState(event) async* {
     _log.fine('Event: $event');
 
     if (event is DisableCamera) {
-      _dbStore.insertSetting(MapEntry('camera_disabled', 'true'));
+      await _dbStore.insertSetting(MapEntry<String, String>('camera_disabled', 'true'));
       yield CameraState.disabled();
     } else if (event is EnableCamera) {
-      _dbStore.insertSetting(MapEntry('camera_disabled', 'false'));
+      await _dbStore.insertSetting(MapEntry<String, String>('camera_disabled', 'false'));
       yield CameraState.enabled();
     }
   }
 
-  void onDisable() => this.add(DisableCamera());
+  void onDisable() => add(DisableCamera());
 
-  void onEnable() => this.add(EnableCamera());
+  void onEnable() => add(EnableCamera());
 
   void onStart() async {
-    if (_dbStore.settings['camera_disabled'] == 'true')
+    if (_dbStore.settings['camera_disabled'] == 'true') {
       onDisable();
-    else
+    } else {
       onEnable();
+    }
   }
 
   @override
-  void onTransition(Transition transition) {
+  void onTransition(Transition<CameraEvent, CameraState> transition) {
     _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
     super.onTransition(transition);
   }

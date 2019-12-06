@@ -52,7 +52,7 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
                 textAlign: TextAlign.center,
               ),
               onPressed: () {
-                Navigator.of(context).push(
+                Navigator.of(context).push<RegisterPage>(
                   MaterialPageRoute(
                     builder: (BuildContext context) => RegisterPage(authBloc: widget.authBloc),
                   ),

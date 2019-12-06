@@ -97,9 +97,9 @@ class _JoblistPageState extends State<JoblistPage> {
               bloc: joblistModeBloc,
               builder: (BuildContext context, JoblistMode mode) {
                 if (mode == JoblistMode.print) {
-                  if (selectionBloc.items.isEmpty)
+                  if (selectionBloc.items.isEmpty) {
                     return JoblistUploadFab();
-                  else
+                  } else {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
@@ -114,8 +114,10 @@ class _JoblistPageState extends State<JoblistPage> {
                         ),
                       ],
                     );
-                } else
+                  }
+                } else {
                   return Container(width: 0.0, height: 0.0);
+                }
               },
             ),
             body: RefreshIndicator(
@@ -200,8 +202,8 @@ class _JoblistPageState extends State<JoblistPage> {
     _intentTextSubscription = ReceiveSharingIntent.getTextStream().listen((String text) {
       ReceiveSharingIntent.reset();
       handleIntentText(text, context);
-    }, onError: (err) {
-      print("intentTextSubscription error: $err");
+    }, onError: (dynamic err) {
+      print('intentTextSubscription error: $err');
     });
 
     ReceiveSharingIntent.getInitialText().then((String text) {
@@ -212,8 +214,8 @@ class _JoblistPageState extends State<JoblistPage> {
     _intentImageSubscription = ReceiveSharingIntent.getImageStream().listen((List<String> value) {
       ReceiveSharingIntent.reset();
       handleIntentValue(value, context);
-    }, onError: (err) {
-      print("intentImageSubscription error: $err");
+    }, onError: (dynamic err) {
+      print('intentImageSubscription error: $err');
     });
 
     ReceiveSharingIntent.getInitialImage().then((List<String> value) {
@@ -223,43 +225,45 @@ class _JoblistPageState extends State<JoblistPage> {
     });
 
     // For sharing images coming from outside the app while the app is in the memory
-    if (Platform.isAndroid)
+    if (Platform.isAndroid) {
       _intentDataStreamSubscription =
           ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
         handleIntentValue(value, context);
-      }, onError: (err) {
-        print("intentDataStreamSubscription error: $err");
+      }, onError: (dynamic err) {
+        print('intentDataStreamSubscription error: $err');
       });
+    }
 
     // For sharing images coming from outside the app while the app is closed
-    if (Platform.isAndroid)
+    if (Platform.isAndroid) {
       ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();
         handleIntentValue(value, context);
       });
+    }
 
     super.initState();
   }
 
   void _onDeleteSelected() {
-    for (int item in selectionBloc.items) {
+    for (var item in selectionBloc.items) {
       BlocProvider.of<JoblistBloc>(context).onDeleteById(item);
       selectionBloc.onToggleItem(item);
     }
   }
 
   void _onPrintSelected() async {
-    String barcode = '';
+    var barcode = '';
     try {
       barcode = await BarcodeScanner.scan();
     } catch (e) {
       print(e);
     }
 
-    for (int item in selectionBloc.items) {
+    for (var item in selectionBloc.items) {
       BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, item);
       selectionBloc.onToggleItem(item);
     }
@@ -274,12 +278,13 @@ class _JoblistPageState extends State<JoblistPage> {
   void _onSelectAll() {
     selectionBloc.onClear();
     if (!allSelected) {
-      for (Job job in BlocProvider.of<JoblistBloc>(context).jobs) {
+      for (var job in BlocProvider.of<JoblistBloc>(context).jobs) {
         selectionBloc.onToggleItem(job.id);
       }
       allSelected = true;
-    } else
+    } else {
       allSelected = false;
+    }
   }
 
   void _onTapTab(int value) {
@@ -287,13 +292,13 @@ class _JoblistPageState extends State<JoblistPage> {
         (value == 0) ? JoblistMode.print : (value == 1) ? JoblistMode.scan : JoblistMode.copy);
   }
 
-  Future<bool> _onWillPop() {
+  Future<bool> _onWillPop() async {
     if (joblistModeBloc.mode != JoblistMode.print) {
       joblistModeBloc.onSwitch(JoblistMode.print);
       refreshingBloc.onDisableForce();
       return Future.value(false);
     } else {
-      return showDialog(
+      return await showDialog(
             context: context,
             builder: (context) => ExitAppAlert(),
           ) ??

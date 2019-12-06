@@ -13,16 +13,20 @@ class PutUploads extends RefreshingEvent {
 }
 
 class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
-  Logger _log = Logger('RefreshingBloc');
+  final Logger _log = Logger('RefreshingBloc');
   List<DispatcherTask> _uploads = [];
-  int _lastUploads = 0;
+  int _lastUploads;
 
   Timer _timer;
 
   bool _force = false;
 
+  RefreshingBloc() {
+    _lastUploads = 0;
+  }
+
   @override
-  get initialState => RefreshingState.idle();
+  RefreshingState get initialState => RefreshingState.idle();
 
   @override
   Stream<RefreshingState> mapEventToState(RefreshingEvent event) async* {
@@ -34,7 +38,7 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
         _log.finer('timer already running');
       } else {
         _log.finer('starting locked timer');
-        _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => this.add(Trigger()));
+        _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => add(Trigger()));
       }
     } else if (event is UnforceRefreshing) {
       _force = false;
@@ -50,7 +54,7 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
           _log.finer('timer already running');
         } else {
           _log.finer('starting timer');
-          _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => this.add(Trigger()));
+          _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => add(Trigger()));
         }
       } else if (!_force) {
         _log.finer('cancelling timer');
@@ -66,11 +70,11 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
     }
   }
 
-  void onAddUploads(List<DispatcherTask> uploads) => this.add(PutUploads(uploads));
+  void onAddUploads(List<DispatcherTask> uploads) => add(PutUploads(uploads));
 
-  void onDisableForce() => this.add(UnforceRefreshing());
-  
-  void onEnableForce() => this.add(ForceRefreshing());
+  void onDisableForce() => add(UnforceRefreshing());
+
+  void onEnableForce() => add(ForceRefreshing());
 }
 
 abstract class RefreshingEvent {}
@@ -96,7 +100,7 @@ class RefreshingState {
       RefreshingState(
           isRefreshing: true, isIdle: false, refreshJobs: refreshJobs, refreshQueue: refreshQueue);
 
-  Map<String, dynamic> toMap() => {'isIdle': isIdle, 'isRefreshing': isRefreshing};
+  Map<String, dynamic> toMap() => <String, dynamic>{'isIdle': isIdle, 'isRefreshing': isRefreshing};
 
   @override
   String toString() => '[RefreshingState ${toMap().toString()}]';

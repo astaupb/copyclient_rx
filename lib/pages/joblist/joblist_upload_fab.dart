@@ -36,7 +36,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
   void initState() {
     uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) async {
       if (state.isException) {
-        final int status = (state.error as ApiException).statusCode;
+        final status = (state.error as ApiException).statusCode;
         String errorText;
         switch (status) {
           case 400:
@@ -68,7 +68,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
       print('got filepaths: $filePaths');
       if (filePaths != null && filePaths.isNotEmpty) return filePaths;
     } catch (e) {
-      print("Error while picking the file: " + e.toString());
+      print('Error while picking the file: ' + e.toString());
     }
     return {};
   }

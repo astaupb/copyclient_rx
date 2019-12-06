@@ -62,10 +62,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       .showSnackBar(SnackBar(
                           content: Text('Registrierung erfolgreich'),
                           duration: Duration(seconds: 2)));
-                  snackbarFeatureController.closed.then((val) => Navigator.pop(context));
+                  snackbarFeatureController.closed.then((dynamic val) => Navigator.pop(context));
                 } else if (state.isException) {
                   SnackBar snack;
-                  ApiException error = state.error as ApiException;
+                  var error = state.error as ApiException;
                   if (error.statusCode == 470) {
                     snack = SnackBar(
                         content: Text('Dieser Nutzername ist schon vergeben'),
@@ -168,10 +168,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   obscureText: !showPw2,
                   validator: (value) {
-                    if (value.length < 5)
+                    if (value.length < 5) {
                       return 'Ein Passwort muss mindestens 6 Zeichen enthalten';
-                    else if (value != _password)
+                    } else if (value != _password) {
                       return 'Die Passwörter müssen miteinander übereinstimmen';
+                    }
                     return null;
                   },
                   onSaved: (value) => _retypedPassword = value,

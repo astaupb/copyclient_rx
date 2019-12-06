@@ -4,12 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:logging/logging.dart';
 
 class ScanBloc extends Bloc<ScanEvent, ScanState> {
-  Logger _log = Logger('ScanBloc');
+  final Logger _log = Logger('ScanBloc');
   Timer _timer;
 
-  void onStart() => this.add(EnableHeartbeat());
+  void onStart() => add(EnableHeartbeat());
 
-  void onCancel() => this.add(DisableHeartbeat());
+  void onCancel() => add(DisableHeartbeat());
 
   @override
   ScanState get initialState => ScanState.idle();
@@ -26,7 +26,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
       } else {
         _log.finer('starting heartbeat');
         _timer =
-            Timer.periodic(const Duration(seconds: 50), (Timer t) => this.add(TriggerHeartbeat()));
+            Timer.periodic(const Duration(seconds: 50), (Timer t) => add(TriggerHeartbeat()));
       }
     } else if (event is DisableHeartbeat) {
       _log.finer('cancelling heartbeat');

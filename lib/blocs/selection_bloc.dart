@@ -4,16 +4,16 @@ import 'package:bloc/bloc.dart';
 import 'package:logging/logging.dart';
 
 class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
-  Logger _log = Logger('SelectionBloc');
+  final Logger _log = Logger('SelectionBloc');
 
   List<int> items = [];
 
-  void onToggleItem(int id) => this.add(ToggleItem(id));
+  void onToggleItem(int id) => add(ToggleItem(id));
 
-  void onClear() => this.add(ClearItems());
+  void onClear() => add(ClearItems());
 
   @override
-  get initialState => SelectionState.empty();
+  SelectionState get initialState => SelectionState.empty();
 
   @override
   Stream<SelectionState> mapEventToState(event) async* {
@@ -33,7 +33,7 @@ class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
   }
 
   @override
-  void onTransition(Transition transition) {
+  void onTransition(Transition<SelectionEvent, SelectionState> transition) {
     _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
     super.onTransition(transition);
   }

@@ -102,7 +102,8 @@ class _CreditPageState extends State<CreditPage> {
             ),
             Divider(height: 24.0),
             ListTile(title: Text('Letzte Transaktionen')),
-            ...List.from(transactionsExcerpt.map((Transaction t) => TransactionsTile(t))),
+            ...List.from(
+                transactionsExcerpt.map<TransactionsTile>((Transaction t) => TransactionsTile(t))),
             MaterialButton(
               child: Text('Alle ansehen...'),
               textColor: Colors.black87,
@@ -183,7 +184,7 @@ class _CreditPageState extends State<CreditPage> {
           .then((http.Response response) {
         if (response.statusCode == 200) {
           print(response.body);
-          return json.decode(utf8.decode(response.bodyBytes))['link'];
+          return json.decode(utf8.decode(response.bodyBytes))['link'] as String;
         } else if (response.statusCode == 400) {
           print('error getting payment link: ${response.body}');
         }
@@ -193,29 +194,30 @@ class _CreditPageState extends State<CreditPage> {
     return '';
   }
 
-  void _onDropdownChanged(value) {
+  void _onDropdownChanged(int value) {
     setState(() => selectedValue = value);
   }
 
   Future<void> _onRefresh() async {
     journalBloc.onRefresh();
-    journalBloc.take(1).first.then((JournalState state) {
+    await journalBloc.take(1).first.then((JournalState state) {
       return;
     });
   }
 
   void _onScanCredit(BuildContext context) async {
     try {
-      String token = await BarcodeScanner.scan();
+      var token = await BarcodeScanner.scan();
       journalBloc.onAddTransaction(token);
-      var listener;
+      StreamSubscription listener;
       listener = journalBloc.listen((JournalState state) async {
         if (state.isResult) {
-          Future.delayed(Duration(seconds: 2)).then((val) => userBloc.onRefresh());
-          listener.cancel();
+          await Future<dynamic>.delayed(Duration(seconds: 2))
+              .then((dynamic val) => userBloc.onRefresh());
+          await listener.cancel();
         } else if (state.isException) {
-          ApiException error = state.error;
-          String snackText = 'Fehler: $error';
+          var error = state.error as ApiException;
+          var snackText = 'Fehler: $error';
           if (error.statusCode == 472) {
             snackText = 'Fehler: Dieser Token wurde bereits verbraucht';
           } else if (error.statusCode == 401) {
@@ -223,7 +225,7 @@ class _CreditPageState extends State<CreditPage> {
           } else if (error.statusCode == 400) {
             snackText = 'Der gescannte Code hat das falsche Format oder enthält falsche Daten';
           }
-          SnackBar snackBar = SnackBar(
+          var snackBar = SnackBar(
             content: Text(snackText),
             duration: const Duration(seconds: 3),
           );
@@ -231,7 +233,7 @@ class _CreditPageState extends State<CreditPage> {
         }
       });
     } catch (e) {
-      const SnackBar snackBar = SnackBar(
+      const snackBar = SnackBar(
         content: Text('Es wurde kein Code gescannt'),
         duration: Duration(seconds: 3),
       );
@@ -241,12 +243,12 @@ class _CreditPageState extends State<CreditPage> {
   }
 
   void _onSubmit() async {
-    final int valueToUse = (customValue != null) ? customValue : selectedValue;
+    final valueToUse = (customValue != null) ? customValue : selectedValue;
     print('requesting payment link for $valueToUse euros');
     _link = await _getPaymentLink(valueToUse);
     customValue = null;
     if (_link != '') {
-      Navigator.of(context).push(
+      await Navigator.of(context).push<WebviewScaffold>(
         MaterialPageRoute(
           builder: (BuildContext context) => WebviewScaffold(
             url: _link,
@@ -265,10 +267,10 @@ class _CreditPageState extends State<CreditPage> {
       final flutterWebviewPlugin = FlutterWebviewPlugin();
 
       void waitAndClose() async {
-        await Future.delayed(const Duration(seconds: 3));
+        await Future<dynamic>.delayed(const Duration(seconds: 3));
         Navigator.of(context).pop();
-        flutterWebviewPlugin.close();
-        await Future.delayed(const Duration(seconds: 2));
+        await flutterWebviewPlugin.close();
+        await Future<dynamic>.delayed(const Duration(seconds: 2));
         journalBloc.onRefresh();
       }
 
