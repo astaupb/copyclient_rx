@@ -32,6 +32,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
   List<int> _copiedIds = [];
 
   String _device = '';
+  bool _deviceSelected = false;
 
   StreamSubscription<PrintQueueState> _printQueueListener;
   StreamSubscription<ScanState> _scanListener;
@@ -39,90 +40,93 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<JoblistBloc, JoblistState>(
-      builder: (BuildContext context, JoblistState state) {
-        if (state.isResult || state.isBusy) {
-          if (state.isResult) {
-            _jobs = state.value;
-            _jobs.removeWhere((Job job) => _startIds.contains(job.id));
-            if (widget.copyMode) {
-              for (Job job in _jobs) {
-                if (!_copiedIds.contains(job.id)) {
-                  BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
-                  _copiedIds.add(job.id);
+    if (_deviceSelected)
+      return BlocBuilder<JoblistBloc, JoblistState>(
+        builder: (BuildContext context, JoblistState state) {
+          if (state.isResult || state.isBusy) {
+            if (state.isResult) {
+              _jobs = state.value;
+              _jobs.removeWhere((Job job) => _startIds.contains(job.id));
+              if (widget.copyMode) {
+                for (Job job in _jobs) {
+                  if (!_copiedIds.contains(job.id)) {
+                    BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
+                    _copiedIds.add(job.id);
+                  }
+                }
+              } else {
+                for (Job job in _jobs) {
+                  if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
                 }
               }
-            } else {
-              for (Job job in _jobs) {
-                if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
-              }
+            }
+            if (_jobs.length > 0) {
+              return Column(children: <Widget>[
+                ListTile(
+                  title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.5),
+                  subtitle:
+                      Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
+                  trailing: BlocBuilder<PrintQueueBloc, PrintQueueState>(
+                      builder: (BuildContext context, PrintQueueState state) {
+                    return GestureDetector(
+                      child: Icon(
+                        Icons.fiber_manual_record,
+                        color: state.isLocked ? Colors.green : Colors.red,
+                      ),
+                      onDoubleTap: () => (state.isLocked)
+                          ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
+                          : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
+                    );
+                  }),
+                ),
+                Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
+                for (int i = _jobs.length - 1; i >= 0; i--)
+                  JoblistTile(
+                    context,
+                    i,
+                    _jobs[i],
+                    onPress: () {
+                      BlocProvider.of<RefreshingBloc>(context).onDisableForce();
+                      BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
+                    },
+                    leader: widget.copyMode
+                        ? null
+                        : MaterialButton(
+                            onPressed: () => _onPressedPrint(_jobs[i].id),
+                            color: Colors.teal[800],
+                            child: Icon(
+                              Icons.print,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+              ]);
             }
           }
-          if (_jobs.length > 0) {
-            return Column(children: <Widget>[
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
               ListTile(
-                title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.5),
-                subtitle:
-                    Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
-                trailing: BlocBuilder<PrintQueueBloc, PrintQueueState>(
-                    builder: (BuildContext context, PrintQueueState state) {
-                  return GestureDetector(
-                    child: Icon(
-                      Icons.fiber_manual_record,
-                      color: state.isLocked ? Colors.green : Colors.red,
-                    ),
-                    onDoubleTap: () => (state.isLocked)
-                        ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
-                        : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
-                  );
-                }),
+                title: Text(
+                    'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
               ),
-              Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
-              for (int i = _jobs.length - 1; i >= 0; i--)
-                JoblistTile(
-                  context,
-                  i,
-                  _jobs[i],
-                  onPress: () {
-                    BlocProvider.of<RefreshingBloc>(context).onDisableForce();
-                    BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
-                  },
-                  leader: widget.copyMode
-                      ? null
-                      : MaterialButton(
-                          onPressed: () => _onPressedPrint(_jobs[i].id),
-                          color: Colors.teal[800],
-                          child: Icon(
-                            Icons.print,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-            ]);
-          }
-        }
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              title: Text(
-                  'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(height: 64.0),
-                Icon(Icons.print, size: 64.0),
-                Text(_device, textScaleFactor: 3.0),
-              ],
-            )
-          ],
-        );
-      },
-    );
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(height: 64.0),
+                  Icon(Icons.print, size: 64.0),
+                  Text(_device, textScaleFactor: 3.0),
+                ],
+              )
+            ],
+          );
+        },
+      );
+    else
+      return Container(width: 0.0, height: 0.0);
   }
 
   @override
@@ -209,7 +213,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
   void _initDevice() async {
     try {
       _device = await BarcodeScanner.scan();
-      setState(() => _device);
+      setState(() => _deviceSelected = true);
 
       if (_device == '' || _device.length > 5) {
         BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
