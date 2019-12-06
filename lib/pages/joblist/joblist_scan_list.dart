@@ -210,12 +210,12 @@ class _JoblistScanListState extends State<JoblistScanList> {
       }
     });
 
-    _initDevice();
+    _initDevice(context);
 
     super.initState();
   }
 
-  void _initDevice() async {
+  void _initDevice(BuildContext context) async {
     try {
       _device = await BarcodeScanner.scan();
       setState(() => _deviceSelected = true);
