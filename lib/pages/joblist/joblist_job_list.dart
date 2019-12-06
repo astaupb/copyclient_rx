@@ -7,6 +7,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'joblist_tile.dart';
@@ -102,6 +103,9 @@ class _JoblistJobListState extends State<JoblistJobList> {
             Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
             message = 'Dieser Job war nie da oder ist nicht mehr da.';
             break;
+          case 423:
+            message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
+            break;
           default:
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
         }
@@ -126,7 +130,23 @@ class _JoblistJobListState extends State<JoblistJobList> {
   }
 
   void _onPressedPrint(int id) async {
-    String barcode = await BarcodeScanner.scan();
-    BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
+    String barcode;
+    try {
+      barcode = await BarcodeScanner.scan();
+    } catch (e) {
+      print('exception while scanning barcode: $e');
+      if (e is PlatformException) {
+        print('PlatformException: ${e.code} ${e.details} ${e.message}');
+        if (e.code == 'PERMISSION_NOT_GRANTED') {
+          Scaffold.of(context).showSnackBar(SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                  'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
+        }
+      }
+    }
+
+    if (barcode != null && barcode != '')
+      BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
   }
 }

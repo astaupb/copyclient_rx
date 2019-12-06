@@ -10,6 +10,7 @@ import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_refreshing_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_scan_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'joblist_tile.dart';
@@ -50,6 +51,10 @@ class _JoblistScanListState extends State<JoblistScanList> {
                   BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
                   _copiedIds.add(job.id);
                 }
+              }
+            } else {
+              for (Job job in _jobs) {
+                if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
               }
             }
           }
@@ -136,7 +141,8 @@ class _JoblistScanListState extends State<JoblistScanList> {
   void initState() {
     _scanBloc = ScanBloc();
 
-    _startIds = (BlocProvider.of<JoblistBloc>(context).state.value ?? []).map((Job job) => job.id).toList();
+    _startIds =
+        (BlocProvider.of<JoblistBloc>(context).state.value ?? []).map((Job job) => job.id).toList();
 
     _scanListener = _scanBloc.listen((ScanState state) {
       if (state.isBeating && state.shouldBeat) {
@@ -156,8 +162,12 @@ class _JoblistScanListState extends State<JoblistScanList> {
             Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
             message = 'Dieser Job war nie da oder ist nicht mehr da.';
             break;
+          case 423:
+            BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+            message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
+            break;
           default:
-            message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
+            message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten.';
         }
         Scaffold.of(context).showSnackBar(
             SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
@@ -179,6 +189,10 @@ class _JoblistScanListState extends State<JoblistScanList> {
           case 401:
             BlocProvider.of<AuthBloc>(context).onLogout();
             break;
+          case 423:
+            BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+            message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
+            break;
           default:
             message = 'Unbekanntes Problem bei der Druckerwarteschlange aufgetreten';
         }
@@ -196,16 +210,38 @@ class _JoblistScanListState extends State<JoblistScanList> {
     try {
       _device = await BarcodeScanner.scan();
       setState(() => _device);
+
+      if (_device == '' || _device.length > 5) {
+        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+        Scaffold.of(context).showSnackBar(SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
+      } else {
+        BlocProvider.of<PrintQueueBloc>(context)
+          ..setDeviceId(int.tryParse(_device))
+          ..onLockDevice();
+
+        _scanBloc.onStart();
+      }
     } catch (e) {
-      print(e);
+      print('exception while scanning barcode: $e');
+      BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+      if (e is PlatformException) {
+        print('PlatformException: ${e.code} ${e.details} ${e.message}');
+        if (e.code == 'PERMISSION_NOT_GRANTED') {
+          Scaffold.of(context).showSnackBar(SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                  'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
+        }
+      }
     }
-
-    BlocProvider.of<PrintQueueBloc>(context)
-      ..setDeviceId(int.tryParse(_device))
-      ..onLockDevice();
-
-    _scanBloc.onStart();
   }
 
-  _onPressedPrint(int id) {}
+  _onPressedPrint(int id) {
+    if (_device != '') {
+      BlocProvider.of<JoblistBloc>(context).onPrintById(_device, id);
+    }
+  }
 }
