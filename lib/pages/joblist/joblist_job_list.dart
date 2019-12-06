@@ -9,6 +9,7 @@ import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'joblist_tile.dart';
 
@@ -40,32 +41,49 @@ class _JoblistJobListState extends State<JoblistJobList> {
                 Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
                 for (int i = _jobs.length - 1; i >= 0; i--)
                   BlocBuilder<SelectionBloc, SelectionState>(
-                    builder: (BuildContext context, SelectionState state) => Container(
-                      decoration: BoxDecoration(
-                        color: state.items.contains(_jobs[i].id) ? Colors.black12 : null,
-                      ),
-                      child: JoblistTile(
-                        context,
-                        i,
-                        _jobs[i],
-                        onPress: () => _onPressed(_jobs[i]),
-                        onLongTap: () =>
-                            BlocProvider.of<SelectionBloc>(context).onToggleItem(_jobs[i].id),
-                        chosen: state.items.contains(_jobs[i].id),
-                        leader: (state.items.isNotEmpty)
-                            ? Padding(
-                                padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
-                                child: Icon((state.items.contains(_jobs[i].id))
-                                    ? Icons.check_box
-                                    : Icons.check_box_outline_blank))
-                            : MaterialButton(
-                                color: Colors.teal[800],
-                                child: Icon(
-                                  Icons.print,
-                                  color: Colors.white,
+                    builder: (BuildContext context, SelectionState state) => Slidable(
+                      actionPane: SlidableDrawerActionPane(),
+                      secondaryActions: <Widget>[
+                        IconSlideAction(
+                          caption: (_jobs[i].jobOptions.keep) ? 'Nicht behalten' : 'Behalten',
+                          color: Color(0xffff58ad),
+                          icon: (_jobs[i].jobOptions.keep) ? Icons.favorite_border : Icons.favorite,
+                          onTap: () => _onKeepJob(_jobs[i].id, _jobs[i].jobOptions),
+                        ),
+                        IconSlideAction(
+                          caption: 'Delete',
+                          color: Colors.red,
+                          icon: Icons.delete,
+                          onTap: () => _onDeleteJob(_jobs[i].id),
+                        ),
+                      ],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: state.items.contains(_jobs[i].id) ? Colors.black12 : null,
+                        ),
+                        child: JoblistTile(
+                          context,
+                          i,
+                          _jobs[i],
+                          onPress: () => _onPressed(_jobs[i]),
+                          onLongTap: () =>
+                              BlocProvider.of<SelectionBloc>(context).onToggleItem(_jobs[i].id),
+                          chosen: state.items.contains(_jobs[i].id),
+                          leader: (state.items.isNotEmpty)
+                              ? Padding(
+                                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
+                                  child: Icon((state.items.contains(_jobs[i].id))
+                                      ? Icons.check_box
+                                      : Icons.check_box_outline_blank))
+                              : MaterialButton(
+                                  color: Colors.teal[800],
+                                  child: Icon(
+                                    Icons.print,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () => _onPressedPrint(_jobs[i].id),
                                 ),
-                                onPressed: () => _onPressedPrint(_jobs[i].id),
-                              ),
+                        ),
                       ),
                     ),
                   ),
@@ -119,6 +137,10 @@ class _JoblistJobListState extends State<JoblistJobList> {
     super.initState();
   }
 
+  void _onDeleteJob(int id) {
+    BlocProvider.of<JoblistBloc>(context).onDeleteById(id);
+  }
+
   void _onPressed(Job job) {
     if (BlocProvider.of<SelectionBloc>(context).items.isNotEmpty) {
       BlocProvider.of<SelectionBloc>(context).onToggleItem(job.id);
@@ -149,5 +171,10 @@ class _JoblistJobListState extends State<JoblistJobList> {
     if (barcode != null && barcode != '') {
       BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
     }
+  }
+
+  void _onKeepJob(int id, JobOptions jobOptions) {
+    jobOptions.keep = !jobOptions.keep;
+    BlocProvider.of<JoblistBloc>(context).onUpdateOptionsById(id, jobOptions);
   }
 }

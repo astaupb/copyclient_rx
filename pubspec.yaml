@@ -1,7 +1,7 @@
 name: copyclient_rx
 description: Official AStA Copyservice app using the AStAPrint backend
 
-version: 1.2.0+83
+version: 1.2.0+84
 
 environment:
   sdk: ">=2.3.2 <3.0.0"
@@ -31,6 +31,7 @@ dependencies:
     git: https://github.com/leontappe/receive_sharing_intent.git
     #path: ../receive_sharing_intent/
   mime: ^0.9.6+3
+  flutter_slidable: ^0.5.4
 
 dev_dependencies:
   pedantic: ^1.9.0
