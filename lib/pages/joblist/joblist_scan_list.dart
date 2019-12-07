@@ -243,6 +243,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   void _initDevice(BuildContext context) async {
     try {
+      print('scanning qr code');
       _device = await BarcodeScanner.scan();
       setState(() => _deviceSelected = true);
       print('qr code scanned: $_device');
@@ -255,6 +256,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
           ..setDeviceId(deviceId)
           ..onLockDevice();
 
+        BlocProvider.of<RefreshingBloc>(context).onEnableForce();
         _scanBloc.onStart();
       } else {
         BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);

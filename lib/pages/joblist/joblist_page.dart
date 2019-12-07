@@ -186,9 +186,7 @@ class _JoblistPageState extends State<JoblistPage> {
 
     _joblistModeListener = joblistModeBloc.listen((JoblistMode mode) {
       setState(() => _mode = mode);
-      if (mode == JoblistMode.scan || mode == JoblistMode.copy) {
-        refreshingBloc.onEnableForce();
-      } else if (mode == JoblistMode.print) {
+      if (mode == JoblistMode.print) {
         if (BlocProvider.of<PrintQueueBloc>(context).state.isLocked) {
           BlocProvider.of<PrintQueueBloc>(context).onDelete();
         }
