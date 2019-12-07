@@ -156,6 +156,8 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _scanListener = _scanBloc.listen((ScanState state) {
       if (state.isBeating && state.shouldBeat) {
         BlocProvider.of<PrintQueueBloc>(context).onLockDevice();
+      } else if (state.isIdle) {
+        BlocProvider.of<PrintQueueBloc>(context).onDelete();
       }
     });
 
@@ -163,6 +165,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String message;
+        var showError = true;
         switch (status) {
           case 401:
             BlocProvider.of<AuthBloc>(context).onLogout();
@@ -175,11 +178,19 @@ class _JoblistScanListState extends State<JoblistScanList> {
             BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
             message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
             break;
+          case 424:
+            showError = false;
+            break;
+          case 403:
+            showError = false;
+            break;
           default:
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten.';
         }
-        Scaffold.of(context).showSnackBar(
-            SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+        if (showError) {
+          Scaffold.of(context).showSnackBar(
+              SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+        }
         BlocProvider.of<JoblistBloc>(context).onRefresh();
       }
     });
