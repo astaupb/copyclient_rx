@@ -7,6 +7,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_credit_text.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_refreshing_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_scan_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'joblist_slidable.dart';
 import 'joblist_tile.dart';
 
 class JoblistScanList extends StatefulWidget {
@@ -78,24 +80,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if (widget.copyMode)
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Text('Guthaben'),
-                            BlocBuilder<UserBloc, UserState>(
-                              builder: (BuildContext context, UserState state) {
-                                if (state.isResult) {
-                                  return Text('${(state.value.credit / 100.0).toStringAsFixed(2)}€',
-                                      textScaleFactor: 1.5);
-                                } else {
-                                  return Container(width: 0.0, height: 0.0);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
+                      if (widget.copyMode) CreditText(),
                       BlocBuilder<PrintQueueBloc, PrintQueueState>(
                           builder: (BuildContext context, PrintQueueState state) {
                         return GestureDetector(
@@ -113,26 +98,29 @@ class _JoblistScanListState extends State<JoblistScanList> {
                 ),
                 Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
                 for (int i = _jobs.length - 1; i >= 0; i--)
-                  JoblistTile(
-                    context,
-                    i,
-                    _jobs[i],
-                    onPress: () {
-                      BlocProvider.of<RefreshingBloc>(context).onDisableForce();
-                      BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-                      Navigator.of(context).push<JobdetailsPage>(MaterialPageRoute(
-                          builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
-                    },
-                    leader: widget.copyMode
-                        ? null
-                        : MaterialButton(
-                            onPressed: () => _onPressedPrint(_jobs[i].id),
-                            color: Colors.teal[800],
-                            child: Icon(
-                              Icons.print,
-                              color: Colors.white,
+                  JoblistSlidable(
+                    job: _jobs[i],
+                    child: JoblistTile(
+                      context,
+                      i,
+                      _jobs[i],
+                      onPress: () {
+                        BlocProvider.of<RefreshingBloc>(context).onDisableForce();
+                        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+                        Navigator.of(context).push<JobdetailsPage>(MaterialPageRoute(
+                            builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
+                      },
+                      leader: widget.copyMode
+                          ? null
+                          : MaterialButton(
+                              onPressed: () => _onPressedPrint(_jobs[i].id),
+                              color: Colors.teal[800],
+                              child: Icon(
+                                Icons.print,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
               ]);
             }
@@ -270,10 +258,13 @@ class _JoblistScanListState extends State<JoblistScanList> {
         _scanBloc.onStart();
       } else {
         BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-        Scaffold.of(context).showSnackBar(SnackBar(
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
             duration: Duration(seconds: 5),
             content: Text(
-                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
+                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.'),
+          ),
+        );
       }
     } catch (e) {
       print('exception while scanning barcode: $e');
@@ -285,6 +276,17 @@ class _JoblistScanListState extends State<JoblistScanList> {
               duration: Duration(seconds: 5),
               content: Text(
                   'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
+        }
+      } else if (e is FormatException) {
+        print('FormatException: ${e.message} ${e.offset} ${e.source}');
+        if (e.message == 'Invalid envelope') {
+          Scaffold.of(context).showSnackBar(const SnackBar(
+              duration: Duration(seconds: 3), content: Text('QR-Code Scan wurde abgebrochen')));
+        } else {
+          Scaffold.of(context).showSnackBar(const SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                  'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
         }
       }
     }

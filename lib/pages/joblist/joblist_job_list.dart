@@ -8,11 +8,12 @@ import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_credit_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
+import 'joblist_slidable.dart';
 import 'joblist_tile.dart';
 
 class JoblistJobList extends StatefulWidget {
@@ -41,43 +42,13 @@ class _JoblistJobListState extends State<JoblistJobList> {
                 ListTile(
                   title: Text('Jobs', textScaleFactor: 1.7),
                   subtitle: Text('${_jobs.length} Jobs in der Liste'),
-                  trailing: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Text('Guthaben'),
-                      BlocBuilder<UserBloc, UserState>(
-                        builder: (BuildContext context, UserState state) {
-                          if (state.isResult) {
-                            return Text('${(state.value.credit / 100.0).toStringAsFixed(2)}€',
-                                textScaleFactor: 1.5);
-                          } else {
-                            return Container(width: 0.0, height: 0.0);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
+                  trailing: CreditText(),
                 ),
                 Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
                 for (int i = _jobs.length - 1; i >= 0; i--)
                   BlocBuilder<SelectionBloc, SelectionState>(
-                    builder: (BuildContext context, SelectionState state) => Slidable(
-                      actionPane: SlidableDrawerActionPane(),
-                      secondaryActions: <Widget>[
-                        IconSlideAction(
-                          caption: (_jobs[i].jobOptions.keep) ? 'Nicht behalten' : 'Behalten',
-                          color: Color(0xffff58ad),
-                          icon: (_jobs[i].jobOptions.keep) ? Icons.favorite_border : Icons.favorite,
-                          onTap: () => _onKeepJob(_jobs[i].id, _jobs[i].jobOptions),
-                        ),
-                        IconSlideAction(
-                          caption: 'Delete',
-                          color: Colors.red,
-                          icon: Icons.delete,
-                          onTap: () => _onDeleteJob(_jobs[i].id),
-                        ),
-                      ],
+                    builder: (BuildContext context, SelectionState state) => JoblistSlidable(
+                      job: _jobs[i],
                       child: Container(
                         decoration: BoxDecoration(
                           color: state.items.contains(_jobs[i].id) ? Colors.black12 : null,
@@ -165,10 +136,6 @@ class _JoblistJobListState extends State<JoblistJobList> {
     super.initState();
   }
 
-  void _onDeleteJob(int id) {
-    BlocProvider.of<JoblistBloc>(context).onDeleteById(id);
-  }
-
   void _onPressed(Job job) {
     if (BlocProvider.of<SelectionBloc>(context).items.isNotEmpty) {
       BlocProvider.of<SelectionBloc>(context).onToggleItem(job.id);
@@ -193,6 +160,17 @@ class _JoblistJobListState extends State<JoblistJobList> {
               content: Text(
                   'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
         }
+      } else if (e is FormatException) {
+        print('FormatException: ${e.message} ${e.offset} ${e.source}');
+        if (e.message == 'Invalid envelope') {
+          Scaffold.of(context).showSnackBar(const SnackBar(
+              duration: Duration(seconds: 3), content: Text('QR-Code Scan wurde abgebrochen')));
+        } else {
+          Scaffold.of(context).showSnackBar(const SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                  'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
+        }
       }
     }
 
@@ -204,10 +182,5 @@ class _JoblistJobListState extends State<JoblistJobList> {
         BlocProvider.of<JoblistBloc>(context).onRefresh();
       });
     }
-  }
-
-  void _onKeepJob(int id, JobOptions jobOptions) {
-    jobOptions.keep = !jobOptions.keep;
-    BlocProvider.of<JoblistBloc>(context).onUpdateOptionsById(id, jobOptions);
   }
 }
