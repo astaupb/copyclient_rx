@@ -78,6 +78,7 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
             'Es werden alle Dokumente in der Reihenfolge unten an den Drucker ($barcode) gesendet.\nJobs die nicht geherzt wurden sind danach weg.'),
         actions: <Widget>[
           MaterialButton(
+            color: Colors.teal[800],
             child: Text('Ja'),
             onPressed: () {
               dialogPositive = true;
@@ -85,6 +86,7 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
             },
           ),
           MaterialButton(
+            color: Colors.teal[800],
             child: Text('Abbrechen'),
             onPressed: () {
               dialogPositive = false;
@@ -113,6 +115,7 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
             'Die Dokumente sind danach für immer gelöscht und können nicht wiederhergestellt werden'),
         actions: <Widget>[
           MaterialButton(
+            color: Colors.teal[800],
             child: Text('Ja'),
             onPressed: () {
               dialogPositive = true;
@@ -120,6 +123,7 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
             },
           ),
           MaterialButton(
+            color: Colors.teal[800],
             child: Text('Abbrechen'),
             onPressed: () {
               dialogPositive = false;

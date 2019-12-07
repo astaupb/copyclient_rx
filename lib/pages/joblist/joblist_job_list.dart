@@ -63,7 +63,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
                           chosen: state.items.contains(_jobs[i].id),
                           leader: (state.items.isNotEmpty)
                               ? Padding(
-                                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
+                                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 24.0, 0.0),
                                   child: Icon((state.items.contains(_jobs[i].id))
                                       ? Icons.check_box
                                       : Icons.check_box_outline_blank))
