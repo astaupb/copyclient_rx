@@ -31,8 +31,16 @@ class _DrawerHeaderState extends State<DrawerHeader> {
       accountEmail: BlocBuilder<UserBloc, UserState>(
         builder: (BuildContext context, state) {
           if (state.isResult) {
-            return Text(
-              'Restliches Guthaben: ${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text((state.value.email != null && state.value.email.isNotEmpty)
+                    ? state.value.email
+                    : 'Keine E-Mail eingestellt'),
+                Text(
+                  'Restliches Guthaben: ${((state.value?.credit ?? 0) / 100.0).toStringAsFixed(2)}€',
+                )
+              ],
             );
           } else {
             return Container(width: 0.0, height: 0.0);

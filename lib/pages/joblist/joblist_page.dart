@@ -70,11 +70,11 @@ class _JoblistPageState extends State<JoblistPage> {
               iconSize: 28.0,
               items: [
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.3)),
+                    icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.3)),
+                    icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.5)),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.3)),
+                    icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.4)),
               ],
             ),
             appBar: AppBar(

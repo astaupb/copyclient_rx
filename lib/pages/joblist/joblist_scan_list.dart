@@ -5,6 +5,7 @@ import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_refreshing_bloc.dart';
@@ -67,21 +68,45 @@ class _JoblistScanListState extends State<JoblistScanList> {
             if (_jobs.isNotEmpty) {
               return Column(children: <Widget>[
                 ListTile(
-                  title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.5),
+                  title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.7),
                   subtitle:
                       Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
-                  trailing: BlocBuilder<PrintQueueBloc, PrintQueueState>(
-                      builder: (BuildContext context, PrintQueueState state) {
-                    return GestureDetector(
-                      child: Icon(
-                        Icons.fiber_manual_record,
-                        color: state.isLocked ? Colors.green : Colors.red,
-                      ),
-                      onDoubleTap: () => (state.isLocked)
-                          ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
-                          : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
-                    );
-                  }),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      if (widget.copyMode)
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Text('Guthaben'),
+                            BlocBuilder<UserBloc, UserState>(
+                              builder: (BuildContext context, UserState state) {
+                                if (state.isResult) {
+                                  return Text('${(state.value.credit / 100.0).toStringAsFixed(2)}€',
+                                      textScaleFactor: 1.5);
+                                } else {
+                                  return Container(width: 0.0, height: 0.0);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      BlocBuilder<PrintQueueBloc, PrintQueueState>(
+                          builder: (BuildContext context, PrintQueueState state) {
+                        return GestureDetector(
+                          child: Icon(
+                            Icons.fiber_manual_record,
+                            color: state.isLocked ? Colors.green : Colors.red,
+                          ),
+                          onDoubleTap: () => (state.isLocked)
+                              ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
+                              : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
+                        );
+                      }),
+                    ],
+                  ),
                 ),
                 Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
                 for (int i = _jobs.length - 1; i >= 0; i--)
@@ -143,7 +168,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _scanBloc
       ..onCancel()
       ..close();
-    
+
     super.dispose();
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
@@ -35,8 +36,25 @@ class _JoblistJobListState extends State<JoblistJobList> {
             return Column(
               children: <Widget>[
                 ListTile(
-                  title: Text('Jobs', textScaleFactor: 1.5),
+                  title: Text('Jobs', textScaleFactor: 1.7),
                   subtitle: Text('${_jobs.length} Jobs in der Liste'),
+                  trailing: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Text('Guthaben'),
+                      BlocBuilder<UserBloc, UserState>(
+                        builder: (BuildContext context, UserState state) {
+                          if (state.isResult) {
+                            return Text('${(state.value.credit / 100.0).toStringAsFixed(2)}€',
+                                textScaleFactor: 1.5);
+                          } else {
+                            return Container(width: 0.0, height: 0.0);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
                 for (int i = _jobs.length - 1; i >= 0; i--)
@@ -170,6 +188,11 @@ class _JoblistJobListState extends State<JoblistJobList> {
 
     if (barcode != null && barcode != '') {
       BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
+
+      await Future<dynamic>.delayed(const Duration(seconds: 10)).then<void>((dynamic _) {
+        BlocProvider.of<UserBloc>(context).onRefresh();
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+      });
     }
   }
 
