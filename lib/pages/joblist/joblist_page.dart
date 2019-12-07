@@ -5,10 +5,12 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
+import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_popup_button.dart';
+import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,25 +62,28 @@ class _JoblistPageState extends State<JoblistPage> {
         child: BlocProvider<SelectionBloc>(
           create: (BuildContext context) => selectionBloc,
           child: Scaffold(
-            bottomNavigationBar: CupertinoTabBar(
-              backgroundColor:
-                  (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
-                      ? Colors.grey[900]
-                      : null,
-              currentIndex: _mode.index,
-              onTap: _onTapTab,
-              activeColor: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
-                  ? Colors.white
-                  : null,
-              iconSize: 28.0,
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.5)),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.content_copy), title: Text('Kopieren', textScaleFactor: 1.4)),
-              ],
+            bottomNavigationBar: Builder(
+              builder: (BuildContext context) => CupertinoTabBar(
+                backgroundColor:
+                    (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                        ? Colors.grey[900]
+                        : null,
+                currentIndex: _mode.index,
+                onTap: (int index) => _onTapTab(context, index),
+                activeColor: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                    ? Colors.white
+                    : null,
+                iconSize: 28.0,
+                items: [
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.5)),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.content_copy),
+                      title: Text('Kopieren', textScaleFactor: 1.4)),
+                ],
+              ),
             ),
             appBar: AppBar(
               actions: (_selectedItems.isNotEmpty)
@@ -260,11 +265,12 @@ class _JoblistPageState extends State<JoblistPage> {
   }
 
   void _onPrintSelected() async {
-    var barcode = '';
-    try {
-      barcode = await BarcodeScanner.scan();
-    } catch (e) {
-      print(e);
+    String barcode;
+    if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
+      barcode = await showDialog<String>(
+          context: context, builder: (BuildContext context) => selectPrinterDialog(context));
+    } else {
+      barcode = await getDeviceId(context).toString();
     }
 
     for (var item in selectionBloc.items) {
@@ -291,9 +297,17 @@ class _JoblistPageState extends State<JoblistPage> {
     }
   }
 
-  void _onTapTab(int value) async {
+  void _onTapTab(BuildContext context, int value) async {
     if (value > 0) {
-      final id = await getDeviceId(context);
+      int id;
+      if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
+        id = int.tryParse(await showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => selectPrinterDialog(context)) ??
+            '');
+      } else {
+        id = await getDeviceId(context);
+      }
 
       if (id != null) {
         _deviceId = id;

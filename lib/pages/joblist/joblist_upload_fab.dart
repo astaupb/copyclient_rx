@@ -38,6 +38,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String errorText;
+        var showError = true;
         switch (status) {
           case 400:
             errorText =
@@ -49,11 +50,17 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
           case 415:
             errorText = 'Das Format der hochgeladenen Datei wird nicht unterstützt.';
             break;
+          case 502:
+            showError = false;
+            break;
           default:
             errorText = 'Beim Hochladen ist ein unbekannter Fehler aufgetreten.';
         }
-        Scaffold.of(context).showSnackBar(
-            SnackBar(duration: Duration(seconds: 3), content: Text('$errorText ($status)')));
+        if (showError) {
+          Scaffold.of(context).showSnackBar(
+              SnackBar(duration: Duration(seconds: 3), content: Text('$errorText ($status)')));
+        }
+        await Future<dynamic>.delayed(Duration(seconds: 1));
         BlocProvider.of<UploadBloc>(context).onRefresh();
       }
     });

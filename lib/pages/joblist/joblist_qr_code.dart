@@ -31,10 +31,11 @@ Future<int> getDeviceId(BuildContext context) async {
             content: Text(
                 'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
       }
+      return null;
     }
   }
 
-  if (device != '' && device.length == 5) deviceId = int.tryParse(device);
+  if (device != null && device.isNotEmpty && device.length == 5) deviceId = int.tryParse(device);
 
   if (deviceId == null) {
     Scaffold.of(context).showSnackBar(

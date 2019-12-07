@@ -1,8 +1,12 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
+import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'joblist_qr_code.dart';
 
 enum PopupMenuEntry {
   deleteAll,
@@ -61,11 +65,12 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
   }
 
   void _onPrintAll() async {
-    var barcode = '';
-    try {
-      barcode = await BarcodeScanner.scan();
-    } catch (e) {
-      print(e);
+    String barcode;
+    if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
+      barcode = await showDialog<String>(
+          context: context, builder: (BuildContext context) => selectPrinterDialog(context));
+    } else {
+      barcode = await getDeviceId(context).toString();
     }
 
     var dialogPositive = false;

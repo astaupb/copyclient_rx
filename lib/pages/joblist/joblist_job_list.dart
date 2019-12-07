@@ -5,10 +5,12 @@ import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_credit_text.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_qr_code.dart';
+import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -107,17 +109,18 @@ class _JoblistJobListState extends State<JoblistJobList> {
       BlocProvider.of<UploadBloc>(context).onRefresh();
     });
 
-    _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
+    _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) async {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String message;
+        var showMessage = true;
         switch (status) {
           case 401:
             BlocProvider.of<AuthBloc>(context).onLogout();
             break;
           case 404:
             Navigator.of(context).popUntil((Route route) => route.settings.name == '/');
-            message = 'Dieser Job war nie da oder ist nicht mehr da.';
+            message = 'Dieser Job oder Drucker existiert nicht';
             break;
           case 423:
             message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
@@ -125,12 +128,16 @@ class _JoblistJobListState extends State<JoblistJobList> {
           case 502:
             message =
                 'Der AStAPrint Dienst ist gerade nicht aktiv. Das könnte an einem geplanten Neustart liegen.';
+            showMessage = false;
             break;
           default:
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
         }
-        Scaffold.of(context).showSnackBar(
-            SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+        if (showMessage) {
+          Scaffold.of(context).showSnackBar(
+              SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
+        }
+        await Future<dynamic>.delayed(Duration(seconds: 1));
         BlocProvider.of<JoblistBloc>(context).onRefresh();
       }
     });
@@ -150,7 +157,14 @@ class _JoblistJobListState extends State<JoblistJobList> {
   }
 
   void _onPressedPrint(int id) async {
-    final device = await getDeviceId(context);
+    String device;
+    if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
+      device = await showDialog<String>(
+              context: context, builder: (BuildContext context) => selectPrinterDialog(context)) ??
+          '';
+    } else {
+      device = await getDeviceId(context).toString();
+    }
 
     if (device != null) {
       BlocProvider.of<JoblistBloc>(context).onPrintById(device.toString(), id);
