@@ -143,6 +143,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _scanBloc
       ..onCancel()
       ..close();
+    
     super.dispose();
   }
 
@@ -156,8 +157,6 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _scanListener = _scanBloc.listen((ScanState state) {
       if (state.isBeating && state.shouldBeat) {
         BlocProvider.of<PrintQueueBloc>(context).onLockDevice();
-      } else if (state.isIdle) {
-        BlocProvider.of<PrintQueueBloc>(context).onDelete();
       }
     });
 

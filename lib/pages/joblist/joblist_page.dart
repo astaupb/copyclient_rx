@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
-//import 'package:blocs_copyclient/print_queue.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
@@ -190,7 +190,9 @@ class _JoblistPageState extends State<JoblistPage> {
       if (mode == JoblistMode.scan || mode == JoblistMode.copy) {
         refreshingBloc.onEnableForce();
       } else if (mode == JoblistMode.print) {
-        //BlocProvider.of<PrintQueueBloc>(context).onDelete();
+        if (BlocProvider.of<PrintQueueBloc>(context).state.isLocked) {
+          BlocProvider.of<PrintQueueBloc>(context).onDelete();
+        }
         refreshingBloc.onDisableForce();
       }
     });
