@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
@@ -9,8 +8,8 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_credit_text.dart';
+import 'package:copyclient_rx/pages/joblist/joblist_qr_code.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'joblist_slidable.dart';
@@ -123,6 +122,10 @@ class _JoblistJobListState extends State<JoblistJobList> {
           case 423:
             message = 'Der ausgewählte Drucker ist gerade von einem anderen Nutzer reserviert.';
             break;
+          case 502:
+            message =
+                'Der AStAPrint Dienst ist gerade nicht aktiv. Das könnte an einem geplanten Neustart liegen.';
+            break;
           default:
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
         }
@@ -147,35 +150,10 @@ class _JoblistJobListState extends State<JoblistJobList> {
   }
 
   void _onPressedPrint(int id) async {
-    String barcode;
-    try {
-      barcode = await BarcodeScanner.scan();
-    } catch (e) {
-      print('exception while scanning barcode: $e');
-      if (e is PlatformException) {
-        print('PlatformException: ${e.code} ${e.details} ${e.message}');
-        if (e.code == 'PERMISSION_NOT_GRANTED') {
-          Scaffold.of(context).showSnackBar(SnackBar(
-              duration: Duration(seconds: 5),
-              content: Text(
-                  'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
-        }
-      } else if (e is FormatException) {
-        print('FormatException: ${e.message} ${e.offset} ${e.source}');
-        if (e.message == 'Invalid envelope') {
-          Scaffold.of(context).showSnackBar(const SnackBar(
-              duration: Duration(seconds: 3), content: Text('QR-Code Scan wurde abgebrochen')));
-        } else {
-          Scaffold.of(context).showSnackBar(const SnackBar(
-              duration: Duration(seconds: 5),
-              content: Text(
-                  'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
-        }
-      }
-    }
+    final device = await getDeviceId(context);
 
-    if (barcode != null && barcode != '') {
-      BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, id);
+    if (device != null) {
+      BlocProvider.of<JoblistBloc>(context).onPrintById(device.toString(), id);
 
       await Future<dynamic>.delayed(const Duration(seconds: 10)).then<void>((dynamic _) {
         BlocProvider.of<UserBloc>(context).onRefresh();

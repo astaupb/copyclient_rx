@@ -18,6 +18,7 @@ import '../../widgets/drawer/drawer.dart';
 import '../../widgets/exit_app_alert.dart';
 import 'joblist_intent_handlers.dart';
 import 'joblist_job_list.dart';
+import 'joblist_qr_code.dart';
 import 'joblist_refreshing_bloc.dart';
 import 'joblist_scan_list.dart';
 import 'joblist_upload_fab.dart';
@@ -47,6 +48,8 @@ class _JoblistPageState extends State<JoblistPage> {
   List<int> _selectedItems = [];
 
   bool allSelected = false;
+
+  int _deviceId;
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +138,9 @@ class _JoblistPageState extends State<JoblistPage> {
                     if (_mode == JoblistMode.print)
                       JoblistJobList()
                     else if (_mode == JoblistMode.scan)
-                      JoblistScanList()
+                      JoblistScanList(_deviceId)
                     else if (_mode == JoblistMode.copy)
-                      JoblistScanList(copyMode: true),
+                      JoblistScanList(_deviceId, copyMode: true),
                   ],
                 ),
               ),
@@ -288,9 +291,17 @@ class _JoblistPageState extends State<JoblistPage> {
     }
   }
 
-  void _onTapTab(int value) {
-    joblistModeBloc.onSwitch(
-        (value == 0) ? JoblistMode.print : (value == 1) ? JoblistMode.scan : JoblistMode.copy);
+  void _onTapTab(int value) async {
+    if (value > 0) {
+      final id = await getDeviceId(context);
+
+      if (id != null) {
+        _deviceId = id;
+        joblistModeBloc.onSwitch((value == 1) ? JoblistMode.scan : JoblistMode.copy);
+      }
+    } else {
+      joblistModeBloc.onSwitch(JoblistMode.print);
+    }
   }
 
   Future<bool> _onWillPop() async {

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
@@ -12,19 +11,25 @@ import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_refreshing_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_scan_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'joblist_slidable.dart';
 import 'joblist_tile.dart';
 
 class JoblistScanList extends StatefulWidget {
+  final int id;
   final bool copyMode;
 
-  JoblistScanList({this.copyMode = false});
+  JoblistScanList(this.id, {this.copyMode = false});
 
   @override
-  _JoblistScanListState createState() => _JoblistScanListState();
+  State<JoblistScanList> createState() {
+    if (id != null) {
+      return _JoblistScanListState();
+    } else {
+      return _JoblistScanListStateEmpty();
+    }
+  }
 }
 
 class _JoblistScanListState extends State<JoblistScanList> {
@@ -33,9 +38,6 @@ class _JoblistScanListState extends State<JoblistScanList> {
   List<Job> _jobs = [];
   List<int> _startIds;
   List<int> _copiedIds;
-
-  String _device = '';
-  bool _deviceSelected = false;
 
   StreamSubscription<PrintQueueState> _printQueueListener;
   StreamSubscription<ScanState> _scanListener;
@@ -47,107 +49,103 @@ class _JoblistScanListState extends State<JoblistScanList> {
 
   @override
   Widget build(BuildContext context) {
-    if (_deviceSelected) {
-      return BlocBuilder<JoblistBloc, JoblistState>(
-        builder: (BuildContext context, JoblistState state) {
-          if (state.isResult || state.isBusy) {
-            if (state.isResult) {
-              _jobs = state.value;
-              _jobs.removeWhere((Job job) => _startIds.contains(job.id));
-              if (widget.copyMode) {
-                for (var job in _jobs) {
-                  if (!_copiedIds.contains(job.id)) {
-                    BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
-                    _copiedIds.add(job.id);
+    return BlocBuilder<JoblistBloc, JoblistState>(
+      builder: (BuildContext context, JoblistState state) {
+        if (state.isResult || state.isBusy) {
+          if (state.isResult) {
+            _jobs = state.value;
+            _jobs.removeWhere((Job job) => _startIds.contains(job.id));
+            if (widget.copyMode) {
+              for (var job in _jobs) {
+                if (!_copiedIds.contains(job.id)) {
+                  BlocProvider.of<JoblistBloc>(context).onPrintById(widget.id.toString(), job.id);
+                  _copiedIds.add(job.id);
 
-                    Future<dynamic>.delayed(const Duration(seconds: 10))
-                        .then<void>((dynamic _) => BlocProvider.of<UserBloc>(context).onRefresh());
-                  }
-                }
-              } else {
-                for (var job in _jobs) {
-                  if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
+                  Future<dynamic>.delayed(const Duration(seconds: 10))
+                      .then<void>((dynamic _) => BlocProvider.of<UserBloc>(context).onRefresh());
                 }
               }
-            }
-            if (_jobs.isNotEmpty) {
-              return Column(children: <Widget>[
-                ListTile(
-                  title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.7),
-                  subtitle:
-                      Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      if (widget.copyMode) CreditText(),
-                      BlocBuilder<PrintQueueBloc, PrintQueueState>(
-                          builder: (BuildContext context, PrintQueueState state) {
-                        return GestureDetector(
-                          child: Icon(
-                            Icons.fiber_manual_record,
-                            color: state.isLocked ? Colors.green : Colors.red,
-                          ),
-                          onDoubleTap: () => (state.isLocked)
-                              ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
-                              : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
-                for (int i = _jobs.length - 1; i >= 0; i--)
-                  JoblistSlidable(
-                    job: _jobs[i],
-                    child: JoblistTile(
-                      context,
-                      i,
-                      _jobs[i],
-                      onPress: () {
-                        BlocProvider.of<RefreshingBloc>(context).onDisableForce();
-                        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-                        Navigator.of(context).push<JobdetailsPage>(MaterialPageRoute(
-                            builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
-                      },
-                      leader: widget.copyMode
-                          ? null
-                          : MaterialButton(
-                              onPressed: () => _onPressedPrint(_jobs[i].id),
-                              color: Colors.teal[800],
-                              child: Icon(
-                                Icons.print,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-              ]);
+            } else {
+              for (var job in _jobs) {
+                if (!_copiedIds.contains(job.id)) _copiedIds.add(job.id);
+              }
             }
           }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+          if (_jobs.isNotEmpty) {
+            return Column(children: <Widget>[
               ListTile(
-                title: Text(
-                    'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
+                title: Text(widget.copyMode ? 'Kopien' : 'Scans', textScaleFactor: 1.7),
+                subtitle:
+                    Text('${_jobs.length} ${widget.copyMode ? 'Kopien' : 'Scans'} in der Liste'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (widget.copyMode) CreditText(),
+                    BlocBuilder<PrintQueueBloc, PrintQueueState>(
+                        builder: (BuildContext context, PrintQueueState state) {
+                      return GestureDetector(
+                        child: Icon(
+                          Icons.fiber_manual_record,
+                          color: state.isLocked ? Colors.green : Colors.red,
+                        ),
+                        onDoubleTap: () => (state.isLocked)
+                            ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
+                            : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
+                      );
+                    }),
+                  ],
+                ),
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container(height: 64.0),
-                  Icon(Icons.print, size: 64.0),
-                  Text(_device, textScaleFactor: 3.0),
-                ],
-              )
-            ],
-          );
-        },
-      );
-    } else {
-      return Container(width: 0.0, height: 0.0);
-    }
+              Divider(indent: 16.0, endIndent: 16.0, height: 0.0),
+              for (int i = _jobs.length - 1; i >= 0; i--)
+                JoblistSlidable(
+                  job: _jobs[i],
+                  child: JoblistTile(
+                    context,
+                    i,
+                    _jobs[i],
+                    onPress: () {
+                      BlocProvider.of<RefreshingBloc>(context).onDisableForce();
+                      BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
+                      Navigator.of(context).push<JobdetailsPage>(MaterialPageRoute(
+                          builder: (BuildContext context) => JobdetailsPage(_jobs[i])));
+                    },
+                    leader: widget.copyMode
+                        ? null
+                        : MaterialButton(
+                            onPressed: () => _onPressedPrint(_jobs[i].id),
+                            color: Colors.teal[800],
+                            child: Icon(
+                              Icons.print,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+            ]);
+          }
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              title: Text(
+                  'Es sind noch keine ${widget.copyMode ? 'Kopien' : 'Scans'} in dieser Liste.\n\nWähle von der Startseite des Druckers "Scanner" und dort das Ziel "scan2asta" um Dokumente in diese Liste zu senden.\n\nAusgewählter Drucker:'),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(height: 64.0),
+                Icon(Icons.print, size: 64.0),
+                Text(widget.id.toString(), textScaleFactor: 3.0),
+              ],
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -236,67 +234,26 @@ class _JoblistScanListState extends State<JoblistScanList> {
       }
     });
 
-    _initDevice(context);
+    BlocProvider.of<PrintQueueBloc>(context)
+      ..setDeviceId(widget.id)
+      ..onLockDevice();
+
+    BlocProvider.of<RefreshingBloc>(context).onEnableForce();
+    _scanBloc.onStart();
 
     super.initState();
   }
 
-  void _initDevice(BuildContext context) async {
-    try {
-      print('scanning qr code');
-      _device = await BarcodeScanner.scan();
-      setState(() => _deviceSelected = true);
-      print('qr code scanned: $_device');
-
-      int deviceId;
-      if (_device != '' && _device.length == 5) deviceId = int.tryParse(_device);
-
-      if (deviceId != null) {
-        BlocProvider.of<PrintQueueBloc>(context)
-          ..setDeviceId(deviceId)
-          ..onLockDevice();
-
-        BlocProvider.of<RefreshingBloc>(context).onEnableForce();
-        _scanBloc.onStart();
-      } else {
-        BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 5),
-            content: Text(
-                'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.'),
-          ),
-        );
-      }
-    } catch (e) {
-      print('exception while scanning barcode: $e');
-      BlocProvider.of<JoblistModeBloc>(context).onSwitch(JoblistMode.print);
-      if (e is PlatformException) {
-        print('PlatformException: ${e.code} ${e.details} ${e.message}');
-        if (e.code == 'PERMISSION_NOT_GRANTED') {
-          Scaffold.of(context).showSnackBar(SnackBar(
-              duration: Duration(seconds: 5),
-              content: Text(
-                  'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
-        }
-      } else if (e is FormatException) {
-        print('FormatException: ${e.message} ${e.offset} ${e.source}');
-        if (e.message == 'Invalid envelope') {
-          Scaffold.of(context).showSnackBar(const SnackBar(
-              duration: Duration(seconds: 3), content: Text('QR-Code Scan wurde abgebrochen')));
-        } else {
-          Scaffold.of(context).showSnackBar(const SnackBar(
-              duration: Duration(seconds: 5),
-              content: Text(
-                  'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
-        }
-      }
+  void _onPressedPrint(int id) {
+    if (widget.id.toString() != '') {
+      BlocProvider.of<JoblistBloc>(context).onPrintById(widget.id.toString(), id);
     }
   }
+}
 
-  void _onPressedPrint(int id) {
-    if (_device != '') {
-      BlocProvider.of<JoblistBloc>(context).onPrintById(_device, id);
-    }
+class _JoblistScanListStateEmpty extends State<JoblistScanList> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 0.0, height: 0.0);
   }
 }
