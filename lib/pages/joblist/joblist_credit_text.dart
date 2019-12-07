@@ -2,7 +2,14 @@ import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CreditText extends StatelessWidget {
+class CreditText extends StatefulWidget {
+  @override
+  _CreditTextState createState() => _CreditTextState();
+}
+
+class _CreditTextState extends State<CreditText> {
+  int _lastCredit = 0;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -15,11 +22,9 @@ class CreditText extends StatelessWidget {
           BlocBuilder<UserBloc, UserState>(
             builder: (BuildContext context, UserState state) {
               if (state.isResult) {
-                return Text('${(state.value.credit / 100.0).toStringAsFixed(2)}€',
-                    textScaleFactor: 1.5);
-              } else {
-                return Container(width: 0.0, height: 0.0);
+                _lastCredit = state.value.credit;
               }
+              return Text('${(_lastCredit / 100.0).toStringAsFixed(2)}€', textScaleFactor: 1.5);
             },
           ),
         ],
