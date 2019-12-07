@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/auth.dart';
+import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
@@ -23,6 +24,8 @@ class _JoblistJobListState extends State<JoblistJobList> {
   List<Job> _jobs = [];
 
   StreamSubscription<JoblistState> _joblistListener;
+
+  Timer _refreshTimer;
 
   @override
   Widget build(BuildContext context) {
@@ -122,11 +125,18 @@ class _JoblistJobListState extends State<JoblistJobList> {
   @override
   void dispose() {
     _joblistListener.cancel();
+    _refreshTimer.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 20), (Timer t) {
+      BlocProvider.of<JoblistBloc>(context).onRefresh();
+      BlocProvider.of<UserBloc>(context).onRefresh();
+      BlocProvider.of<UploadBloc>(context).onRefresh();
+    });
+
     _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;

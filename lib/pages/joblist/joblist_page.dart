@@ -166,7 +166,6 @@ class _JoblistPageState extends State<JoblistPage> {
   @override
   void initState() {
     joblistModeBloc = JoblistModeBloc(JoblistMode.print);
-    joblistModeBloc.onSwitch(JoblistMode.print);
     selectionBloc = SelectionBloc();
     refreshingBloc = RefreshingBloc();
 

@@ -12,7 +12,7 @@ class JoblistModeBloc extends Bloc<JoblistModeEvent, JoblistMode> {
   void onSwitch(JoblistMode mode) => add(SwitchMode(mode));
 
   @override
-  JoblistMode get initialState => JoblistMode.copy;
+  JoblistMode get initialState => JoblistMode.print;
 
   @override
   Stream<JoblistMode> mapEventToState(JoblistModeEvent event) async* {

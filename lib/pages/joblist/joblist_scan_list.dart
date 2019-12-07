@@ -57,6 +57,9 @@ class _JoblistScanListState extends State<JoblistScanList> {
                   if (!_copiedIds.contains(job.id)) {
                     BlocProvider.of<JoblistBloc>(context).onPrintById(_device, job.id);
                     _copiedIds.add(job.id);
+
+                    Future<dynamic>.delayed(const Duration(seconds: 10))
+                        .then<void>((dynamic _) => BlocProvider.of<UserBloc>(context).onRefresh());
                   }
                 }
               } else {
