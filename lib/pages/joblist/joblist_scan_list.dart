@@ -257,14 +257,14 @@ class _JoblistScanListState extends State<JoblistScanList> {
     try {
       _device = await BarcodeScanner.scan();
       setState(() => _deviceSelected = true);
+      print('qr code scanned: $_device');
 
       int deviceId;
-
-      if (_device != '' && !(_device.length > 5)) deviceId = int.tryParse(_device);
+      if (_device != '' && _device.length == 5) deviceId = int.tryParse(_device);
 
       if (deviceId != null) {
         BlocProvider.of<PrintQueueBloc>(context)
-          ..setDeviceId(int.tryParse(_device))
+          ..setDeviceId(deviceId)
           ..onLockDevice();
 
         _scanBloc.onStart();
