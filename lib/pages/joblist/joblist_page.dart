@@ -160,7 +160,7 @@ class _JoblistPageState extends State<JoblistPage> {
   void dispose() {
     _intentTextSubscription.cancel();
     _intentImageSubscription.cancel();
-    _intentDataStreamSubscription.cancel();
+    if (_intentDataStreamSubscription != null) _intentDataStreamSubscription.cancel();
     _uploadListener.cancel();
     _selectionListener.cancel();
     _refreshingListener.cancel();

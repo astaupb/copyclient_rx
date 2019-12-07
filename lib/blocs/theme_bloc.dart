@@ -5,7 +5,18 @@ import 'package:flutter/material.dart';
 
 import '../db_store.dart';
 
-enum CopyclientTheme { copyshop, dark, light, custom }
+final ThemeData astaTheme = ThemeData(
+  brightness: Brightness.light,
+  primarySwatch: Colors.orange,
+  accentColor: Colors.orangeAccent,
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.orange,
+    disabledColor: Colors.orange[200],
+    colorScheme: ColorScheme.dark(),
+    shape: StadiumBorder(),
+    minWidth: 16.0,
+  ),
+);
 
 final ThemeData copyshopTheme = ThemeData(
   brightness: Brightness.light,
@@ -48,17 +59,26 @@ final ThemeData darkTheme = ThemeData(
   ),
 );
 
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.blue,
+    disabledColor: Colors.blue[300],
+    colorScheme: ColorScheme.dark(),
+    shape: StadiumBorder(),
+    minWidth: 16.0,
+  ),
+);
+
+class ActivateAStATheme extends ThemeEvent {}
+
 class ActivateDarkTheme extends ThemeEvent {}
 
 class ActivateDefaultTheme extends ThemeEvent {}
 
 class ActivateLightTheme extends ThemeEvent {}
 
-class ChangeTheme extends ThemeEvent {
-  final ThemeData newTheme;
-
-  ChangeTheme(this.newTheme);
-}
+enum CopyclientTheme { copyshop, dark, light, asta }
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   DBStore dbStore = DBStore();
@@ -68,22 +88,22 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
 
   @override
   Stream<ThemeState> mapEventToState(ThemeEvent event) async* {
-    if (event is ChangeTheme) {
-      yield ThemeState.custom(event.newTheme);
-    }
     if (event is ActivateDarkTheme) {
       await dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
       yield ThemeState.darkTheme();
-    }
-    if (event is ActivateLightTheme) {
+    } else if (event is ActivateLightTheme) {
       await dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
       yield ThemeState.lightTheme();
-    }
-    if (event is ActivateDefaultTheme) {
+    } else if (event is ActivateDefaultTheme) {
       await dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
       yield ThemeState.copyshopTheme();
+    } else if (event is ActivateAStATheme) {
+      await dbStore.insertSetting(MapEntry<String, String>('theme', 'asta'));
+      yield ThemeState.astaTheme();
     }
   }
+
+  void onSetAStATheme() => add(ActivateAStATheme());
 
   void onSetCopyshopTheme() => add(ActivateDefaultTheme());
 
@@ -93,12 +113,20 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
 
   void onStart() {
     var theme = dbStore.settings['theme'];
-    if (theme == 'copyshop') {
-      onSetCopyshopTheme();
-    } else if (theme == 'dark') {
-      onSetDarkTheme();
-    } else if (theme == 'light') {
-      onSetLightTheme();
+    switch (theme) {
+      case 'copyshop':
+        onSetCopyshopTheme();
+        break;
+      case 'dark':
+        onSetDarkTheme();
+        break;
+      case 'light':
+        onSetLightTheme();
+        break;
+      case 'asta':
+        onSetAStATheme();
+        break;
+      default:
     }
   }
 }
@@ -111,13 +139,13 @@ class ThemeState {
 
   ThemeState(this.theme, this.id);
 
-  factory ThemeState.copyshopTheme() => ThemeState(copyshopTheme, CopyclientTheme.copyshop);
+  factory ThemeState.astaTheme() => ThemeState(astaTheme, CopyclientTheme.asta);
 
-  factory ThemeState.custom(ThemeData theme) => ThemeState(theme, CopyclientTheme.custom);
+  factory ThemeState.copyshopTheme() => ThemeState(copyshopTheme, CopyclientTheme.copyshop);
 
   factory ThemeState.darkTheme() => ThemeState(darkTheme, CopyclientTheme.dark);
 
-  factory ThemeState.lightTheme() => ThemeState(ThemeData.light(), CopyclientTheme.light);
+  factory ThemeState.lightTheme() => ThemeState(lightTheme, CopyclientTheme.light);
 
   Map<String, dynamic> toMap() => <String, dynamic>{'theme': theme};
 
