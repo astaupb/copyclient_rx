@@ -1,4 +1,3 @@
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';

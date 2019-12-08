@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
@@ -12,6 +11,7 @@ import 'package:copyclient_rx/pages/joblist/joblist_mode_bloc.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_popup_button.dart';
 import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -234,7 +234,7 @@ class _JoblistPageState extends State<JoblistPage> {
     });
 
     // For sharing images coming from outside the app while the app is in the memory
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       _intentDataStreamSubscription =
           ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
         // Call reset method if you don't want to see this callback again.
@@ -246,7 +246,7 @@ class _JoblistPageState extends State<JoblistPage> {
     }
 
     // For sharing images coming from outside the app while the app is closed
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
         // Call reset method if you don't want to see this callback again.
         ReceiveSharingIntent.reset();

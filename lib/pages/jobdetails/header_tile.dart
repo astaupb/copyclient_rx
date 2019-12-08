@@ -4,6 +4,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_download.dart';
 import 'package:blocs_copyclient/user.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -65,7 +66,7 @@ class _HeaderTileState extends State<HeaderTile> {
                     Text(DateTime.fromMillisecondsSinceEpoch(_job.timestamp * 1000)
                         .toString()
                         .split('.')[0]),
-                    (!Platform.isIOS)
+                    (!kIsWeb && !Platform.isIOS)
                         ? BlocBuilder<PdfBloc, PdfState>(
                             builder: (BuildContext context, PdfState state) {
                               if (state.isResult || state.isInit) {

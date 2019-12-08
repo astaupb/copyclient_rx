@@ -5,6 +5,7 @@ import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,8 +32,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Builder(
               builder: (BuildContext context) => IconButton(
                     icon: Icon(Icons.share),
-                    onPressed: () =>
-                        (Platform.isIOS) ? _onExportJournal(context, true) : _onShowShare(context),
+                    onPressed: () => (!kIsWeb && Platform.isIOS)
+                        ? _onExportJournal(context, true)
+                        : _onShowShare(context),
                     tooltip: 'Transaktionen als PDF exportieren',
                   )),
         ],
@@ -155,7 +157,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              if (!Platform.isIOS)
+              if (!kIsWeb && !Platform.isIOS)
                 RaisedButton(
                   child: Row(children: <Widget>[
                     Icon(Icons.file_download),

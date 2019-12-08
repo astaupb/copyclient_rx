@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_download.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,7 +50,8 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
           Builder(
             builder: (BuildContext context) => IconButton(
               icon: Icon(Icons.share),
-              onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
+              onPressed: () =>
+                  (!kIsWeb && Platform.isIOS) ? _onShare(context) : _onShowShare(context),
             ),
           ),
           IconButton(
@@ -159,7 +161,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              if (!Platform.isIOS)
+              if (!kIsWeb && !Platform.isIOS)
                 RaisedButton(
                   child: Row(children: <Widget>[
                     Icon(Icons.file_download),
