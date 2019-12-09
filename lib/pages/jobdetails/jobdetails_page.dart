@@ -47,13 +47,13 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                   return JobDeletionModal(widget._job.id);
                 }),
           ),
-          Builder(
-            builder: (BuildContext context) => IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () =>
-                  (!kIsWeb && Platform.isIOS) ? _onShare(context) : _onShowShare(context),
+          if (!kIsWeb)
+            Builder(
+              builder: (BuildContext context) => IconButton(
+                icon: Icon(Icons.share),
+                onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
+              ),
             ),
-          ),
           IconButton(
             icon: Icon(Icons.info),
             onPressed: () => showDialog<DetailsDialog>(

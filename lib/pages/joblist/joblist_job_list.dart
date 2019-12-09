@@ -11,6 +11,7 @@ import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_credit_text.dart';
 import 'package:copyclient_rx/pages/joblist/joblist_qr_code.dart';
 import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -68,14 +69,16 @@ class _JoblistJobListState extends State<JoblistJobList> {
                                   child: Icon((state.items.contains(_jobs[i].id))
                                       ? Icons.check_box
                                       : Icons.check_box_outline_blank))
-                              : MaterialButton(
-                                  color: Colors.teal[800],
-                                  child: Icon(
-                                    Icons.print,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () => _onPressedPrint(_jobs[i].id),
-                                ),
+                              : (!kIsWeb)
+                                  ? MaterialButton(
+                                      color: Colors.teal[800],
+                                      child: Icon(
+                                        Icons.print,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () => _onPressedPrint(_jobs[i].id),
+                                    )
+                                  : null,
                         ),
                       ),
                     ),

@@ -6,6 +6,7 @@ import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/journal.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
@@ -91,15 +92,16 @@ class _CreditPageState extends State<CreditPage> {
               ),
             ),
             Divider(height: 24.0),
-            Builder(
-              builder: (BuildContext context) => Padding(
-                padding: EdgeInsets.only(left: 24.0, right: 24.0),
-                child: RaisedButton(
-                  onPressed: () => _onScanCredit(context),
-                  child: Text('Guthabencode einscannen'),
+            if (!kIsWeb)
+              Builder(
+                builder: (BuildContext context) => Padding(
+                  padding: EdgeInsets.only(left: 24.0, right: 24.0),
+                  child: RaisedButton(
+                    onPressed: () => _onScanCredit(context),
+                    child: Text('Guthabencode einscannen'),
+                  ),
                 ),
               ),
-            ),
             Divider(height: 24.0),
             ListTile(title: Text('Letzte Transaktionen')),
             ...List.from(

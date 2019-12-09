@@ -2,6 +2,7 @@ import 'package:blocs_copyclient/joblist.dart';
 import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
 import 'package:copyclient_rx/widgets/select_printer_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,17 +36,18 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
               Text(' Alle Jobs löschen')
             ]),
             value: PopupMenuEntry.deleteAll),
-        PopupMenuItem(
-            child: Row(children: [
-              Icon(
-                Icons.print,
-                color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
-                    ? Colors.grey[800]
-                    : null,
-              ),
-              Text(' Alle Jobs drucken')
-            ]),
-            value: PopupMenuEntry.printAll),
+        if (!kIsWeb)
+          PopupMenuItem(
+              child: Row(children: [
+                Icon(
+                  Icons.print,
+                  color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                      ? Colors.grey[800]
+                      : null,
+                ),
+                Text(' Alle Jobs drucken')
+              ]),
+              value: PopupMenuEntry.printAll),
       ],
     );
   }

@@ -62,29 +62,33 @@ class _JoblistPageState extends State<JoblistPage> {
         child: BlocProvider<SelectionBloc>(
           create: (BuildContext context) => selectionBloc,
           child: Scaffold(
-            bottomNavigationBar: Builder(
-              builder: (BuildContext context) => CupertinoTabBar(
-                backgroundColor:
-                    (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
-                        ? Colors.grey[900]
-                        : null,
-                currentIndex: _mode.index,
-                onTap: (int index) => _onTapTab(context, index),
-                activeColor: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
-                    ? Colors.white
-                    : null,
-                iconSize: 28.0,
-                items: [
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.scanner), title: Text('Scannen', textScaleFactor: 1.5)),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.content_copy),
-                      title: Text('Kopieren', textScaleFactor: 1.4)),
-                ],
-              ),
-            ),
+            bottomNavigationBar: (!kIsWeb)
+                ? Builder(
+                    builder: (BuildContext context) => CupertinoTabBar(
+                      backgroundColor:
+                          (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                              ? Colors.grey[900]
+                              : null,
+                      currentIndex: _mode.index,
+                      onTap: (int index) => _onTapTab(context, index),
+                      activeColor:
+                          (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.dark)
+                              ? Colors.white
+                              : null,
+                      iconSize: 28.0,
+                      items: [
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.scanner),
+                            title: Text('Scannen', textScaleFactor: 1.5)),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.content_copy),
+                            title: Text('Kopieren', textScaleFactor: 1.4)),
+                      ],
+                    ),
+                  )
+                : null,
             appBar: AppBar(
               actions: (_selectedItems.isNotEmpty)
                   ? <Widget>[

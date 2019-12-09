@@ -98,39 +98,40 @@ class _HeaderTileState extends State<HeaderTile> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      RaisedButton.icon(
-                        textColor: Colors.grey[100],
-                        label: Padding(
-                          padding: EdgeInsets.only(right: 16.0),
-                          child:
-                              Text('${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
-                        ),
-                        icon: Padding(
-                          padding: EdgeInsets.only(left: 16.0),
-                          child: Icon(Icons.print),
-                        ),
-                        onPressed: () async {
-                          String target;
-                          try {
-                            if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
-                              target = await showDialog<String>(
-                                context: context,
-                                builder: (BuildContext context) => selectPrinterDialog(context),
-                              );
-                            } else {
-                              target = await BarcodeScanner.scan();
+                      if (!kIsWeb)
+                        RaisedButton.icon(
+                          textColor: Colors.grey[100],
+                          label: Padding(
+                            padding: EdgeInsets.only(right: 16.0),
+                            child: Text(
+                                '${((_job.priceEstimation ?? 0) / 100.0).toStringAsFixed(2)} €'),
+                          ),
+                          icon: Padding(
+                            padding: EdgeInsets.only(left: 16.0),
+                            child: Icon(Icons.print),
+                          ),
+                          onPressed: () async {
+                            String target;
+                            try {
+                              if (BlocProvider.of<CameraBloc>(context).state.cameraDisabled) {
+                                target = await showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) => selectPrinterDialog(context),
+                                );
+                              } else {
+                                target = await BarcodeScanner.scan();
+                              }
+                              if (target != null) {
+                                BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);
+                                Navigator.of(context).pop();
+                              }
+                            } catch (e) {
+                              print('MetaTile: $e');
+                              Scaffold.of(context).showSnackBar(
+                                  SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
                             }
-                            if (target != null) {
-                              BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);
-                              Navigator.of(context).pop();
-                            }
-                          } catch (e) {
-                            print('MetaTile: $e');
-                            Scaffold.of(context).showSnackBar(
-                                SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
-                          }
-                        },
-                      ),
+                          },
+                        ),
                       BlocBuilder<UserBloc, UserState>(
                         builder: (BuildContext context, UserState state) {
                           if (state.isResult) {
