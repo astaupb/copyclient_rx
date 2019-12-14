@@ -40,7 +40,24 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                       ),
                       Divider(),
                     ],
-                  )
+                  ),
+                ListTile(
+                  title: Text('Platz im UI', textScaleFactor: 1.7),
+                ),
+                Divider(height: 24.0, indent: 8.0),
+                for (var density in (DensityLevel.values))
+                  Column(
+                    children: <Widget>[
+                      ListTile(
+                        title: Text(translateDensityId(density)),
+                        onTap: () => _onTapDensity(density),
+                        trailing: (density == state.density)
+                            ? Icon(Icons.check)
+                            : Container(height: 0.0, width: 0.0),
+                      ),
+                      Divider(),
+                    ],
+                  ),
               ],
             );
           }),
@@ -57,6 +74,21 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
         return 'Hell';
       case CopyclientTheme.asta:
         return 'AStA';
+      default:
+        return '???';
+    }
+  }
+
+  String translateDensityId(DensityLevel density) {
+    switch (density) {
+      case DensityLevel.veryDense:
+        return 'Sehr eng';
+      case DensityLevel.dense:
+        return 'Eng';
+      case DensityLevel.normal:
+        return 'Normal';
+      case DensityLevel.spacey:
+        return 'Locker';
       default:
         return '???';
     }
@@ -80,5 +112,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
       default:
         print('theme not found $theme');
     }
+  }
+
+  void _onTapDensity(DensityLevel density) {
+    themeBloc.onSetDensity(density);
   }
 }
