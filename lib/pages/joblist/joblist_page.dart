@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/print_queue.dart';
 import 'package:blocs_copyclient/upload.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/blocs/theme_bloc.dart';
@@ -286,6 +287,7 @@ class _JoblistPageState extends State<JoblistPage> {
   Future<void> _onRefresh() async {
     BlocProvider.of<JoblistBloc>(context).onRefresh();
     BlocProvider.of<UploadBloc>(context).onRefresh();
+    BlocProvider.of<UserBloc>(context).onRefresh();
     return;
   }
 

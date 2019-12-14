@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:blocs_copyclient/auth.dart';
-import 'package:blocs_copyclient/upload.dart';
 import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
@@ -107,9 +106,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
   @override
   void initState() {
     _refreshTimer = Timer.periodic(const Duration(seconds: 20), (Timer t) {
-      BlocProvider.of<JoblistBloc>(context).onRefresh();
       BlocProvider.of<UserBloc>(context).onRefresh();
-      BlocProvider.of<UploadBloc>(context).onRefresh();
     });
 
     _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) async {
