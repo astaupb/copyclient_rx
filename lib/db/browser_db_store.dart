@@ -61,7 +61,8 @@ class BrowserDBStore implements DBStore {
 
   @override
   void openDb() {
-    if (window.localStorage['setting_theme'] == null || window.localStorage['setting_theme'].isEmpty) {
+    if (window.localStorage['setting_theme'] == null ||
+        window.localStorage['setting_theme'].isEmpty) {
       _settings.addAll({'theme': 'copyshop'});
       window.localStorage['setting_theme'] = 'copyshop';
     }
