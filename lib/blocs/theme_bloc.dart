@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
-import '../db_store.dart';
+import '../db/db_store.dart';
 
 final ThemeData astaTheme = ThemeData(
   brightness: Brightness.light,
@@ -81,7 +81,9 @@ class ActivateLightTheme extends ThemeEvent {}
 enum CopyclientTheme { copyshop, dark, light, asta }
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
-  DBStore dbStore = DBStore();
+  final DBStore _dbStore;
+
+  ThemeBloc(this._dbStore);
 
   @override
   ThemeState get initialState => ThemeState.copyshopTheme();
@@ -89,16 +91,16 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   @override
   Stream<ThemeState> mapEventToState(ThemeEvent event) async* {
     if (event is ActivateDarkTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
       yield ThemeState.darkTheme();
     } else if (event is ActivateLightTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
       yield ThemeState.lightTheme();
     } else if (event is ActivateDefaultTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
       yield ThemeState.copyshopTheme();
     } else if (event is ActivateAStATheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'asta'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'asta'));
       yield ThemeState.astaTheme();
     }
   }
@@ -112,7 +114,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   void onSetLightTheme() => add(ActivateLightTheme());
 
   void onStart() {
-    var theme = dbStore.settings['theme'];
+    var theme = _dbStore.settings['theme'];
     switch (theme) {
       case 'copyshop':
         onSetCopyshopTheme();

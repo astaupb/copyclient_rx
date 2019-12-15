@@ -43,7 +43,7 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
     } else if (event is UnforceRefreshing) {
       _force = false;
       _log.finer('cancelling locked timer');
-      _timer.cancel();
+      if (_timer != null) _timer.cancel();
       yield RefreshingState.idle();
     } else if (event is PutUploads) {
       _log.finer('${event.uploads.length} ${event.uploads}');
@@ -58,7 +58,7 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
         }
       } else if (!_force) {
         _log.finer('cancelling timer');
-        _timer.cancel();
+        if (_timer != null) _timer.cancel();
         yield RefreshingState.idle();
       }
     } else if (event is Trigger) {

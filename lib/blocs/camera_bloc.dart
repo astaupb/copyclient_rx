@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:logging/logging.dart';
 
-import '../db_store.dart';
+import '../db/db_store.dart';
 
 class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final Logger _log = Logger('CameraBloc');
-  final DBStore _dbStore = DBStore();
+  final DBStore _dbStore;
+
+  CameraBloc(this._dbStore);
 
   @override
   CameraState get initialState => CameraState.enabled();

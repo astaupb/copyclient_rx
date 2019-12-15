@@ -1,29 +1,29 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:sqflite/sqflite.dart';
 
-class DBStore {
-  static final DBStore _instance = DBStore.internal();
+import 'db_store.dart';
 
-  // Make it a singleton
-  final Logger _log = Logger('DBStore');
+class MobileDBStore implements DBStore {
+  Map<String, String> _settings;
+  final Logger _log = Logger('MobileDBStore');
   Database _db;
+
   String _currentToken;
 
-  static Map<String, String> _settings;
-
-  factory DBStore() {
-    _settings = {};
-    return _instance;
-  }
-  DBStore.internal();
-
+  @override
   String get currentToken => _currentToken;
+
+  @override
   Map<String, String> get settings => _settings;
 
+  MobileDBStore() {
+    _settings = <String, String>{};
+  }
+
+  @override
   Future<void> clearTokens() async {
     _log.info('clearing tokens...');
     await _db.transaction((txn) async {
@@ -33,8 +33,9 @@ class DBStore {
     });
   }
 
-  Future<String> getCurrentToken(Database db) async {
-    List<Map> results = await db.query('Users', columns: ['token'], orderBy: 'id DESC', limit: 1);
+  @override
+  Future<String> getCurrentToken() async {
+    List<Map> results = await _db.query('Users', columns: ['token'], orderBy: 'id DESC', limit: 1);
     if (results.isNotEmpty) {
       return results[0]['token'] as String;
     } else {
@@ -42,9 +43,10 @@ class DBStore {
     }
   }
 
-  Future<String> getSetting(Database db, String key) async {
+  @override
+  Future<String> getSetting(String key) async {
     _log.info('getting setting $key from database');
-    return await db.transaction((txn) async {
+    return await _db.transaction((txn) async {
       var batch = txn.batch();
       batch.rawQuery('SELECT mapValue FROM Settings WHERE mapKey = "$key"');
       var results = await batch.commit();
@@ -56,6 +58,7 @@ class DBStore {
     });
   }
 
+  @override
   Future<void> insertSetting(MapEntry entry) async {
     _log.info('inserting settings $entry in database');
     await _db.transaction((txn) async {
@@ -67,6 +70,7 @@ class DBStore {
     });
   }
 
+  @override
   Future<void> insertToken(String token, {int credit = 0}) async {
     var userId = base64.decode(token)[0];
     _log.info('inserting token for $userId in database');
@@ -79,6 +83,7 @@ class DBStore {
     });
   }
 
+  @override
   Future<void> openDb() async {
     // Get db location
     var basePath = await getDatabasesPath();
@@ -115,11 +120,11 @@ class DBStore {
         },
         onOpen: (Database db) async {
           _db = db;
-          _currentToken = await getCurrentToken(db);
+          _currentToken = await getCurrentToken();
           _settings.addAll(
             {
-              'theme': await getSetting(db, 'theme'),
-              'camera_disabled': await getSetting(db, 'camera_disabled'),
+              'theme': await getSetting('theme'),
+              'camera_disabled': await getSetting('camera_disabled'),
             },
           );
           _log.fine('currentToken: $currentToken');

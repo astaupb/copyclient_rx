@@ -7,12 +7,13 @@ import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/pdf_creation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 import '../blocs/camera_bloc.dart';
 import '../blocs/theme_bloc.dart';
-import '../db_store.dart';
+import '../db/db_store.dart';
 import '../models/backend_shiva.dart';
 import '../routes.dart';
 import 'login/login.dart';
@@ -31,8 +32,6 @@ class _RootPageState extends State<RootPage> {
   static final http.Client client = http.Client();
   static final Backend backend = BackendShiva(client);
 
-  DBStore store = DBStore();
-
   AuthBloc authBloc = AuthBloc(backend: backend);
   JoblistBloc joblistBloc;
   UserBloc userBloc;
@@ -44,7 +43,6 @@ class _RootPageState extends State<RootPage> {
   TokensBloc tokensBloc;
 
   PdfCreationBloc pdfCreationBloc;
-  CameraBloc cameraBloc = CameraBloc();
 
   String _token;
 
@@ -58,7 +56,7 @@ class _RootPageState extends State<RootPage> {
         bloc: authBloc,
         builder: (BuildContext context, AuthState state) {
           if (state.isAuthorized) {
-            if (state.persistent) store.insertToken(state.token);
+            if (state.persistent) DBStoreProvider.of(context).db.insertToken(state.token);
 
             _initBlocs();
 
@@ -96,7 +94,6 @@ class _RootPageState extends State<RootPage> {
                 BlocProvider<PreviewBloc>(create: (BuildContext context) => previewBloc),
                 BlocProvider<PdfBloc>(create: (BuildContext context) => pdfBloc),
                 BlocProvider<PrintQueueBloc>(create: (BuildContext context) => printQueueBloc),
-                BlocProvider<CameraBloc>(create: (BuildContext context) => cameraBloc),
                 BlocProvider<TokensBloc>(create: (BuildContext context) => tokensBloc),
                 BlocProvider<PdfCreationBloc>(create: (BuildContext context) => pdfCreationBloc),
               ],
@@ -180,23 +177,27 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    _checkExistingToken();
-
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    _checkExistingToken();
+    super.didChangeDependencies();
+  }
+
   void _checkExistingToken() async {
-    await store.openDb();
-    _token = store.currentToken;
+    await DBStoreProvider.of(context).db.openDb();
+    _token = await DBStoreProvider.of(context).db.getCurrentToken();
     if (_token != null) authBloc.onTokenLogin(_token);
-    cameraBloc.onStart();
+    BlocProvider.of<CameraBloc>(context).onStart();
     BlocProvider.of<ThemeBloc>(context).onStart();
   }
 
   void _for401(ResultState state) async {
     if (state.isException && (state.error as ApiException).statusCode == 401) {
       authBloc.onLogout();
-      await DBStore().clearTokens();
+      await DBStoreProvider.of(context).db.clearTokens();
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     }
   }

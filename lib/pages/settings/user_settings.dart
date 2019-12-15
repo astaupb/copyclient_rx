@@ -6,7 +6,7 @@ import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../db_store.dart';
+import '../../db/db_store.dart';
 import 'user_dialogs/change_email_dialog.dart';
 import 'user_dialogs/change_name_dialog.dart';
 import 'user_dialogs/change_password_dialog.dart';
@@ -172,7 +172,7 @@ class UserSettingsPage extends StatelessWidget {
             builder: (BuildContext context) => ChangePasswordDialog(userBloc: userBloc))) ??
         false) {
       BlocProvider.of<AuthBloc>(context).onLogout();
-      await DBStore().clearTokens();
+      await DBStoreProvider.of(context).db.clearTokens();
     }
   }
 
