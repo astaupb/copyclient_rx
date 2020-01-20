@@ -10,6 +10,9 @@ class PutUploads extends RefreshingEvent {
   final List<DispatcherTask> uploads;
 
   PutUploads(this.uploads);
+
+  @override
+  String toString() => '[PutUploads uploads:$uploads]';
 }
 
 class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {

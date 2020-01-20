@@ -12,7 +12,7 @@ dependencies:
   barcode_scan: ^1.0.0
     #git: https://github.com/astaupb/flutter_barcode_reader.git
   blocs_copyclient:
-    version: ^1.0.2
+    version: ^1.0.3
     git: https://git.uni-paderborn.de/asta/blocs_copyclient.git
     #path: ../blocs_copyclient/
   flutter_bloc: ^2.0.0

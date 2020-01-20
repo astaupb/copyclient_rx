@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:blocs_copyclient/joblist.dart';
 import 'package:blocs_copyclient/pdf_download.dart';
+import 'package:blocs_copyclient/upload.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../blocs/theme_bloc.dart';
 import '../../widgets/details_dialog.dart';
 import '../../widgets/joboption_switches.dart';
 import '../../widgets/preview_grid.dart';
 import 'header_tile.dart';
 import 'job_deletion_modal.dart';
+
+enum PopupMenuEntry { delete, info, copy, copyImage }
 
 ///
 /// A Page that holds additional information on each job on the joblist
@@ -39,27 +43,71 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
       appBar: AppBar(
         title: Text('Jobdetails'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () => showModalBottomSheet<JobDeletionModal>(
-                context: context,
-                builder: (BuildContext context) {
-                  return JobDeletionModal(widget._job.id);
-                }),
-          ),
           if (!kIsWeb)
             Builder(
               builder: (BuildContext context) => IconButton(
                 icon: Icon(Icons.share),
+                tooltip: 'Job teilen',
                 onPressed: () => (Platform.isIOS) ? _onShare(context) : _onShowShare(context),
               ),
             ),
-          IconButton(
-            icon: Icon(Icons.info),
-            onPressed: () => showDialog<DetailsDialog>(
-              context: context,
-              builder: (context) => DetailsDialog(widget._job),
-            ),
+          PopupMenuButton<PopupMenuEntry>(
+            onSelected: _onPopupButtonSelected,
+            icon: Icon(Icons.more_vert),
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<PopupMenuEntry>(
+                child: Row(children: [
+                  Icon(
+                    Icons.delete,
+                    color:
+                        (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                            ? Colors.grey[800]
+                            : null,
+                  ),
+                  Text(' Job löschen')
+                ]),
+                value: PopupMenuEntry.delete,
+              ),
+              PopupMenuItem<PopupMenuEntry>(
+                child: Row(children: [
+                  Icon(
+                    Icons.info,
+                    color:
+                        (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                            ? Colors.grey[800]
+                            : null,
+                  ),
+                  Text(' Details anzeigen')
+                ]),
+                value: PopupMenuEntry.info,
+              ),
+              PopupMenuItem<PopupMenuEntry>(
+                child: Row(children: [
+                  Icon(
+                    Icons.content_copy,
+                    color:
+                        (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                            ? Colors.grey[800]
+                            : null,
+                  ),
+                  Text(' Job duplizieren')
+                ]),
+                value: PopupMenuEntry.copy,
+              ),
+              PopupMenuItem<PopupMenuEntry>(
+                child: Row(children: [
+                  Icon(
+                    Icons.image,
+                    color:
+                        (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                            ? Colors.grey[800]
+                            : null,
+                  ),
+                  Text(' Job als Bild duplizieren')
+                ]),
+                value: PopupMenuEntry.copyImage,
+              ),
+            ],
           ),
         ],
       ),
@@ -184,5 +232,39 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         );
       },
     );
+  }
+
+  void _onPopupButtonSelected(PopupMenuEntry value) async {
+    switch (value) {
+      case PopupMenuEntry.delete:
+        await showModalBottomSheet<JobDeletionModal>(
+          context: context,
+          builder: (BuildContext context) {
+            return JobDeletionModal(widget._job.id);
+          },
+        );
+        break;
+      case PopupMenuEntry.info:
+        await showDialog<DetailsDialog>(
+          context: context,
+          builder: (context) => DetailsDialog(widget._job),
+        );
+        break;
+      case PopupMenuEntry.copy:
+        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, false);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        BlocProvider.of<UploadBloc>(context).onRefresh();
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+        Navigator.of(context).pop();
+        break;
+      case PopupMenuEntry.copyImage:
+        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, true);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        BlocProvider.of<UploadBloc>(context).onRefresh();
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+        Navigator.of(context).pop();
+        break;
+      default:
+    }
   }
 }
