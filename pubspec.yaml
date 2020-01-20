@@ -1,7 +1,7 @@
 name: copyclient_rx
 description: Official AStA Copyservice app using the AStAPrint backend
 
-version: 1.2.0+87
+version: 1.2.0+88
 
 environment:
   sdk: ">=2.3.2 <3.0.0"

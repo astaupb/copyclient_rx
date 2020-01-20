@@ -71,7 +71,7 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
       barcode = await showDialog<String>(
           context: context, builder: (BuildContext context) => selectPrinterDialog(context));
     } else {
-      barcode = await getDeviceId(context).toString();
+      barcode = (await getDeviceId(context)).toString();
     }
 
     var dialogPositive = false;

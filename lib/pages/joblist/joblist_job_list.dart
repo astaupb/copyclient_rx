@@ -163,11 +163,12 @@ class _JoblistJobListState extends State<JoblistJobList> {
               context: context, builder: (BuildContext context) => selectPrinterDialog(context)) ??
           '';
     } else {
-      device = await getDeviceId(context).toString();
+      device = (await getDeviceId(context)).toString();
+      print('devicelool: $device');
     }
 
     if (device != null) {
-      BlocProvider.of<JoblistBloc>(context).onPrintById(device.toString(), id);
+      BlocProvider.of<JoblistBloc>(context).onPrintById(device, id);
 
       await Future<dynamic>.delayed(const Duration(seconds: 10)).then<void>((dynamic _) {
         BlocProvider.of<UserBloc>(context).onRefresh();

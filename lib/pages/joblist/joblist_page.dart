@@ -275,7 +275,7 @@ class _JoblistPageState extends State<JoblistPage> {
       barcode = await showDialog<String>(
           context: context, builder: (BuildContext context) => selectPrinterDialog(context));
     } else {
-      barcode = await getDeviceId(context).toString();
+      barcode = (await getDeviceId(context)).toString();
     }
 
     for (var item in selectionBloc.items) {
