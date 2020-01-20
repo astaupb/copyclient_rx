@@ -44,6 +44,11 @@
 	<string>Used to choose file to upload from the media library</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Used for speech to text</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
