@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
-import '../db_store.dart';
+import '../db/db_store.dart';
 
 const double dense = -2.0;
 
@@ -119,7 +119,9 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   DensityLevel _density = DensityLevel.normal;
 
   DensityLevel get density => _density;
-  DBStore dbStore = DBStore();
+  final DBStore _dbStore;
+
+  ThemeBloc(this._dbStore);
 
   ThemeState _lastState;
 
@@ -129,23 +131,23 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   @override
   Stream<ThemeState> mapEventToState(ThemeEvent event) async* {
     if (event is ActivateDarkTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'dark'));
       _lastState = ThemeState.darkTheme(_getVisualDensity(density));
       yield _lastState;
     } else if (event is ActivateLightTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'light'));
       _lastState = ThemeState.lightTheme(_getVisualDensity(density));
       yield _lastState;
     } else if (event is ActivateDefaultTheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'copyshop'));
       _lastState = ThemeState.copyshopTheme(_getVisualDensity(density));
       yield _lastState;
     } else if (event is ActivateAStATheme) {
-      await dbStore.insertSetting(MapEntry<String, String>('theme', 'asta'));
+      await _dbStore.insertSetting(MapEntry<String, String>('theme', 'asta'));
       _lastState = ThemeState.astaTheme(_getVisualDensity(density));
       yield _lastState;
     } else if (event is SetDensity) {
-      await dbStore
+      await _dbStore
           .insertSetting(MapEntry<String, String>('density', _getDensityString(event.density)));
       _density = event.density;
       switch (_lastState.id) {
@@ -179,7 +181,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   void onSetLightTheme() => add(ActivateLightTheme());
 
   void onStart() {
-    var theme = dbStore.settings['theme'];
+    var theme = _dbStore.settings['theme'];
     switch (theme) {
       case 'copyshop':
         onSetCopyshopTheme();
@@ -198,7 +200,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         break;
     }
 
-    var density = dbStore.settings['density'];
+    var density = _dbStore.settings['density'];
     switch (density) {
       case 'very_dense':
         add(SetDensity(DensityLevel.veryDense));
