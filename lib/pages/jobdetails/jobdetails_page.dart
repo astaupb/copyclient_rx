@@ -97,7 +97,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
               PopupMenuItem<PopupMenuEntry>(
                 child: Row(children: [
                   Icon(
-                    Icons.image,
+                    Icons.photo_library,
                     color:
                         (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
                             ? Colors.grey[800]
