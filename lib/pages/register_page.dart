@@ -22,6 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String _password;
   String _retypedPassword;
   String _username;
+  String _email;
 
   StreamSubscription authListener;
 
@@ -31,19 +32,8 @@ class _RegisterPageState extends State<RegisterPage> {
   _RegisterPageState()
       : _password = '',
         _retypedPassword = '',
-        _username = '';
-
-  @override
-  void dispose() {
-    if (authListener != null) authListener.cancel();
-    super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    if (authListener != null) authListener.cancel();
-    super.deactivate();
-  }
+        _username = '',
+        _email = '';
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +91,29 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  @override
+  void deactivate() {
+    if (authListener != null) authListener.cancel();
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    if (authListener != null) authListener.cancel();
+    super.dispose();
+  }
+
+  String onValidateEmail(String value) {
+    if (!value.contains('@')) {
+      return 'Bitte gebe ein gültige E-Mail Adresse ein';
+    }
+    return null;
+  }
+
   void _onPressedButton(BuildContext context, AuthBloc authBloc) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      authBloc.onRegister(_username, _password);
+      authBloc.onRegister(_username, _password, _email);
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text('Registriert neuen Nutzer...'),
         duration: Duration(seconds: 2),
@@ -176,6 +185,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     return null;
                   },
                   onSaved: (value) => _retypedPassword = value,
+                ),
+                TextFormField(
+                  autocorrect: false,
+                  initialValue: _email,
+                  decoration: InputDecoration(labelText: 'E-Mail', hintText: 'maxmuster@web.de'),
+                  validator: onValidateEmail,
+                  onSaved: (value) => _email = value,
                 ),
               ],
             ),
