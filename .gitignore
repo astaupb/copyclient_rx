@@ -28,6 +28,8 @@
 .pub/
 build/
 make.mk
+.flutter-plugins-dependencies
+ios\Flutter\flutter_export_environment.sh
 
 # Android related
 **/android/**/gradle-wrapper.jar

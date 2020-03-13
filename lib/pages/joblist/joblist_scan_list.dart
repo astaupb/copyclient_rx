@@ -235,7 +235,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
     });
 
     BlocProvider.of<PrintQueueBloc>(context)
-      ..setDeviceId(widget.id)
+      ..onSetDeviceId(widget.id)
       ..onLockDevice();
 
     BlocProvider.of<RefreshingBloc>(context).onEnableForce();
