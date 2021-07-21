@@ -55,22 +55,23 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             lastTokens = state.value.reversed.toList();
           }
           return RefreshIndicator(
-              child: ListView.builder(
-                itemCount: lastTokens.length,
-                itemBuilder: (BuildContext context, int i) {
-                  return ListTile(
-                    leading: clientTypeIcon(lastTokens[i].clientType),
-                    title: Text('Ort: ${lastTokens[i].location}, IP: ${lastTokens[i].ip}'),
-                    subtitle: Text(
-                        'Erstellt: ${lastTokens[i].created.toLocal().toString().split('.').first}'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.cancel),
-                      onPressed: () => _onPressedDelete(lastTokens[i].id),
-                    ),
-                  );
-                },
-              ),
-              onRefresh: () => onRefresh());
+            onRefresh: () => onRefresh(),
+            child: ListView.builder(
+              itemCount: lastTokens.length,
+              itemBuilder: (BuildContext context, int i) {
+                return ListTile(
+                  leading: clientTypeIcon(lastTokens[i].clientType),
+                  title: Text('Ort: ${lastTokens[i].location}, IP: ${lastTokens[i].ip}'),
+                  subtitle: Text(
+                      'Erstellt: ${lastTokens[i].created.toLocal().toString().split('.').first}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.cancel),
+                    onPressed: () => _onPressedDelete(lastTokens[i].id),
+                  ),
+                );
+              },
+            ),
+          );
         },
       ),
     );

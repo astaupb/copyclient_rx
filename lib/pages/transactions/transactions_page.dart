@@ -115,7 +115,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             await File('$_basePath/transaktionen_${DateTime.now().toIso8601String()}.pdf')
                 .writeAsBytes(state.value, flush: true);
 
-            Scaffold.of(context).showSnackBar(doneSnack);
+            ScaffoldMessenger.of(context).showSnackBar(doneSnack);
           } else {
             await Share.file(
                 'Transaktionen vom ${DateTime.now().toIso8601String()}',
@@ -169,11 +169,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   },
                 ),
               RaisedButton(
+                onPressed: () => _onExportJournal(context, true),
                 child: Row(children: <Widget>[
                   Icon(Icons.share),
                   Text('PDF Teilen'),
                 ]),
-                onPressed: () => _onExportJournal(context, true),
               ),
             ],
           ),

@@ -57,7 +57,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
             errorText = 'Beim Hochladen ist ein unbekannter Fehler aufgetreten.';
         }
         if (showError) {
-          Scaffold.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(duration: Duration(seconds: 3), content: Text('$errorText ($status)')));
         }
         await Future<dynamic>.delayed(Duration(seconds: 1));
@@ -71,7 +71,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
   Future<Map<String, String>> _getFilePath() async {
     Map<String, String> filePaths;
     try {
-      filePaths = await FilePicker.getMultiFilePath(type: FileType.ANY);
+      filePaths = await FilePicker.getMultiFilePath(type: FileType.any);
       print('got filepaths: $filePaths');
       if (filePaths != null && filePaths.isNotEmpty) return filePaths;
     } catch (e) {
@@ -110,7 +110,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
           BlocProvider.of<PdfCreationBloc>(context)
               .onCreateFromText(File(path).readAsStringSync(), monospace: (!path.endsWith('txt')));
         } else {
-          Scaffold.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
                 'Nicht unterstütztes Dateiformat in $filename. Es werden nur PDF Dokumente, Bilder und einfacher Text unterstützt.'),
             duration: Duration(seconds: 3),

@@ -51,8 +51,8 @@ class MainDrawer extends StatelessWidget {
                       Divider(),
                       Text('Copyright © AStA Paderborn 2019'),
                       RaisedButton(
-                        child: Text('Lizenzen'),
                         onPressed: () => showLicensePage(context: context),
+                        child: Text('Lizenzen'),
                       )
                     ],
                   );

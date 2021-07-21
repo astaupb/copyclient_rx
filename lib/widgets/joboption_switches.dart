@@ -132,7 +132,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                                     _job.jobOptions.copies--;
                                     joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                                   } else {
-                                    Scaffold.of(context).showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text('Nicht weniger als eine Kopie möglich'),
                                       ),
@@ -161,7 +161,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                               _job.jobOptions.copies++;
                               joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                             } else {
-                              Scaffold.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Nicht mehr als 999 Kopien möglich'),
                                 ),
@@ -265,12 +265,14 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
           );
         } else if (state.isException) {
           if ((state.error as ApiException).statusCode == 400) {
-            Scaffold.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  'Der angegebene Seitenbereich ist falsch formatiert oder liegt außerhalb des Seitenbereichs'),
-              duration: Duration(seconds: 2),
-            ))
-              ..closed.then((_) => joblistBloc.onRefresh());
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(
+                  content: Text(
+                      'Der angegebene Seitenbereich ist falsch formatiert oder liegt außerhalb des Seitenbereichs'),
+                  duration: Duration(seconds: 2),
+                ))
+                .closed
+                .then((_) => joblistBloc.onRefresh());
           }
         } else {
           return Center(child: CircularProgressIndicator());
@@ -312,7 +314,7 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                         try {
                           newCopies = int.parse(text);
                         } catch (e) {
-                          Scaffold.of(context).showSnackBar(SnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
                                 'Fehler beim Lesen der angebenen Kopien. Die Anzahl der Kopien sollte eine Zahl sein.'),
                             duration: const Duration(seconds: 3),
@@ -322,12 +324,12 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                     ),
                     MaterialButton(
                       textColor: Colors.black87,
-                      child: Text('Okay'),
                       onPressed: () {
                         _job.jobOptions.copies = newCopies;
                         joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                         Navigator.of(context).pop();
                       },
+                      child: Text('Okay'),
                     ),
                   ],
                 ),
@@ -363,12 +365,12 @@ class _JoboptionSwitchesState extends State<JoboptionSwitches> {
                     ),
                     MaterialButton(
                       textColor: Colors.black87,
-                      child: Text('Okay'),
                       onPressed: () {
                         _job.jobOptions.range = newRange;
                         joblistBloc.onUpdateOptionsById(_job.id, _job.jobOptions);
                         Navigator.of(context).pop();
                       },
+                      child: Text('Okay'),
                     ),
                   ],
                 ),

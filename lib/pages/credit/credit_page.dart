@@ -8,6 +8,7 @@ import 'package:blocs_copyclient/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:http/http.dart' as http;
@@ -76,7 +77,7 @@ class _CreditPageState extends State<CreditPage> {
                           autofocus: true,
                           textAlign: TextAlign.end,
                           maxLength: 3,
-                          maxLengthEnforced: true,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
                           buildCounter: _counterBuilder,
                           onChanged: (String value) => customValue = int.tryParse(value),
                         ),
@@ -107,10 +108,10 @@ class _CreditPageState extends State<CreditPage> {
             ...List.from(
                 transactionsExcerpt.map<TransactionsTile>((Transaction t) => TransactionsTile(t))),
             MaterialButton(
-              child: Text('Alle ansehen...'),
               textColor: Colors.black87,
               minWidth: 180.0,
               onPressed: () => Navigator.of(context).pushNamed('/credit/transactions'),
+              child: Text('Alle ansehen...'),
             ),
           ],
         ),
@@ -231,7 +232,7 @@ class _CreditPageState extends State<CreditPage> {
             content: Text(snackText),
             duration: const Duration(seconds: 3),
           );
-          Scaffold.of(context).showSnackBar(snackBar);
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
       });
     } catch (e) {
@@ -239,7 +240,7 @@ class _CreditPageState extends State<CreditPage> {
         content: Text('Es wurde kein Code gescannt'),
         duration: Duration(seconds: 3),
       );
-      Scaffold.of(context).showSnackBar(snackBar);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       print(e.toString());
     }
   }

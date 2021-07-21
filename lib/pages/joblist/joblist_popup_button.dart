@@ -8,14 +8,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'joblist_qr_code.dart';
 
-enum PopupMenuEntry {
-  deleteAll,
-  printAll,
-}
-
 class JoblistPopupButton extends StatefulWidget {
   @override
   _JoblistPopupButtonState createState() => _JoblistPopupButtonState();
+}
+
+enum PopupMenuEntry {
+  deleteAll,
+  printAll,
 }
 
 class _JoblistPopupButtonState extends State<JoblistPopupButton> {
@@ -26,30 +26,65 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
       icon: Icon(Icons.more_vert),
       itemBuilder: (BuildContext context) => [
         PopupMenuItem(
+          value: PopupMenuEntry.deleteAll,
+          child: Row(children: [
+            Icon(
+              Icons.delete,
+              color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
+                  ? Colors.grey[800]
+                  : null,
+            ),
+            Text(' Alle Jobs löschen')
+          ]),
+        ),
+        if (!kIsWeb)
+          PopupMenuItem(
+            value: PopupMenuEntry.printAll,
             child: Row(children: [
               Icon(
-                Icons.delete,
+                Icons.print,
                 color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
                     ? Colors.grey[800]
                     : null,
               ),
-              Text(' Alle Jobs löschen')
+              Text(' Alle Jobs drucken')
             ]),
-            value: PopupMenuEntry.deleteAll),
-        if (!kIsWeb)
-          PopupMenuItem(
-              child: Row(children: [
-                Icon(
-                  Icons.print,
-                  color: (BlocProvider.of<ThemeBloc>(context).state.id == CopyclientTheme.copyshop)
-                      ? Colors.grey[800]
-                      : null,
-                ),
-                Text(' Alle Jobs drucken')
-              ]),
-              value: PopupMenuEntry.printAll),
+          ),
       ],
     );
+  }
+
+  void _onDeleteAll() async {
+    var dialogPositive = false;
+
+    await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text('Wirklich alle Jobs löschen?'),
+        content: Text(
+            'Die Dokumente sind danach für immer gelöscht und können nicht wiederhergestellt werden'),
+        actions: <Widget>[
+          MaterialButton(
+            color: Colors.teal[800],
+            onPressed: () {
+              dialogPositive = true;
+              Navigator.of(context).pop();
+            },
+            child: Text('Ja'),
+          ),
+          MaterialButton(
+            color: Colors.teal[800],
+            onPressed: () {
+              dialogPositive = false;
+              Navigator.of(context).pop();
+            },
+            child: Text('Abbrechen'),
+          )
+        ],
+      ),
+    );
+
+    if (dialogPositive) BlocProvider.of<JoblistBloc>(context).onDeleteAll();
   }
 
   void _onPopupButtonSelected(PopupMenuEntry value) {
@@ -85,19 +120,19 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
         actions: <Widget>[
           MaterialButton(
             color: Colors.teal[800],
-            child: Text('Ja'),
             onPressed: () {
               dialogPositive = true;
               Navigator.of(context).pop();
             },
+            child: Text('Ja'),
           ),
           MaterialButton(
             color: Colors.teal[800],
-            child: Text('Abbrechen'),
             onPressed: () {
               dialogPositive = false;
               Navigator.of(context).pop();
             },
+            child: Text('Abbrechen'),
           )
         ],
       ),
@@ -108,38 +143,5 @@ class _JoblistPopupButtonState extends State<JoblistPopupButton> {
         BlocProvider.of<JoblistBloc>(context).onPrintById(barcode, job.id);
       }
     }
-  }
-
-  void _onDeleteAll() async {
-    var dialogPositive = false;
-
-    await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('Wirklich alle Jobs löschen?'),
-        content: Text(
-            'Die Dokumente sind danach für immer gelöscht und können nicht wiederhergestellt werden'),
-        actions: <Widget>[
-          MaterialButton(
-            color: Colors.teal[800],
-            child: Text('Ja'),
-            onPressed: () {
-              dialogPositive = true;
-              Navigator.of(context).pop();
-            },
-          ),
-          MaterialButton(
-            color: Colors.teal[800],
-            child: Text('Abbrechen'),
-            onPressed: () {
-              dialogPositive = false;
-              Navigator.of(context).pop();
-            },
-          )
-        ],
-      ),
-    );
-
-    if (dialogPositive) BlocProvider.of<JoblistBloc>(context).onDeleteAll();
   }
 }

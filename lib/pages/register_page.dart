@@ -48,8 +48,8 @@ class _RegisterPageState extends State<RegisterPage> {
               if (authListener != null) authListener.cancel();
               authListener = widget.authBloc.listen((AuthState state) {
                 if (state.isRegistered) {
-                  ScaffoldFeatureController snackbarFeatureController = Scaffold.of(context)
-                      .showSnackBar(SnackBar(
+                  ScaffoldFeatureController snackbarFeatureController =
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('Registrierung erfolgreich'),
                           duration: Duration(seconds: 2)));
                   snackbarFeatureController.closed.then((dynamic val) => Navigator.pop(context));
@@ -71,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         duration: Duration(seconds: 2));
                   }
 
-                  Scaffold.of(context).showSnackBar(snack);
+                  ScaffoldMessenger.of(context).showSnackBar(snack);
                   authListener.cancel();
                 }
               });
@@ -114,7 +114,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       authBloc.onRegister(_username, _password, _email);
-      Scaffold.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Registriert neuen Nutzer...'),
         duration: Duration(seconds: 2),
       ));
@@ -123,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Form _registerForm() => Form(
         key: _formKey,
-        autovalidate: true,
+        autovalidateMode: AutovalidateMode.always,
         child: Card(
           margin: EdgeInsets.all(8.0),
           child: Padding(

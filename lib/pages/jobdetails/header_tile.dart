@@ -127,7 +127,7 @@ class _HeaderTileState extends State<HeaderTile> {
                               }
                             } catch (e) {
                               print('MetaTile: $e');
-                              Scaffold.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('Es wurde kein Drucker ausgewählt')));
                             }
                           },

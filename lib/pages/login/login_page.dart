@@ -23,7 +23,7 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
   BuildContext _context;
   @override
   void afterFirstLayout(BuildContext context) {
-    if (widget.startSnack != null) Scaffold.of(_context).showSnackBar(widget.startSnack);
+    if (widget.startSnack != null) ScaffoldMessenger.of(_context).showSnackBar(widget.startSnack);
   }
 
   @override
@@ -47,10 +47,6 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
       ),
       floatingActionButton: MediaQuery.of(context).viewInsets.bottom == 0.0
           ? TealOutlineButton(
-              child: Text(
-                'Registrieren',
-                textAlign: TextAlign.center,
-              ),
               onPressed: () {
                 Navigator.of(context).push<RegisterPage>(
                   MaterialPageRoute(
@@ -58,6 +54,10 @@ class LoginPageState extends State<LoginPage> with AfterLayoutMixin<LoginPage> {
                   ),
                 );
               },
+              child: Text(
+                'Registrieren',
+                textAlign: TextAlign.center,
+              ),
             )
           : null,
     );

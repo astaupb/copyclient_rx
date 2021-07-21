@@ -18,8 +18,6 @@ import '../../widgets/preview_grid.dart';
 import 'header_tile.dart';
 import 'job_deletion_modal.dart';
 
-enum PopupMenuEntry { delete, info, copy, copyImage }
-
 ///
 /// A Page that holds additional information on each job on the joblist
 /// Contains: Preview Grid, Header Tile, Joboptions Switches
@@ -32,6 +30,8 @@ class JobdetailsPage extends StatefulWidget {
   @override
   _JobdetailsPageState createState() => _JobdetailsPageState();
 }
+
+enum PopupMenuEntry { delete, info, copy, copyImage }
 
 class _JobdetailsPageState extends State<JobdetailsPage> {
   static const MethodChannel _mChannel = MethodChannel('de.upb.copyclient/download_path');
@@ -56,6 +56,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
             icon: Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<PopupMenuEntry>(
+                value: PopupMenuEntry.delete,
                 child: Row(children: [
                   Icon(
                     Icons.delete,
@@ -66,9 +67,9 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                   ),
                   Text(' Job löschen')
                 ]),
-                value: PopupMenuEntry.delete,
               ),
               PopupMenuItem<PopupMenuEntry>(
+                value: PopupMenuEntry.info,
                 child: Row(children: [
                   Icon(
                     Icons.info,
@@ -79,9 +80,9 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                   ),
                   Text(' Details anzeigen')
                 ]),
-                value: PopupMenuEntry.info,
               ),
               PopupMenuItem<PopupMenuEntry>(
+                value: PopupMenuEntry.copy,
                 child: Row(children: [
                   Icon(
                     Icons.content_copy,
@@ -92,9 +93,9 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                   ),
                   Text(' Job duplizieren')
                 ]),
-                value: PopupMenuEntry.copy,
               ),
               PopupMenuItem<PopupMenuEntry>(
+                value: PopupMenuEntry.copyImage,
                 child: Row(children: [
                   Icon(
                     Icons.photo_library,
@@ -105,7 +106,6 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
                   ),
                   Text(' Job als Bild duplizieren')
                 ]),
-                value: PopupMenuEntry.copyImage,
               ),
             ],
           ),
@@ -145,7 +145,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
     await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
     await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 
-    Scaffold.of(context).showSnackBar(downloadSnack);
+    ScaffoldMessenger.of(context).showSnackBar(downloadSnack);
     BlocProvider.of<PdfBloc>(context).listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         String downloadPath;
@@ -169,13 +169,47 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         await File(_path).writeAsBytes(state.value.last.file, flush: true);
 
         Scaffold.of(context).removeCurrentSnackBar();
-        Scaffold.of(context).showSnackBar(doneSnack);
+        ScaffoldMessenger.of(context).showSnackBar(doneSnack);
       } else if (state.isException) {
-        Scaffold.of(context).showSnackBar(errorSnack);
+        ScaffoldMessenger.of(context).showSnackBar(errorSnack);
       }
     });
 
     BlocProvider.of<PdfBloc>(context).onGetPdf(widget._job.id);
+  }
+
+  void _onPopupButtonSelected(PopupMenuEntry value) async {
+    switch (value) {
+      case PopupMenuEntry.delete:
+        await showModalBottomSheet<JobDeletionModal>(
+          context: context,
+          builder: (BuildContext context) {
+            return JobDeletionModal(widget._job.id);
+          },
+        );
+        break;
+      case PopupMenuEntry.info:
+        await showDialog<DetailsDialog>(
+          context: context,
+          builder: (context) => DetailsDialog(widget._job),
+        );
+        break;
+      case PopupMenuEntry.copy:
+        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, false);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        BlocProvider.of<UploadBloc>(context).onRefresh();
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+        Navigator.of(context).pop();
+        break;
+      case PopupMenuEntry.copyImage:
+        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, true);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        BlocProvider.of<UploadBloc>(context).onRefresh();
+        BlocProvider.of<JoblistBloc>(context).onRefresh();
+        Navigator.of(context).pop();
+        break;
+      default:
+    }
   }
 
   void _onShare(BuildContext context) {
@@ -211,60 +245,26 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
             children: <Widget>[
               if (!kIsWeb && !Platform.isIOS)
                 RaisedButton(
-                  child: Row(children: <Widget>[
-                    Icon(Icons.file_download),
-                    Text('Download'),
-                  ]),
                   onPressed: () async {
                     Navigator.of(context).pop();
                     await _onPdfDownload(scaffoldContext);
                   },
+                  child: Row(children: <Widget>[
+                    Icon(Icons.file_download),
+                    Text('Download'),
+                  ]),
                 ),
               RaisedButton(
+                onPressed: () => _onShare(context),
                 child: Row(children: <Widget>[
                   Icon(Icons.share),
                   Text('Teilen'),
                 ]),
-                onPressed: () => _onShare(context),
               ),
             ],
           ),
         );
       },
     );
-  }
-
-  void _onPopupButtonSelected(PopupMenuEntry value) async {
-    switch (value) {
-      case PopupMenuEntry.delete:
-        await showModalBottomSheet<JobDeletionModal>(
-          context: context,
-          builder: (BuildContext context) {
-            return JobDeletionModal(widget._job.id);
-          },
-        );
-        break;
-      case PopupMenuEntry.info:
-        await showDialog<DetailsDialog>(
-          context: context,
-          builder: (context) => DetailsDialog(widget._job),
-        );
-        break;
-      case PopupMenuEntry.copy:
-        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, false);
-        await Future<void>.delayed(const Duration(seconds: 1));
-        BlocProvider.of<UploadBloc>(context).onRefresh();
-        BlocProvider.of<JoblistBloc>(context).onRefresh();
-        Navigator.of(context).pop();
-        break;
-      case PopupMenuEntry.copyImage:
-        BlocProvider.of<JoblistBloc>(context).onCopyById(widget._job.id, true);
-        await Future<void>.delayed(const Duration(seconds: 1));
-        BlocProvider.of<UploadBloc>(context).onRefresh();
-        BlocProvider.of<JoblistBloc>(context).onRefresh();
-        Navigator.of(context).pop();
-        break;
-      default:
-    }
   }
 }

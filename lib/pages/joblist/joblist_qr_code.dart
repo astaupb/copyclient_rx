@@ -15,7 +15,7 @@ Future<int> getDeviceId(BuildContext context) async {
     if (e is PlatformException) {
       print('PlatformException: ${e.code} ${e.details} ${e.message}');
       if (e.code == 'PERMISSION_NOT_GRANTED') {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             duration: Duration(seconds: 5),
             content: Text(
                 'Keine Berechtigung zum Nutzen der Kamera. Bitte erlaube dies in den Einstellungen um den Druck per QR-Code zu nutzen.')));
@@ -23,10 +23,10 @@ Future<int> getDeviceId(BuildContext context) async {
     } else if (e is FormatException) {
       print('FormatException: ${e.message} ${e.offset} ${e.source}');
       if (e.message == 'Invalid envelope') {
-        Scaffold.of(context).showSnackBar(const SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             duration: Duration(seconds: 3), content: Text('QR-Code Scan wurde abgebrochen')));
       } else {
-        Scaffold.of(context).showSnackBar(const SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             duration: Duration(seconds: 5),
             content: Text(
                 'Es wurde kein gültiger QR-Code gescannt. Bitte nutze die QR Codes auf den Displays der Drucker.')));
@@ -38,7 +38,7 @@ Future<int> getDeviceId(BuildContext context) async {
   if (device != null && device.isNotEmpty && device.length == 5) deviceId = int.tryParse(device);
 
   if (deviceId == null) {
-    Scaffold.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: Duration(seconds: 5),
         content: Text(

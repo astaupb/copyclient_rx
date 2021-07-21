@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:blocs_copyclient/auth.dart';
-import 'package:blocs_copyclient/user.dart';
 import 'package:blocs_copyclient/exceptions.dart';
 import 'package:blocs_copyclient/joblist.dart';
+import 'package:blocs_copyclient/user.dart';
 import 'package:copyclient_rx/blocs/camera_bloc.dart';
 import 'package:copyclient_rx/blocs/selection_bloc.dart';
 import 'package:copyclient_rx/pages/jobdetails/jobdetails.dart';
@@ -71,11 +71,11 @@ class _JoblistJobListState extends State<JoblistJobList> {
                               : (!kIsWeb)
                                   ? MaterialButton(
                                       color: Colors.teal[800],
+                                      onPressed: () => _onPressedPrint(_jobs[i].id),
                                       child: Icon(
                                         Icons.print,
                                         color: Colors.white,
                                       ),
-                                      onPressed: () => _onPressedPrint(_jobs[i].id),
                                     )
                                   : null,
                         ),
@@ -134,7 +134,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten';
         }
         if (showMessage) {
-          Scaffold.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
         }
         await Future<dynamic>.delayed(Duration(seconds: 1));

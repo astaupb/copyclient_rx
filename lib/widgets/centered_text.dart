@@ -9,8 +9,8 @@ class CenteredText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        child: Text(text),
         padding: EdgeInsets.only(left: 40.0, right: 40.0),
+        child: Text(text),
       ),
     );
   }

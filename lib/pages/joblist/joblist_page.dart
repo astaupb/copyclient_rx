@@ -79,13 +79,17 @@ class _JoblistPageState extends State<JoblistPage> {
                       iconSize: 28.0,
                       items: [
                         BottomNavigationBarItem(
-                            icon: Icon(Icons.print), title: Text('Drucken', textScaleFactor: 1.5)),
+                          icon: Icon(Icons.print),
+                          title: Text('Drucken', textScaleFactor: 1.5),
+                        ),
                         BottomNavigationBarItem(
-                            icon: Icon(Icons.scanner),
-                            title: Text('Scannen', textScaleFactor: 1.5)),
+                          icon: Icon(Icons.scanner),
+                          title: Text('Scannen', textScaleFactor: 1.5),
+                        ),
                         BottomNavigationBarItem(
-                            icon: Icon(Icons.content_copy),
-                            title: Text('Kopieren', textScaleFactor: 1.4)),
+                          icon: Icon(Icons.content_copy),
+                          title: Text('Kopieren', textScaleFactor: 1.4),
+                        ),
                       ],
                     ),
                   )
@@ -118,13 +122,13 @@ class _JoblistPageState extends State<JoblistPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         FloatingActionButton(
-                          child: Icon(Icons.delete, color: Colors.white),
                           onPressed: _onDeleteSelected,
+                          child: Icon(Icons.delete, color: Colors.white),
                         ),
                         Container(width: 8.0, height: 0.0),
                         FloatingActionButton(
-                          child: Icon(Icons.print, color: Colors.white),
                           onPressed: _onPrintSelected,
+                          child: Icon(Icons.print, color: Colors.white),
                         ),
                       ],
                     );

@@ -85,13 +85,13 @@ class _JoblistScanListState extends State<JoblistScanList> {
                     BlocBuilder<PrintQueueBloc, PrintQueueState>(
                         builder: (BuildContext context, PrintQueueState state) {
                       return GestureDetector(
+                        onDoubleTap: () => (state.isLocked)
+                            ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
+                            : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
                         child: Icon(
                           Icons.fiber_manual_record,
                           color: state.isLocked ? Colors.green : Colors.red,
                         ),
-                        onDoubleTap: () => (state.isLocked)
-                            ? BlocProvider.of<PrintQueueBloc>(context).onDelete()
-                            : BlocProvider.of<PrintQueueBloc>(context).onLockDevice(),
                       );
                     }),
                   ],
@@ -201,7 +201,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
             message = 'Ein unbekannter Fehler ist auf der Jobliste aufgetreten.';
         }
         if (showError) {
-          Scaffold.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
         }
         BlocProvider.of<JoblistBloc>(context).onRefresh();
@@ -229,7 +229,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
           default:
             message = 'Unbekanntes Problem bei der Druckerwarteschlange aufgetreten';
         }
-        Scaffold.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(duration: Duration(seconds: 3), content: Text('$message ($status)')));
       }
     });

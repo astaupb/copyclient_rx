@@ -24,18 +24,18 @@ class _JobDeletionModalState extends State<JobDeletionModal> {
           Text('Wirklich löschen?'),
           Spacer(),
           MaterialButton(
-            child: Text('Nein'),
             onPressed: () => Navigator.of(context).pop(),
             color: Colors.teal,
+            child: Text('Nein'),
           ),
           MaterialButton(
-            child: Text('Ja'),
             onPressed: () {
               BlocProvider.of<JoblistBloc>(context).onDeleteById(widget.id);
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
             color: Colors.teal,
+            child: Text('Ja'),
           )
         ],
       ),
