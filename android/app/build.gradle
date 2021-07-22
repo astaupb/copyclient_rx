@@ -39,7 +39,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -51,8 +51,8 @@ android {
 
     defaultConfig {
         applicationId "de.upb.asta.copyclient"
-        minSdkVersion 16
-        targetSdkVersion 28
+        minSdkVersion 18
+        targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
