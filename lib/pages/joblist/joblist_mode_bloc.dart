@@ -7,12 +7,7 @@ class JoblistModeBloc extends Bloc<JoblistModeEvent, JoblistMode> {
   final Logger _log = Logger('JoblistModeBloc');
   JoblistMode mode;
 
-  JoblistModeBloc(this.mode);
-
-  void onSwitch(JoblistMode mode) => add(SwitchMode(mode));
-
-  @override
-  JoblistMode get initialState => JoblistMode.print;
+  JoblistModeBloc(this.mode) : super(JoblistMode.print);
 
   @override
   Stream<JoblistMode> mapEventToState(JoblistModeEvent event) async* {
@@ -23,6 +18,8 @@ class JoblistModeBloc extends Bloc<JoblistModeEvent, JoblistMode> {
       yield mode;
     }
   }
+
+  void onSwitch(JoblistMode mode) => add(SwitchMode(mode));
 }
 
 abstract class JoblistModeEvent {}

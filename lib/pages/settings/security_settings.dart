@@ -107,7 +107,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> onRefresh() async {
     StreamSubscription listener;
-    listener = tokensBloc.listen((TokensState state) {
+    listener = tokensBloc.stream.listen((TokensState state) {
       if (state.isResult) {
         listener.cancel();
         return;

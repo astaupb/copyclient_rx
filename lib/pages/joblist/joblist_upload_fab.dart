@@ -34,7 +34,7 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
 
   @override
   void initState() {
-    uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) async {
+    uploadListener = BlocProvider.of<UploadBloc>(context).stream.listen((UploadState state) async {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String errorText;
@@ -71,7 +71,10 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
   Future<Map<String, String>> _getFilePath() async {
     Map<String, String> filePaths;
     try {
-      filePaths = await FilePicker.getMultiFilePath(type: FileType.any);
+      filePaths = (await FilePicker.platform.pickFiles(allowMultiple: true, type: FileType.any))
+          .files
+          .asMap()
+          .map((key, value) => MapEntry(value.name, value.path));
       print('got filepaths: $filePaths');
       if (filePaths != null && filePaths.isNotEmpty) return filePaths;
     } catch (e) {
@@ -88,8 +91,10 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
               .onUpload(File(path).readAsBytesSync(), filename: filename);
         } else if ((lookupMimeType(filename) ?? '').contains('image/')) {
           StreamSubscription listener;
-          listener =
-              BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
+          listener = BlocProvider.of<PdfCreationBloc>(context)
+              .stream
+              .skip(1)
+              .listen((PdfCreationState state) {
             if (state.isResult) {
               BlocProvider.of<UploadBloc>(context).onUpload(state.value, filename: filename);
               listener.cancel();
@@ -99,8 +104,10 @@ class _JoblistUploadFabState extends State<JoblistUploadFab> {
           BlocProvider.of<PdfCreationBloc>(context).onCreateFromImage(File(path).readAsBytesSync());
         } else if ((lookupMimeType(filename) ?? '').contains('text/')) {
           StreamSubscription listener;
-          listener =
-              BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
+          listener = BlocProvider.of<PdfCreationBloc>(context)
+              .stream
+              .skip(1)
+              .listen((PdfCreationState state) {
             if (state.isResult) {
               BlocProvider.of<UploadBloc>(context).onUpload(state.value, filename: filename);
               listener.cancel();

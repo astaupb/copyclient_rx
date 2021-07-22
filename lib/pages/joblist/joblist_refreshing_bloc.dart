@@ -24,12 +24,9 @@ class RefreshingBloc extends Bloc<RefreshingEvent, RefreshingState> {
 
   bool _force = false;
 
-  RefreshingBloc() {
+  RefreshingBloc() : super(RefreshingState.idle()) {
     _lastUploads = 0;
   }
-
-  @override
-  RefreshingState get initialState => RefreshingState.idle();
 
   @override
   Stream<RefreshingState> mapEventToState(RefreshingEvent event) async* {

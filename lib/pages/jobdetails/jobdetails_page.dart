@@ -141,12 +141,14 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
       duration: Duration(seconds: 30),
       content: Text('Lade PDF...'),
     );
-
-    await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
-    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+    
+    if (!(await Permission.contacts.request().isGranted)) {
+      Map<Permission, PermissionStatus> statuses = await [Permission.storage].request();
+      print(statuses[Permission.storage]);
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(downloadSnack);
-    BlocProvider.of<PdfBloc>(context).listen((PdfState state) async {
+    BlocProvider.of<PdfBloc>(context).stream.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         String downloadPath;
         try {
@@ -168,7 +170,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
         }
         await File(_path).writeAsBytes(state.value.last.file, flush: true);
 
-        Scaffold.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(doneSnack);
       } else if (state.isException) {
         ScaffoldMessenger.of(context).showSnackBar(errorSnack);
@@ -214,7 +216,7 @@ class _JobdetailsPageState extends State<JobdetailsPage> {
 
   void _onShare(BuildContext context) {
     StreamSubscription listen;
-    listen = BlocProvider.of<PdfBloc>(context).listen((PdfState state) async {
+    listen = BlocProvider.of<PdfBloc>(context).stream.listen((PdfState state) async {
       if (state.isResult && state.value.last.id == widget._job.id) {
         //Navigator.of(context).pop();
         final pdf = state.value.last;

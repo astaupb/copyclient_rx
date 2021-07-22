@@ -119,7 +119,7 @@ class _HeaderTileState extends State<HeaderTile> {
                                   builder: (BuildContext context) => selectPrinterDialog(context),
                                 );
                               } else {
-                                target = await BarcodeScanner.scan();
+                                target = (await BarcodeScanner.scan()).rawContent;
                               }
                               if (target != null) {
                                 BlocProvider.of<JoblistBloc>(context).onPrintById(target, _job.id);

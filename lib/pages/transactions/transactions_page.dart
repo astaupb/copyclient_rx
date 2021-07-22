@@ -102,8 +102,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
       pdfListener = pdfCreation.listen((PdfCreationState state) async {
         if (state.isResult) {
           if (!share) {
-            await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
-            await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+            if (!(await Permission.contacts.request().isGranted)) {
+              Map<Permission, PermissionStatus> statuses = await [Permission.storage].request();
+              print(statuses[Permission.storage]);
+            }
 
             String downloadPath;
             try {
@@ -138,7 +140,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Future<void> _onRefresh() async {
     StreamSubscription listener;
-    listener = journalBloc.listen((JournalState state) {
+    listener = journalBloc.stream.listen((JournalState state) {
       if (state.isResult) {
         listener.cancel();
         return;

@@ -109,7 +109,7 @@ class _JoblistJobListState extends State<JoblistJobList> {
       BlocProvider.of<UserBloc>(context).onRefresh();
     });
 
-    _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) async {
+    _joblistListener = BlocProvider.of<JoblistBloc>(context).stream.listen((JoblistState state) async {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String message;

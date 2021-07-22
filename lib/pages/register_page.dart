@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
             bloc: widget.authBloc,
             builder: (BuildContext context, AuthState state) {
               if (authListener != null) authListener.cancel();
-              authListener = widget.authBloc.listen((AuthState state) {
+              authListener = widget.authBloc.stream.listen((AuthState state) {
                 if (state.isRegistered) {
                   ScaffoldFeatureController snackbarFeatureController =
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

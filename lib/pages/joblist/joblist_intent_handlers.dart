@@ -11,7 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 void handleIntentText(String text, BuildContext context) {
   if (text != null) {
     StreamSubscription listener;
-    listener = BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
+    listener =
+        BlocProvider.of<PdfCreationBloc>(context).stream.skip(1).listen((PdfCreationState state) {
       if (state.isResult) {
         BlocProvider.of<UploadBloc>(context)
             .onUpload(state.value, filename: 'text_${DateTime.now().toIso8601String()}.txt');
@@ -24,8 +25,10 @@ void handleIntentText(String text, BuildContext context) {
 
 void handleIntentValue(List<String> value, BuildContext context) async {
   if (value != null) {
-    await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.storage);
-    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+    if (!(await Permission.contacts.request().isGranted)) {
+      Map<Permission, PermissionStatus> statuses = await [Permission.storage].request();
+      print(statuses[Permission.storage]);
+    }
 
     for (var url in value) {
       final file = File(url);
@@ -38,8 +41,10 @@ void handleIntentValue(List<String> value, BuildContext context) async {
             filename: (numericFilename == null) ? filename : null);
       } else if (lookupMimeType(filename).contains('image/')) {
         StreamSubscription listener;
-        listener =
-            BlocProvider.of<PdfCreationBloc>(context).skip(1).listen((PdfCreationState state) {
+        listener = BlocProvider.of<PdfCreationBloc>(context)
+            .stream
+            .skip(1)
+            .listen((PdfCreationState state) {
           if (state.isResult) {
             BlocProvider.of<UploadBloc>(context).onUpload(state.value, filename: filename);
             listener.cancel();

@@ -9,10 +9,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
   final Logger _log = Logger('CameraBloc');
   final DBStore _dbStore;
 
-  CameraBloc(this._dbStore);
-
-  @override
-  CameraState get initialState => CameraState.enabled();
+  CameraBloc(this._dbStore) : super(CameraState.enabled());
 
   @override
   Stream<CameraState> mapEventToState(event) async* {

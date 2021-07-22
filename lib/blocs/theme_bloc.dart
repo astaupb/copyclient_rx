@@ -83,10 +83,7 @@ enum CopyclientTheme { copyshop, dark, light, asta }
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   final DBStore _dbStore;
 
-  ThemeBloc(this._dbStore);
-
-  @override
-  ThemeState get initialState => ThemeState.copyshopTheme();
+  ThemeBloc(this._dbStore) : super(ThemeState.copyshopTheme());
 
   @override
   Stream<ThemeState> mapEventToState(ThemeEvent event) async* {

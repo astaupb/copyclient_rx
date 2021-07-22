@@ -72,7 +72,7 @@ class _RootPageState extends State<RootPage> {
             ];
 
             for (var bloc in blocs) {
-              (bloc as Bloc).listen((dynamic state) => _for401(state as ResultState));
+              (bloc as Bloc).stream.listen((dynamic state) => _for401(state as ResultState));
             }
 
             // AUTHORIZED AND READY TO HUSTLE

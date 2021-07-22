@@ -168,13 +168,13 @@ class _JoblistScanListState extends State<JoblistScanList> {
     _startIds =
         (BlocProvider.of<JoblistBloc>(context).state.value ?? []).map((Job job) => job.id).toList();
 
-    _scanListener = _scanBloc.listen((ScanState state) {
+    _scanListener = _scanBloc.stream.listen((ScanState state) {
       if (state.isBeating && state.shouldBeat) {
         BlocProvider.of<PrintQueueBloc>(context).onLockDevice();
       }
     });
 
-    _joblistListener = BlocProvider.of<JoblistBloc>(context).listen((JoblistState state) {
+    _joblistListener = BlocProvider.of<JoblistBloc>(context).stream.listen((JoblistState state) {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String message;
@@ -208,7 +208,7 @@ class _JoblistScanListState extends State<JoblistScanList> {
       }
     });
 
-    _printQueueListener = BlocProvider.of<PrintQueueBloc>(context).listen((PrintQueueState state) {
+    _printQueueListener = BlocProvider.of<PrintQueueBloc>(context).stream.listen((PrintQueueState state) {
       if (state.isException) {
         final status = (state.error as ApiException).statusCode;
         String message;

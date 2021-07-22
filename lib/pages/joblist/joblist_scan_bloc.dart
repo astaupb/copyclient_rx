@@ -3,16 +3,15 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:logging/logging.dart';
 
+class DisableHeartbeat extends ScanEvent {}
+
+class EnableHeartbeat extends ScanEvent {}
+
 class ScanBloc extends Bloc<ScanEvent, ScanState> {
   final Logger _log = Logger('ScanBloc');
   Timer _timer;
 
-  void onStart() => add(EnableHeartbeat());
-
-  void onCancel() => add(DisableHeartbeat());
-
-  @override
-  ScanState get initialState => ScanState.idle();
+  ScanBloc() : super(ScanState.idle());
 
   @override
   Stream<ScanState> mapEventToState(ScanEvent event) async* {
@@ -33,7 +32,13 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
       yield ScanState.idle();
     }
   }
+
+  void onCancel() => add(DisableHeartbeat());
+
+  void onStart() => add(EnableHeartbeat());
 }
+
+abstract class ScanEvent {}
 
 class ScanState {
   final bool isIdle;
@@ -43,15 +48,9 @@ class ScanState {
 
   ScanState(this.isIdle, this.isBeating, this.shouldBeat);
 
-  factory ScanState.idle() => ScanState(true, false, false);
-
   factory ScanState.beating({bool shouldBeat = false}) => ScanState(false, true, shouldBeat);
+
+  factory ScanState.idle() => ScanState(true, false, false);
 }
-
-abstract class ScanEvent {}
-
-class EnableHeartbeat extends ScanEvent {}
-
-class DisableHeartbeat extends ScanEvent {}
 
 class TriggerHeartbeat extends ScanEvent {}

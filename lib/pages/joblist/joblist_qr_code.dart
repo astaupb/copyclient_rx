@@ -8,7 +8,7 @@ Future<int> getDeviceId(BuildContext context) async {
 
   try {
     print('scanning qr code');
-    device = await BarcodeScanner.scan();
+    device = (await BarcodeScanner.scan()).rawContent;
     print('qr code scanned: $device');
   } catch (e) {
     print('exception while scanning barcode: $e');

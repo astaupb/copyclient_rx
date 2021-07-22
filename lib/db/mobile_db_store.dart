@@ -13,15 +13,15 @@ class MobileDBStore implements DBStore {
 
   String _currentToken;
 
+  MobileDBStore() {
+    _settings = <String, String>{};
+  }
+
   @override
   String get currentToken => _currentToken;
 
   @override
   Map<String, String> get settings => _settings;
-
-  MobileDBStore() {
-    _settings = <String, String>{};
-  }
 
   @override
   Future<void> clearTokens() async {
@@ -46,16 +46,12 @@ class MobileDBStore implements DBStore {
   @override
   Future<String> getSetting(String key) async {
     _log.info('getting setting $key from database');
-    return await _db.transaction((txn) async {
-      var batch = txn.batch();
-      batch.rawQuery('SELECT mapValue FROM Settings WHERE mapKey = "$key"');
-      var results = await batch.commit();
-      if (results.isNotEmpty) {
-        return results[0][0]['mapValue'] as String;
-      } else {
-        return '';
-      }
-    });
+    List<Map> results = await _db.rawQuery('SELECT mapValue FROM Settings WHERE mapKey = "$key"');
+    if (results.isNotEmpty) {
+      return results[0]['mapValue'] as String;
+    } else {
+      return null;
+    }
   }
 
   @override

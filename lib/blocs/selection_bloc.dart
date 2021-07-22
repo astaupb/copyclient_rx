@@ -3,17 +3,14 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:logging/logging.dart';
 
+class ClearItems extends SelectionEvent {}
+
 class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
   final Logger _log = Logger('SelectionBloc');
 
   List<int> items = [];
 
-  void onToggleItem(int id) => add(ToggleItem(id));
-
-  void onClear() => add(ClearItems());
-
-  @override
-  SelectionState get initialState => SelectionState.empty();
+  SelectionBloc() : super(SelectionState.empty());
 
   @override
   Stream<SelectionState> mapEventToState(event) async* {
@@ -32,6 +29,10 @@ class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
     }
   }
 
+  void onClear() => add(ClearItems());
+
+  void onToggleItem(int id) => add(ToggleItem(id));
+
   @override
   void onTransition(Transition<SelectionEvent, SelectionState> transition) {
     _log.fine('Transition from ${transition.currentState} to ${transition.nextState}');
@@ -40,8 +41,6 @@ class SelectionBloc extends Bloc<SelectionEvent, SelectionState> {
 }
 
 abstract class SelectionEvent {}
-
-class ClearItems extends SelectionEvent {}
 
 class SelectionState {
   final List<int> items;

@@ -186,7 +186,7 @@ class _JoblistPageState extends State<JoblistPage> {
     selectionBloc = SelectionBloc();
     refreshingBloc = RefreshingBloc();
 
-    _refreshingListener = refreshingBloc.listen((RefreshingState state) {
+    _refreshingListener = refreshingBloc.stream.listen((RefreshingState state) {
       if (state.isRefreshing) {
         if (state.refreshJobs) {
           BlocProvider.of<JoblistBloc>(context).onRefresh();
@@ -197,11 +197,11 @@ class _JoblistPageState extends State<JoblistPage> {
       }
     });
 
-    _selectionListener = selectionBloc.listen((SelectionState state) {
+    _selectionListener = selectionBloc.stream.listen((SelectionState state) {
       setState(() => _selectedItems = state.items);
     });
 
-    _joblistModeListener = joblistModeBloc.listen((JoblistMode mode) {
+    _joblistModeListener = joblistModeBloc.stream.listen((JoblistMode mode) {
       setState(() => _mode = mode);
       if (mode == JoblistMode.print) {
         if (BlocProvider.of<PrintQueueBloc>(context).state.isLocked) {
@@ -211,7 +211,7 @@ class _JoblistPageState extends State<JoblistPage> {
       }
     });
 
-    _uploadListener = BlocProvider.of<UploadBloc>(context).listen((UploadState state) {
+    _uploadListener = BlocProvider.of<UploadBloc>(context).stream.listen((UploadState state) {
       if (state.isResult) {
         refreshingBloc.onAddUploads(state.value);
       }

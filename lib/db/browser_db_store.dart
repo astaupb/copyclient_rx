@@ -1,5 +1,5 @@
 import 'dart:convert' show base64;
-import 'package:universal_html/prefer_universal/html.dart' show window;
+import 'package:universal_html/html.dart' show window;
 
 import 'package:logging/logging.dart' show Logger;
 

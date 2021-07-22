@@ -133,7 +133,7 @@ class _CreditPageState extends State<CreditPage> {
 
     journalBloc.onRefresh();
 
-    journalListener = journalBloc.listen((JournalState state) {
+    journalListener = journalBloc.stream.listen((JournalState state) {
       if (state.isResult) {
         setState(() => transactionsExcerpt = state.value.transactions.take(5).toList());
       }
@@ -177,13 +177,14 @@ class _CreditPageState extends State<CreditPage> {
 
   Future<String> _getPaymentLink(int value) async {
     int userId;
-    await userBloc
+    await userBloc.stream
         .takeWhile((UserState state) => state.isResult)
         .first
         .then((UserState state) => userId = state.value.userId);
     if (value >= 1) {
       return await http
-          .post('https://astaprint.uni-paderborn.de/aufwerter/create/$value?user_id=$userId')
+          .post(Uri.parse(
+              'https://astaprint.uni-paderborn.de/aufwerter/create/$value?user_id=$userId'))
           .then((http.Response response) {
         if (response.statusCode == 200) {
           print(response.body);
@@ -203,17 +204,17 @@ class _CreditPageState extends State<CreditPage> {
 
   Future<void> _onRefresh() async {
     journalBloc.onRefresh();
-    await journalBloc.take(1).first.then((JournalState state) {
+    await journalBloc.stream.take(1).first.then((JournalState state) {
       return;
     });
   }
 
   void _onScanCredit(BuildContext context) async {
     try {
-      var token = await BarcodeScanner.scan();
+      var token = (await BarcodeScanner.scan()).rawContent;
       journalBloc.onAddTransaction(token);
       StreamSubscription listener;
-      listener = journalBloc.listen((JournalState state) async {
+      listener = journalBloc.stream.listen((JournalState state) async {
         if (state.isResult) {
           await Future<dynamic>.delayed(Duration(seconds: 2))
               .then((dynamic val) => userBloc.onRefresh());
