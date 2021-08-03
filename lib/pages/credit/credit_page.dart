@@ -172,15 +172,11 @@ class _CreditPageState extends State<CreditPage> {
       .toList()
         ..add(DropdownMenuItem(
           value: -1,
-          child: Text('Benutzerdefiniert'),
+          child: Text('Benutzerdefiniert') ,
         ));
 
   Future<String> _getPaymentLink(int value) async {
-    int userId;
-    await userBloc.stream
-        .takeWhile((UserState state) => state.isResult)
-        .first
-        .then((UserState state) => userId = state.value.userId);
+    int userId = userBloc.user.userId;
     if (value >= 1) {
       return await http
           .post(Uri.parse(
